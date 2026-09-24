@@ -1,0 +1,10 @@
+NO_PAK0
+HAS_QBENCH 
+ Volume in drive D is Data
+ Volume Serial Number is 0DD7-091B
+
+ Directory of D:\Project\486quake\quake\out\dos
+
+15-Sep-26  10:09 AM           792,064 qbench.exe
+               1 File(s)        792,064 bytes
+               0 Dir(s)  188,249,333,760 bytes free
