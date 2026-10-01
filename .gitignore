@@ -1,22 +1,4 @@
-# Copyrighted emulator assets. These are consumed in place, never vendored:
-#   PCem-ROMs-master/  third-party BIOS ROM images
-#   PCem-ROMs-master.zip the archive they came from
-#   Dos6.22.img        Microsoft MS-DOS 6.22 floppy image
-# The 486 harness locates them by absolute path in tools/dos-toolchain.json
-# (pcemRomset.path, dosImage.path) and pins both by SHA-256 there, so nothing
-# needs them under version control.
-PCem-ROMs-master/
-PCem-ROMs-master.zip
-Dos6.22.img
-
-# Local emulator staging and run artifacts.
+# Local run artifacts. The renderer subproject keeps its own ignore list;
+# these patterns are here so a stray copy at the wrapper root cannot land.
 *.dmp
-*.img
-*.hdd
-*.nvr
 *.log
-
-# Scratch scripts from the abandoned UI-automation layer. They live in the
-# quake subproject and are deliberately not committed there; ignore the
-# pattern here too so a stray copy at the wrapper root cannot land.
-pcemctl.c
