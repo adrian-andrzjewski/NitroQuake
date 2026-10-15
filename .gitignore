@@ -1,4 +1,5 @@
-# Local run artifacts. The renderer subproject keeps its own ignore list;
-# these patterns are here so a stray copy at the wrapper root cannot land.
+# Local generated output. The renderer subproject keeps its own ignore list;
+# these patterns keep workspace output and stray files out of the wrapper repo.
+/out/
 *.dmp
 *.log
