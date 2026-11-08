@@ -45,6 +45,14 @@ method. `tooling-provenance.json` identifies suite source bytes separately from
 native game provenance. Record executable/data/profile hashes with every result;
 do not infer comparability from filenames or product build numbers alone.
 
+## Ordered frame timing
+
+Ordered frame timing export and its session/CSV/graph formats are documented in
+`FRAME-TIMING.md`. The native DOS CSV is written after playback, before the legacy
+FPS summary sorts its buffer; host analysis validates every sample and its
+recorded environment. It uses a fixed simulation step with real timing, distinct
+from the presentation `-parityclock` correctness mode.
+
 ## History and archives
 
 `../migration.json` records each transferred path's original game revision and

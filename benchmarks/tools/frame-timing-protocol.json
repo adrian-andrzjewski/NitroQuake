@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "id": "nitroquake-frame-timeline-v1",
+  "cpuTarget": "i486",
+  "resolution": [320, 200],
+  "dosboxProfileSha256": "532284EA01C1A93C8B96D70FB538625B694DFAD0172BA13B9BA9C36C8FE845BA",
+  "simulationStepSeconds": 0.0625,
+  "quakeExtraArgs": "-stdvid -nojoy -nomouse",
+  "autoexecCommands": [
+    "startdemos",
+    "host_framerate 0.0625",
+    "viewsize 100",
+    "vid_mode 0",
+    "d_subdiv16 1",
+    "r_fullbright 0",
+    "con_notifytime -1"
+  ],
+  "demos": {"demo1": 969, "demo2": 985, "demo3": 1090},
+  "notes": "Fixed simulation delta, seeded demo RNG, ordinary real DOS timer. No parityclock, per-frame checksum I/O, detailed profiler, sound or input. Each sample covers Host_Frame work through audio update; elapsed positions retain inter-frame gaps."
+}

@@ -6,6 +6,16 @@ The optional chart command additionally needs Matplotlib; install it in a local
 virtual environment using `python -m pip install -r requirements-charts.txt`.
 The game builder has its own compiler manifest and no Matplotlib dependency.
 
+For per-frame FPS/time graphs across demo1, demo2 and demo3, see the
+[frame timeline workflow](docs/FRAME-TIMING.md):
+
+```powershell
+python tools/frame-benchmark.py run --label "Baseline" --output out/baseline-timelines --runs 3 --overhead-controls
+```
+
+The [frame timing validation record](docs/FRAME-TIMING-VALIDATION.md) documents
+the completed three-demo batch, replay checks and measured capture overhead.
+
 ```powershell
 $env:NITROQUAKE_GAME_ROOT = 'workspace\quake'
 pwsh -NoProfile -File tools/bootstrap-dos.ps1

@@ -1,6 +1,8 @@
 [CmdletBinding()]
 param(
     [string]$GameRoot,
+    # Optional machine-readable handoff; the primary report stays in staging.
+    [string]$ResultJson,
     [switch]$SkipBuild,
     [switch]$Instrumentation,
     [switch]$NoBootstrap,
@@ -355,6 +357,8 @@ param(
     # and opt-in. Keep promotion timing uninstrumented even though there is no
     # minimum gain threshold; the recorded baseline was measured with it off.
     [switch]$FpsStats,
+    # Require ordered raw timing samples (new engine builds); implies FpsStats.
+    [switch]$FrameTimings,
     # Retained so older recorded commands keep working; now the default.
     [switch]$NoFpsStats,
     # External DPMI host only; does not change the Quake/DJGPP binary.
@@ -402,6 +406,11 @@ param(
     [switch]$AllowGateOverride
 )
 
+if ($FrameTimings -and $NoFpsStats) { throw '-FrameTimings cannot be combined with -NoFpsStats.' }
+if (-not [string]::IsNullOrWhiteSpace($ResultJson)) {
+    $ResultJson = [IO.Path]::GetFullPath($ResultJson)
+    if (Test-Path -LiteralPath $ResultJson) { throw "Refusing existing result handoff '$ResultJson'." }
+}
 . (Join-Path $PSScriptRoot 'timedemo-event-record.ps1')
 
 Set-StrictMode -Version Latest
@@ -813,7 +822,7 @@ if (-not (Test-Path -LiteralPath $benchmarkExe -PathType Leaf)) {
 $selectorVerification = Assert-RunnerBuildManifest -Resolved $resolved -BuildParameters $buildParams `
     -VisualParityOnly:$VisualParityOnly
 
-$fpsStatsEnabled = [bool]($FpsStats -and -not $NoFpsStats)
+$fpsStatsEnabled = [bool](($FpsStats -or $FrameTimings) -and -not $NoFpsStats)
 $fpsStatsOptions = if ($fpsStatsEnabled) { ' -fpsstats' } else { '' }
 
 $dpmiSuffix = if ($DpmiHost -eq 'cwsdpmi') { '' } else { '-hdpmi32' }
@@ -1028,7 +1037,7 @@ if ($FrameCaptureIndex -ge 0 -and -not $FrameChecksums) {
 }
 $zChecksumsRequested = $QuakeExtraArgs -match '(?i)(?:^|\s)-zchecksums(?:\s|$)'
 $parityClockRequested = $QuakeExtraArgs -match '(?i)(?:^|\s)-parityclock(?:\s|$)'
-if ($parityClockRequested -and (-not $FrameChecksums -or $FpsStats)) {
+if ($parityClockRequested -and (-not $FrameChecksums -or $FpsStats -or $FrameTimings)) {
     throw '-parityclock requires -FrameChecksums and cannot collect performance FPS statistics.'
 }
 if ($zChecksumsRequested -and -not $FrameChecksums) {
@@ -1123,9 +1132,9 @@ if ($profileHash -ne $ExpectedProfileSha256) {
 # it enabled is diagnostic only, not a promotion timing, because the collection
 # changes runtime even when the candidate gain is small.
 if ($fpsStatsEnabled) {
-    Write-Warning ("FPS STATS ENABLED: this run pays per-frame timer reads and is inflated by about 0.020% " +
-        "relative to an uninstrumented run. It is valid as a diagnostic, NOT as a promotion measurement. " +
-        "Re-run without -FpsStats for a matched performance comparison.")
+    Write-Warning ("FPS STATS ENABLED: this diagnostic pays two timer reads per measured frame. " +
+        "Measure overhead against a matched run without FPS stats; do not assume a universal correction. " +
+        "Detailed PROFILE486 instrumentation is separate from this lightweight timing capture.")
 }
 
 for ($run = 1; $run -le $Runs; $run++) {
@@ -1136,6 +1145,10 @@ for ($run = 1; $run -le $Runs; $run++) {
     $timedemoJsonPath = Join-Path $quakeRoot 'timedemo.jsn'
     if (Test-Path -LiteralPath $timedemoJsonPath) {
         Remove-Item -LiteralPath $timedemoJsonPath -Force
+    }
+    $frameTimesDosPath = Join-Path $quakeRoot 'FRAMTIME.CSV'
+    if (Test-Path -LiteralPath $frameTimesDosPath) {
+        Remove-Item -LiteralPath $frameTimesDosPath -Force
     }
     $profileJsonPath = Join-Path $quakeRoot 'profile.jsn'
     if (Test-Path -LiteralPath $profileJsonPath) {
@@ -1296,6 +1309,26 @@ for ($run = 1; $run -le $Runs; $run++) {
     $runFrames = [int]$match.Groups['frames'].Value
     $runSeconds = [double]::Parse($match.Groups['seconds'].Value, $culture)
     $runFps = [double]::Parse($match.Groups['fps'].Value, $culture)
+    $frameTimesPath = $null
+    if ($FrameTimings -and (-not (Test-Path -LiteralPath $frameTimesDosPath -PathType Leaf) -or $null -eq $fpsStatsData)) {
+        throw 'Ordered frame timings are missing; rebuild the game with raw FRAMTIME.CSV export support.'
+    }
+    if ($FrameTimings -and ($fpsStatsData.fps.stored_frames -ne $runFrames -or
+            $fpsStatsData.fps.measured_frames -ne $runFrames -or
+            $fpsStatsData.fps.invalid_frames -ne 0 -or $fpsStatsData.fps.overflow_frames -ne 0)) {
+        throw 'Incomplete frame timing capture: frame count, invalid samples or overflow differs from the timedemo.'
+    }
+    # Preserve each run before the DOS process overwrites its fixed 8.3 filenames.
+    $runArchive = Join-Path $stagingRoot ('runs/run-{0:D2}' -f $run)
+    New-Item -ItemType Directory -Path $runArchive -Force | Out-Null
+    Copy-Item -LiteralPath $reportPath -Destination (Join-Path $runArchive 'timedemo.txt')
+    if ($null -ne $fpsStatsData) {
+        Copy-Item -LiteralPath $timedemoJsonPath -Destination (Join-Path $runArchive 'timedemo-stats.json')
+    }
+    if ($fpsStatsEnabled -and (Test-Path -LiteralPath $frameTimesDosPath -PathType Leaf)) {
+        $frameTimesPath = Join-Path $runArchive 'frame-times.csv'
+        Copy-Item -LiteralPath $frameTimesDosPath -Destination $frameTimesPath
+    }
 
     # A run that completed the wrong number of frames, or rendered a different
     # framebuffer, is not a timing result. Fail rather than report it.
@@ -1330,6 +1363,7 @@ for ($run = 1; $run -le $Runs; $run++) {
         seconds = $runSeconds
         fps = $runFps
         fpsStats = $fpsStatsData
+        frameTimesPath = $frameTimesPath
         report = $report.Trim()
         profile = $profileData
         blobExplosionEventFrames = $blobExplosionEventFrames
@@ -1478,6 +1512,8 @@ $result = [ordered]@{
     medianFps = if ($parityClockRequested) { $null } else { $medianFps }
     fpsSummary = $fpsSummary
     dosboxVersion = $toolManifest.dosboxX.version
+    dosboxExecutableSha256 = (Get-FileHash -LiteralPath $dosbox -Algorithm SHA256).Hash
+    cpuTarget = $CpuTarget
     profile = $profilePath
     profileSha256 = $profileHash
     customProfile = (-not [string]::IsNullOrWhiteSpace($DosboxProfilePath))
@@ -1671,7 +1707,13 @@ if ($null -ne $demoFixtureResult) {
     $result['demoFixture'] = $demoFixtureResult
 }
 $resultPath = Join-Path $stagingRoot 'timedemo-result.json'
-$result | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $resultPath -Encoding ASCII
+$result | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $resultPath -Encoding utf8
+if (-not [string]::IsNullOrWhiteSpace($ResultJson)) {
+    $handoff = [IO.Path]::GetFullPath($ResultJson)
+    if (Test-Path -LiteralPath $handoff) { throw "Refusing existing result handoff '$handoff'." }
+    New-Item -ItemType Directory -Path (Split-Path $handoff -Parent) -Force | Out-Null
+    Copy-Item -LiteralPath $resultPath -Destination $handoff
+}
 
 Write-Host ($results | ForEach-Object { $_.report })
 Write-Host ("Timedemo result: {0}" -f $resultPath)
