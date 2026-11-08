@@ -3,16 +3,16 @@
 The latest nearby instrumented profile attributes 18.52 seconds to perspective
 texture spans across 3.51 million segments and 43.96 million pixels. These
 measurements rank work; their timings are not comparable to uninstrumented FPS
-results. The source profile is [`profile.jsn`](../quake/out/dos-timedemo-20261029-221148/quake/profile.jsn).
+results. The source profile is [`profile.jsn`](../../quake/out/dos-timedemo-20261029-221148/quake/profile.jsn).
 
 ## Profile ranking
 
 | Priority | Opportunity | Assessment |
 |---|---|---|
-| 1 | `D_DrawSpans16` perspective arithmetic | Highest plausible upside in the profile. Exact algorithm changes could reduce per-segment work, but reciprocal and x87 stack rewrites tested on October 31 did not produce a correct, repeatable gain; see the [focused Span16 record](../quake/docs/ledger/2026-10-31-span16-perspective-arithmetic-trials-rejected.md). |
+| 1 | `D_DrawSpans16` perspective arithmetic | Highest plausible upside in the profile. Exact algorithm changes could reduce per-segment work, but reciprocal and x87 stack rewrites tested on October 31 did not produce a correct, repeatable gain; see the [focused Span16 record](../../quake/docs/ledger/2026-10-31-span16-perspective-arithmetic-trials-rejected.md). |
 | 2 | Z spans, edge traversal, and `R_RenderFace` | Meaningful profile share, though recent scheduling, unroll, and branch trials are mostly marginal or regressions. Larger changes would be needed for material gains. |
 | 3 | Alias raster and spans | Still measurable work, but recent alignment, carry, and load/store reorderings have not shown a dependable win. |
-| 4 | Surface cache | The October 31 static-hit leaf path gained **0.019160%** in a matched uninstrumented 320x200 benchmark with exact output parity. The workload had 46,532 hits, 8,773 rebuilds, no cache thrash, and no dynamic-light probes, so remaining hit-path headroom appears small. See the [promotion record](../quake/docs/ledger/2026-10-31-surface-cache-hit-leaf-entry-promoted.md). |
+| 4 | Surface cache | The October 31 static-hit leaf path gained **0.019160%** in a matched uninstrumented 320x200 benchmark with exact output parity. The workload had 46,532 hits, 8,773 rebuilds, no cache thrash, and no dynamic-light probes, so remaining hit-path headroom appears small. See the [promotion record](../../quake/docs/ledger/2026-10-31-surface-cache-hit-leaf-entry-promoted.md). |
 | 5 | Store width and cache layout | Word stores remain best in recorded comparisons. Dword, byte, loop, and `stosw` variants lost. DOSBox-X cannot establish gains from physical 486 cache behavior. |
 
 ## October 31 Span16 result

@@ -1,0 +1,2 @@
+# Optional; core benchmark and comparison tools use the Python standard library.
+matplotlib>=3.7,<4

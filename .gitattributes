@@ -1,0 +1,10 @@
+*.py text eol=lf
+*.ps1 text eol=crlf
+*.json text eol=lf
+*.md text eol=lf
+# Profile hashes normalize CRLF, but preserve the originally transferred bytes.
+benchmarks/tools/dosbox-x-486-high.conf -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab
+# Preserve vendored provider licenses and binaries byte-for-byte.
+benchmarks/tools/thirdparty/** -text whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab
+*.pcx binary
+*.png binary

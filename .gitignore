@@ -3,3 +3,9 @@
 /out/
 *.dmp
 *.log
+/benchmarks/out/
+/benchmarks/baselines/*.exe
+__pycache__/
+*.py[cod]
+.pytest_cache/
+/benchmarks/.venv/

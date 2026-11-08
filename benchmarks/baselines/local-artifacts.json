@@ -1,0 +1,12 @@
+[
+  {
+    "name": "QUAKE.EXE",
+    "sha256": "e0a1936400ca56e94d44d585097bd9e490035fcfb6e7d806d7e879f423928642",
+    "originalLocation": "quake/tools/QUAKE.EXE"
+  },
+  {
+    "name": "486quake.exe",
+    "sha256": "cf461cfa0fea989aa1e2e834b6d5482b7c64f3279bd7be56c52f92752fff429e",
+    "originalLocation": "quake/tools/486quake.exe"
+  }
+]
