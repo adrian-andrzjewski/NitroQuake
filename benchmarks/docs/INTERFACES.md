@@ -75,6 +75,14 @@ reference/candidate roots and the supported builder's resolved flags. It checks
 header/helper compatibility and produces a standalone diagnostic executable;
 the game has no dependency on the fixture or its host-side Python driver.
 
+`plot-matched-comparison.py` consumes the retained matched-comparison session
+format: `groups` contain `kind` (`timing`/`local`), `workload`, `sound`, `frames`
+and `samples.control`/`samples.candidate` elapsed-second arrays, aligned by pair.
+The terminal session must have a sibling `audit.json` with `status: PASS` and
+`sessionSha256` matching its exact bytes. The tool excludes parity groups,
+exports every timing sample to CSV, and plots median FPS/change plus observed
+paired ranges. It does not turn those ranges into confidence intervals.
+
 ## History and archives
 
 `../migration.json` records each transferred path's original game revision and

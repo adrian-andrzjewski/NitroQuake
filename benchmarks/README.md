@@ -22,6 +22,10 @@ For renderer, physics, QuakeC, collision and active audio attribution, use the
 records observer overhead and distinguishes emulator evidence from hardware
 expectations.
 
+The [measured i486 optimization record](docs/I486-OPTIMIZATION-20261108.md) covers
+the accepted warp-table and QuakeC changes, independent attribution, combined
+timings, release checks and a reproducible matched-comparison graph.
+
 The [native QuakeC fixture](docs/QC-INTERPRETER-VALIDATION.md) compares all opcodes,
 overlapping operands, control flow and x87 settings against a retained source
 checkout without requiring game PAKs.
