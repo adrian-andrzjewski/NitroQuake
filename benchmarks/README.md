@@ -16,6 +16,12 @@ python tools/frame-benchmark.py run --label "Baseline" --output out/baseline-tim
 The [frame timing validation record](docs/FRAME-TIMING-VALIDATION.md) documents
 the completed three-demo batch, replay checks and measured capture overhead.
 
+For renderer, physics, QuakeC, collision and active audio attribution, use the
+[whole-engine profiling workflow](docs/ENGINE-PROFILING.md). The
+[320×200 i486 analysis](docs/ENGINE-PERFORMANCE-20261108.md) ranks measured costs,
+records observer overhead and distinguishes emulator evidence from hardware
+expectations.
+
 ```powershell
 $env:NITROQUAKE_GAME_ROOT = 'workspace\quake'
 pwsh -NoProfile -File tools/bootstrap-dos.ps1
