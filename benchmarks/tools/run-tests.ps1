@@ -123,6 +123,7 @@ Invoke-Gate -Name 'test-dosbox-profile' -Kind 'host' -Command @('python', 'tools
 Invoke-Gate -Name 'test-particle-scenario' -Kind 'host' -Command @('python', 'tools/test-particle-scenario.py') | Out-Null
 Invoke-Gate -Name 'test-executable-comparison' -Kind 'host' -Command @('python', 'tools/test-executable-comparison.py') | Out-Null
 Invoke-Gate -Name 'test-frame-times' -Kind 'host' -Command @('python', 'tools/test-frame-times.py') | Out-Null
+Invoke-Gate -Name 'test-engine-profile-analysis' -Kind 'host' -Command @('python', 'tools/test-engine-profile-analysis.py') | Out-Null
 Invoke-Gate -Name 'test-rendering (PCX comparison + frame-log parser)' -Kind 'host' -Command @('python', 'tools/test-rendering.py') | Out-Null
 Invoke-Gate -Name 'test-blobexplosion-demo-fixture (PACK + .dem format)' -Kind 'host' `
     -Command @('python', '-B', 'tools/test_blobexplosion_demo_fixture.py') | Out-Null

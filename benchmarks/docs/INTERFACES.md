@@ -53,6 +53,23 @@ FPS summary sorts its buffer; host analysis validates every sample and its
 recorded environment. It uses a fixed simulation step with real timing, distinct
 from the presentation `-parityclock` correctness mode.
 
+## Whole-engine diagnostics
+
+The game owns BENCH486 `-gamebench` and `benchprofile N`, fixed-step local capture,
+selected-state checksums and native scope bookkeeping. PROFILE486 accepts
+`-profilecoarse` and `-profileparts`; schema-1 `profile.jsn` adds `capture_mode`
+without renumbering existing assembly scope IDs. Local exports are
+`GAMEPROF.TXT`, `QCPROF.CSV` and optional `profile.jsn`. No host analysis dependency
+is required to build or run these native interfaces.
+
+The suite owns serial collection, source-bound validation, schema-version-1
+session/result JSON, timer-floor correction, comparisons and chart generation.
+Results retain hashes and paths to native exports; session jobs hash each result.
+Coarse/component/detailed captures and unprofiled controls retain distinct mode
+labels. Final selected-state checksums do not replace exhaustive replay parity,
+and QuakeC statement counts do not imply per-function elapsed time.
+See [the protocol](ENGINE-PROFILING.md) for clocks, limitations and commands.
+
 ## History and archives
 
 `../migration.json` records each transferred path's original game revision and
