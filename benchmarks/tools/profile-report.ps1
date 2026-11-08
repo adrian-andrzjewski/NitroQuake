@@ -4,13 +4,21 @@ param(
     [string]$ProfileJson,
     [string]$BaselineResult,
     [double]$BaselineSeconds = 0,
-    # Effective emulated clock for the pinned profile (tools\486-cost-model.ps1
-    # uses the same figure). Only used to render cycles.
-    [double]$CpuHz = 33445000.0
+    # Optional explicit clock model. DOSBox cycles are not physical Hz.
+    # The default reports elapsed microseconds rather than invented CPU cycles.
+    [double]$CpuHz = 0
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+$perCallScale = 1000000.0
+$perCallUnit = 'us/call'
+if ($CpuHz -lt 0) { throw 'CpuHz must be nonnegative.' }
+if ($CpuHz -gt 0) {
+    $perCallScale = $CpuHz
+    $perCallUnit = 'model-cycles/call'
+    Write-Warning 'Cycle values use the explicitly supplied clock model; DOSBox elapsed time does not measure physical CPU cycles.'
+}
 
 $ProfileJson = [IO.Path]::GetFullPath($ProfileJson)
 if (-not (Test-Path -LiteralPath $ProfileJson -PathType Leaf)) {
@@ -145,9 +153,9 @@ Write-Host (("Profile timer reads: {0}; maximum stack depth: {1}; stack errors: 
     $profile.profiler.stack_overflows, $profile.profiler.bad_leaves,
     $profile.profiler.discarded_scopes)
 if ($readSeconds -gt 0) {
-    Write-Host (("Instrumentation floor: {0:0.000000000} s per Sys_FloatTime read = {1:0.0} cycles; " +
-        "a scope called N times cannot report less than about {2:0} cycles per call") -f
-        $readSeconds, ($readSeconds * $CpuHz), (2 * $readSeconds * $CpuHz))
+    Write-Host (("Instrumentation floor: {0:0.000000000} s per Sys_FloatTime read = {1:0.000} us; " +
+        "a scope called N times cannot report less than about {2:0.000} us per call") -f
+        $readSeconds, ($readSeconds * 1000000.0), (2 * $readSeconds * 1000000.0))
 }
 if ($null -ne $fpsStats) {
     Write-Host (("Frame FPS: average {0:0.000000}, min {1:0.000000}, max {2:0.000000}, " +
@@ -188,10 +196,10 @@ foreach ($node in @($profile.nodes | Where-Object { (Get-CorrectedSelf $_) -gt 0
     }
     else { '' }
     $perCall = if ([int64]$node.calls -gt 0) {
-        "{0,7:0.0}" -f (($corrected / [int64]$node.calls) * $CpuHz)
+        "{0,7:0.0}" -f (($corrected / [int64]$node.calls) * $perCallScale)
     }
     else { '      -' }
-    Write-Host ("{0,2}. {1,-20} corrected {2,9:0.000000}s {3} raw {4,9:0.000000}s instr {5,9} reads signal {6,6:0.0}% {7:>8} cyc/call calls {8,7}{9}" -f
+    Write-Host ("{0,2}. {1,-20} corrected {2,9:0.000000}s {3} raw {4,9:0.000000}s instr {5,9} reads signal {6,6:0.0}% {7} $perCallUnit calls {8,7}{9}" -f
         $rank, $node.id, $corrected, (Format-Percent $selfPercent),
         [double]$node.self_seconds, $instr, ($signal * 100.0), $perCall,
         $node.calls, $flag)
@@ -211,14 +219,14 @@ else {
             Select-Object -First 14)) {
         $raw = [double]$node.self_seconds
         $rawPerCall = if ([int64]$node.calls -gt 0) {
-            "{0,7:0.0}" -f (($raw / [int64]$node.calls) * $CpuHz)
+            "{0,7:0.0}" -f (($raw / [int64]$node.calls) * $perCallScale)
         }
         else { '      -' }
         $sigPerCall = if ([int64]$node.calls -gt 0) {
-            "{0,7:0.0}" -f ((Get-CorrectedSelf $node) / [int64]$node.calls * $CpuHz)
+            "{0,7:0.0}" -f ((Get-CorrectedSelf $node) / [int64]$node.calls * $perCallScale)
         }
         else { '      -' }
-        Write-Host ("  {0,-22} calls {1,7}  raw {2,8:0.0} cyc/call -> signal {3,8:0.0} cyc/call  ({4:0.0}% signal)" -f
+        Write-Host ("  {0,-22} calls {1,7}  raw {2} $perCallUnit -> signal {3} $perCallUnit  ({4:0.0}% signal)" -f
             $node.id, $node.calls, $rawPerCall, $sigPerCall,
             ((Get-SignalFraction $node) * 100.0))
     }
