@@ -22,6 +22,10 @@ For renderer, physics, QuakeC, collision and active audio attribution, use the
 records observer overhead and distinguishes emulator evidence from hardware
 expectations.
 
+The [native QuakeC fixture](docs/QC-INTERPRETER-VALIDATION.md) compares all opcodes,
+overlapping operands, control flow and x87 settings against a retained source
+checkout without requiring game PAKs.
+
 ```powershell
 $env:NITROQUAKE_GAME_ROOT = 'workspace\quake'
 pwsh -NoProfile -File tools/bootstrap-dos.ps1

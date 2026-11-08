@@ -70,6 +70,11 @@ labels. Final selected-state checksums do not replace exhaustive replay parity,
 and QuakeC statement counts do not imply per-function elapsed time.
 See [the protocol](ENGINE-PROFILING.md) for clocks, limitations and commands.
 
+The suite's [native QuakeC fixture](QC-INTERPRETER-VALIDATION.md) consumes explicit
+reference/candidate roots and the supported builder's resolved flags. It checks
+header/helper compatibility and produces a standalone diagnostic executable;
+the game has no dependency on the fixture or its host-side Python driver.
+
 ## History and archives
 
 `../migration.json` records each transferred path's original game revision and
