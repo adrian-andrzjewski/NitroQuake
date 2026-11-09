@@ -75,6 +75,12 @@ reference/candidate roots and the supported builder's resolved flags. It checks
 header/helper compatibility and produces a standalone diagnostic executable;
 the game has no dependency on the fixture or its host-side Python driver.
 
+The [collision fixtures](COLLISION-VALIDATION.md) use the same explicit-root,
+resolved-builder and pinned native-runner boundaries. Their top-level
+`fixture.json` binds source/header/compiler inputs and per-unit generated files
+to separate `move/` and `cliplinks/` execution records. Helper stubs isolate the
+interfaces; game/runtime/ISA and performance gates remain separate.
+
 `plot-matched-comparison.py` consumes the retained matched-comparison session
 format: `groups` contain `kind` (`timing`/`local`), `workload`, `sound`, `frames`
 and `samples.control`/`samples.candidate` elapsed-second arrays, aligned by pair.
