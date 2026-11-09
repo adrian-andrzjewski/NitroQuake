@@ -4,6 +4,8 @@ This study's source refresh is the pre-change `fd2b7a5` control. Subsequent
 warp-table/QuakeC changes and the combined Build 854 release are measured in the
 [i486 optimization record](I486-OPTIMIZATION-20261108.md). The budgets below remain
 reference measurements for their recorded sources and protocols.
+The [Build 856 collision record](I486-COLLISION-OPTIMIZATION-20261109.md) measures
+subsequent server-side work reductions against Build 854.
 
 ## Main finding and evidence boundaries
 

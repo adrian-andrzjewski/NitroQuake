@@ -26,9 +26,17 @@ The [measured i486 optimization record](docs/I486-OPTIMIZATION-20261108.md) cove
 the accepted warp-table and QuakeC changes, independent attribution, combined
 timings, release checks and a reproducible matched-comparison graph.
 
+The [collision optimization record](docs/I486-COLLISION-OPTIMIZATION-20261109.md)
+adds Build 856 server work reductions, native differential fixtures and matched
+local gameplay results.
+
 The [native QuakeC fixture](docs/QC-INTERPRETER-VALIDATION.md) compares all opcodes,
 overlapping operands, control flow and x87 settings against a retained source
 checkout without requiring game PAKs.
+
+The [native collision fixtures](docs/COLLISION-VALIDATION.md) compare move-clip
+initialization and area-tree traversal against a retained source checkout,
+including complete clip data, helper order, ABI and x87 state without PAKs.
 
 ```powershell
 $env:NITROQUAKE_GAME_ROOT = 'workspace\quake'
