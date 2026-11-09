@@ -235,9 +235,15 @@ hardware cache misses:
 - Fewer than half the tracked face submissions reached the tracked emission path.
   Separate cached-edge reuse, rejection and clipping before calling all non-emission
   work redundant.
-- Dynamic-light probe counters cover the C cache-check path, but the measured
-  build selects assembly checks. Their zero values mean missing coverage, not
-  zero dynamic-light work. Repair this census before ranking dlight proposals.
+- Profile-only counters now cover the selected assembly cache-check path. Two
+  256-frame local captures recorded 330 checks, 314 contributing and 16 false
+  predicates (0.645 checks/frame combined). The check rate is low, and these
+  counts do not price its CPU time.
+
+The [assembly dlight census ledger](../../quake/docs/ledger/2026-11-09-surface-cache-dlight-probe-census.md)
+records the two-map results, build audits, exact run checksums and hashes for the
+ignored generated captures. The census corrects instrumentation coverage; it
+does not establish a dlight optimization or FPS gain.
 
 The default software surface cache is already 2,400 KiB. A retained same-binary
 capacity experiment measured about 1.45% above 600 KiB; this benefit is already in
@@ -321,7 +327,7 @@ Coverage is explicit rather than inferred from a successful demo:
 | --- | --- |
 | Assembly rasterization, geometry, Z and screen presentation | Source-bound i486 builds; broad reference groups and current component scopes |
 | BSP and visibility | World/face budget measured separately from PVS marking; no physical branch/cache-miss counts |
-| Lighting and surface cache | Work/rebuild census and grouped time; active-assembly dlight probe coverage remains incomplete |
+| Lighting and surface cache | Work/rebuild census and grouped time; active-assembly dlight probes are counted but not separately timed |
 | Physics, native AI and QuakeC | Live local-server workloads and retained encounter; not inferred from client demos |
 | Audio | Real emulated Sound Blaster format plus retained active-PCM evidence; no physical/audio-output-parity claim |
 | Memory | Software-cache populations, source routes and helper counts; hardware stalls/misses unmeasured |
