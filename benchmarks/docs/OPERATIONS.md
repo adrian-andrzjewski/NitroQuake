@@ -1105,10 +1105,16 @@ testdata\id1\pak0.pak
 testdata\id1\pak1.pak
 ~~~
 
-The data must live on the same volume as the repository, because the runners
-hardlink the paks into each staging directory rather than copying them and NTFS
-hardlinks cannot span volumes.  If you keep your game data on another volume,
-copy the two paks to `testdata\id1` and drop `-DataRoot`.
+Keep game data in `testdata\id1` or pass another directory with `-DataRoot`.
+Runners hardlink PAKs directly when possible. If the source is on another volume
+or NTFS has reached its hardlink limit, they verify one copy per PAK hash in
+`benchmarks\out\.pak-cache\<UTC-date>` and hardlink each run to that cache.
+The cache is ignored generated output.
+
+Run directories and manifests are benchmark evidence; do not prune them by age
+alone. Before cleanup or NTFS compression under an output tree, enumerate the
+exact files, skip reparse points, and check hardlink counts so shared assets and
+external toolchains remain untouched.
 
 Then run:
 

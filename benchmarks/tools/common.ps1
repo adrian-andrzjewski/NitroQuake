@@ -367,6 +367,53 @@ function Get-BenchmarkToolingProvenance {
     return [ordered]@{ schemaVersion=1; purpose='benchmark-tooling-provenance'; gitRevision=$revision; dirty=($changes.Count -gt 0); files=$files }
 }
 
+function Get-OrCreateSharedPakCacheFile {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory = $true)][string]$SourcePath,
+        [Parameter(Mandatory = $true)][string]$FileName,
+        [Parameter(Mandatory = $true)][string]$Sha256
+    )
+
+    if ($Sha256 -notmatch '^[0-9A-Fa-f]{64}$') { throw "Invalid PAK SHA-256 '$Sha256'." }
+    $cacheRoot = Join-Path (Join-Path (Join-Path $script:BenchmarkRepositoryRoot 'out') '.pak-cache') `
+        ([DateTime]::UtcNow.ToString('yyyyMMdd'))
+    [IO.Directory]::CreateDirectory($cacheRoot) | Out-Null
+    $cacheName = $Sha256.ToLowerInvariant() + '-' + [IO.Path]::GetFileName($FileName).ToLowerInvariant()
+    $cachePath = Join-Path $cacheRoot $cacheName
+
+    if (Test-Path -LiteralPath $cachePath -PathType Leaf) {
+        if ((Get-FileHash -LiteralPath $cachePath -Algorithm SHA256).Hash -ne $Sha256) {
+            throw [IO.InvalidDataException]::new("Shared PAK cache hash mismatch: '$cachePath'.")
+        }
+        return $cachePath
+    }
+
+    $temporaryPath = Join-Path $cacheRoot ('.pak-' + [guid]::NewGuid().ToString('N') + '.tmp')
+    try {
+        Copy-Item -LiteralPath $SourcePath -Destination $temporaryPath -ErrorAction Stop
+        if ((Get-FileHash -LiteralPath $temporaryPath -Algorithm SHA256).Hash -ne $Sha256) {
+            throw [IO.InvalidDataException]::new("Source PAK changed while populating shared cache: '$SourcePath'.")
+        }
+        try {
+            [IO.File]::Move($temporaryPath, $cachePath)
+        }
+        catch {
+            # Another runner may have populated the same content-addressed entry.
+            if (-not (Test-Path -LiteralPath $cachePath -PathType Leaf)) { throw }
+            if ((Get-FileHash -LiteralPath $cachePath -Algorithm SHA256).Hash -ne $Sha256) {
+                throw [IO.InvalidDataException]::new("Shared PAK cache hash mismatch: '$cachePath'.")
+            }
+        }
+    }
+    finally {
+        if (Test-Path -LiteralPath $temporaryPath -PathType Leaf) {
+            Remove-Item -LiteralPath $temporaryPath -Force
+        }
+    }
+    return $cachePath
+}
+
 function New-QuakeStaging {
     <#
     .SYNOPSIS
@@ -377,8 +424,11 @@ function New-QuakeStaging {
         assume it:  <staging>\quake\{quake.exe,cwsdpmi.exe,<batch>}  and
         <staging>\quake\id1\*.pak.
 
-        Prefer hardlinks for immutable PAKs. Cross-volume data and exhausted
-        NTFS hardlink counts fall back to a SHA-256 verified copy.
+        Prefer hardlinks for immutable PAKs. If the source is on another volume
+        or has exhausted its NTFS hardlink count, use a SHA-256 verified shared
+        cache under benchmarks\out\.pak-cache\<UTC date> and hardlink to that
+        entry. Daily cache files bound NTFS hardlink fanout. If hardlinks remain
+        unavailable, fall back to a SHA-256 verified copy.
 
         Only paks are staged.  A Steam id1 directory also holds configs, saves and
         autoexec lines, and a local autoexec can prevent +quit from ever returning
@@ -449,19 +499,34 @@ function New-QuakeStaging {
     $storage = @()
     foreach ($pak in $pakFiles) {
         $destination = Join-Path $stagedData $pak.Name
+        $sourceHash = (Get-FileHash -LiteralPath $pak.FullName -Algorithm SHA256).Hash
         $method = 'hardlink'
+        $cachePath = $null
         try {
             New-Item -ItemType HardLink -Path $destination -Value $pak.FullName -ErrorAction Stop | Out-Null
         }
         catch {
-            $method = 'copy'
-            Copy-Item -LiteralPath $pak.FullName -Destination $destination -ErrorAction Stop
+            try {
+                $cachePath = Get-OrCreateSharedPakCacheFile -SourcePath $pak.FullName -FileName $pak.Name -Sha256 $sourceHash
+                New-Item -ItemType HardLink -Path $destination -Value $cachePath -ErrorAction Stop | Out-Null
+                $method = 'hardlink-cache'
+            }
+            catch [IO.InvalidDataException] {
+                throw
+            }
+            catch {
+                if (Test-Path -LiteralPath $destination -PathType Leaf) {
+                    Remove-Item -LiteralPath $destination -Force
+                }
+                $cachePath = $null
+                $method = 'copy'
+                Copy-Item -LiteralPath $pak.FullName -Destination $destination -ErrorAction Stop
+            }
         }
-        $sourceHash = (Get-FileHash -LiteralPath $pak.FullName -Algorithm SHA256).Hash
         if ((Get-FileHash -LiteralPath $destination -Algorithm SHA256).Hash -ne $sourceHash) {
             throw "Staged PAK hash mismatch: '$destination'."
         }
-        $storage += [pscustomobject]@{ name=$pak.Name; source=$pak.FullName; sha256=$sourceHash; storage=$method }
+        $storage += [pscustomobject]@{ name=$pak.Name; source=$pak.FullName; sha256=$sourceHash; storage=$method; cache=$cachePath }
     }
     $storage | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $StagingRoot 'staged-data.json') -Encoding utf8
     Get-BenchmarkToolingProvenance | ConvertTo-Json -Depth 5 |
