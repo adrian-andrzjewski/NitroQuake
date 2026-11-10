@@ -1,39 +1,58 @@
 # Remaining optimization opportunities
 
-The latest nearby instrumented profile attributes 18.52 seconds to perspective
-texture spans across 3.51 million segments and 43.96 million pixels. These
-measurements rank work; their timings are not comparable to uninstrumented FPS
-results. The source profile is [`profile.jsn`](../../quake/out/dos-timedemo-20261029-221148/quake/profile.jsn).
+## Current-source refresh (2026-11-10)
 
-## Profile ranking
+A fresh one-repetition `demo1` profile was collected from the current game tree
+(`2a2448a`) and benchmark suite (`741beef`) at VGA 320x200 under DOSBox-X
+2026.08.31, `cputype=486`, fixed 33,445 cycles, FPU 387, and the verified
+`testdata/id1` PAKs. The game source-tree fingerprint is
+`5555126FDDD71C350EB9ED7AA077042C8EA9E12610EDAC91EB9E8A39289666A5`. The full
+session and captured artifacts are retained under
+[`out/engine-profile-current-20261110/`](../out/engine-profile-current-20261110/).
+The `session.json` SHA-256 is
+`4502233F44781DE9F8730464BDC1F089BBAEFA9D61E0EDC78E3796221933C315`.
 
-| Priority | Opportunity | Assessment |
-|---|---|---|
-| 1 | `D_DrawSpans16` perspective arithmetic | Highest plausible upside in the profile. Exact algorithm changes could reduce per-segment work, but reciprocal and x87 stack rewrites tested on October 31 did not produce a correct, repeatable gain; see the [focused Span16 record](../../quake/docs/ledger/2026-10-31-span16-perspective-arithmetic-trials-rejected.md). |
-| 2 | Z spans, edge traversal, and `R_RenderFace` | Meaningful profile share, though recent scheduling, unroll, and branch trials are mostly marginal or regressions. Larger changes would be needed for material gains. |
-| 3 | Alias raster and spans | Still measurable work, but recent alignment, carry, and load/store reorderings have not shown a dependable win. |
-| 4 | Surface cache | The October 31 static-hit leaf path gained **0.019160%** in a matched uninstrumented 320x200 benchmark with exact output parity. The workload had 46,532 hits, 8,773 rebuilds, no cache thrash, and no dynamic-light probes, so remaining hit-path headroom appears small. See the [promotion record](../../quake/docs/ledger/2026-10-31-surface-cache-hit-leaf-entry-promoted.md). |
-| 5 | Store width and cache layout | Word stores remain best in recorded comparisons. Dword, byte, loop, and `stosw` variants lost. DOSBox-X cannot establish gains from physical 486 cache behavior. |
+All four runs completed 969 frames and ended with framebuffer checksum
+`1047377823`. The uninstrumented control was one sample at 16.951799 FPS
+(57.162076 seconds); it is not a new baseline or a performance comparison.
+The coarse, parts, and detailed runs measured 15.867923, 15.117910, and
+11.401184 FPS respectively. Their lower rates show the profile overhead and
+must not be compared with release timing.
 
-## October 31 Span16 result
+The lower-overhead `parts` capture ranks these demo1 components:
 
-Three focused candidates were checked with deterministic 320x200 DOSBox-X
-runs and strict i486 audits. Reusing the reciprocal when horizontal inverse
-depth was zero was 0.7705% slower and changed intermediate frame checksums.
-Changing the x87 division stack order caused visible texture banding and failed
-the framebuffer checksum. Replacing two stack exchanges with direct S/T
-stack-slot updates had a slower three-run mean and changed only the transient
-pickup message in the two captured differing frames; it did not show a
-repeatable gain. The original `D_DrawSpans16` arithmetic remains in place.
+| Component | Corrected share |
+| --- | ---: |
+| Texture spans | 28.13% |
+| World BSP and face work | 13.39% |
+| Alias rasterization | 12.67% |
+| Z spans | 11.03% |
+| Edge scan | 10.03% |
+| Surface cache | 9.10% |
 
-## Remaining headroom
+These are exclusive profiled shares from one capture, not uninstrumented cycle
+fractions or confidence intervals. The detailed capture records 3,512,959
+texture segments and 43,955,018 texture pixels. It again finds zero unit-stride
+pixels; surface-cache counters report 46,005 hits, 8,354 rebuilds, and no cache
+thrash. The profile does not split each Span16 segment's setup from its pixel
+body, so that attribution remains open.
 
-The renderer already uses hand-scheduled x87 work, fixed-point stepping,
-unrolled span loops, and i486-safe scalar instructions. The earlier estimate
-was that routine scheduling changes might add less than 1% cumulatively, with
-most individual ideas below a tenth of a percent. A further 1–3% was considered
-plausible only from substantial exact algorithmic work on perspective spans
-or raster traversal. That range is a hypothesis, not a measured result; the
-recent perspective-arithmetic experiments did not realize it. DOSBox-X also
-cannot establish how cache layout and instruction latency behave on physical
-486 variants.
+## Span16 decisions that remain closed
+
+The latest profile still ranks texture spans first, but several obvious
+specializations have already failed or lacked the required premise. The current
+profile records zero unit-stride pixels. A power-of-two width shift was 0.688%
+slower, the signed row-scale table was 0.430% slower, and the no-row-cross path
+was 0.585% slower in their recorded 320x200 checks. See the [power-of-two
+multiply result](../../quake/docs/ledger/2026-10-29-span16-pow2-cachewidth-multiply-screen-rejected.md),
+[row-scale table result](../../quake/docs/ledger/2026-11-02-span16-row-scale-table-unqualified.md),
+[no-row-cross result](../../quake/docs/ledger/2026-10-29-span16-norowcross-current-recheck-rejected.md),
+and the [unit-stride census](../../quake/docs/ledger/2026-10-02-surf8-bundle-and-promotion.md).
+Do not revive these exact paths. Any further texture-span change needs a
+different algorithm that reduces required work while preserving exact output.
+
+The next pass should isolate segment setup versus the 16-pixel body, or select a
+different renderer path with remaining measured work. Keep exact image/depth
+parity, the complete i486 ISA gate, and repeated matched uninstrumented timings
+as promotion requirements. DOSBox-X timing remains emulator evidence, not a
+physical-486 measurement.
