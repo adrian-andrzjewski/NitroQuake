@@ -37,6 +37,17 @@ pixels; surface-cache counters report 46,005 hits, 8,354 rebuilds, and no cache
 thrash. The profile does not split each Span16 segment's setup from its pixel
 body, so that attribution remains open.
 
+## Demo2 underwater warp pixel loop promoted (2026-11-10)
+
+The measured `demo2` profile attributed 1.877079 seconds (3.13%) to 210
+underwater warp calls. An eight-pixel assembly copy loop with a leading
+four-pixel odd tail preserved store order and exact rendering output. Three
+alternating uninstrumented pairs averaged 17.185951 FPS for control and
+17.241270 FPS for the candidate (+0.321885%). The full strict i486 audit passed.
+These DOSBox-X timings apply to this workload and do not establish physical-486
+performance. The complete parity, audit, timing, and provenance record is in
+the [promotion ledger](../../quake/docs/ledger/2026-11-10-underwater-warp-pixel-unroll8-promoted.md).
+
 ## Span16 decisions that remain closed
 
 The latest profile still ranks texture spans first, but several obvious
