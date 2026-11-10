@@ -1,5 +1,26 @@
 # Remaining optimization opportunities
 
+## Current-source profile and R_ClipEdge promotion (2026-11-11)
+
+The committed source revision `23672ac` was profiled again at VGA 320x200 on
+the pinned DOSBox-X 486 configuration. The lower-overhead `demo1` parts pass
+ranks texture spans at 28.09%, world BSP at 13.37%, alias rasterization at
+12.65%, Z spans at 11.01%, edge scan at 10.02%, and surface cache at 9.09%.
+The parts and detailed captures are retained as
+[`parts`](../out/engine-profile-demo1-currentparts-20261111.json) and
+[`detailed`](../out/engine-profile-demo1-currentdetailed-20261111.json);
+their instrumented rates are diagnostic only.
+
+The detailed pass counted 789,805 `R_ClipEdge` calls and 1,479,208 plane tests.
+An endpoint-at-a-time x87 schedule removed five `FXCH` instructions per test
+pair while preserving the left-associative dot products and exact output. Three
+alternating uninstrumented `demo1` pairs improved mean FPS from 16.823771 to
+16.888323 (+0.383695%). All 970 color and Z records and the captured frame 482
+PCX matched; the complete strict i486 gate passed. This DOSBox-X result does
+not establish performance on physical 486 hardware. See the
+[promotion ledger](../../quake/docs/ledger/2026-11-11-r-clipedge-dot-product-stack-reschedule-promoted.md)
+for the exact samples and audit details.
+
 ## Current-source refresh (2026-11-10)
 
 A fresh one-repetition `demo1` profile was collected from the current game tree
@@ -62,8 +83,8 @@ and the [unit-stride census](../../quake/docs/ledger/2026-10-02-surf8-bundle-and
 Do not revive these exact paths. Any further texture-span change needs a
 different algorithm that reduces required work while preserving exact output.
 
-The next pass should isolate segment setup versus the 16-pixel body, or select a
-different renderer path with remaining measured work. Keep exact image/depth
-parity, the complete i486 ISA gate, and repeated matched uninstrumented timings
-as promotion requirements. DOSBox-X timing remains emulator evidence, not a
-physical-486 measurement.
+The next pass should rank remaining work from the current source profile. Any
+further texture-span candidate needs a different algorithm that reduces
+required work. Keep exact image/depth parity, the complete i486 ISA gate, and
+repeated matched uninstrumented timings as promotion requirements. DOSBox-X
+timing remains emulator evidence, not a physical-486 measurement.
