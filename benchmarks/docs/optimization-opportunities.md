@@ -1,25 +1,40 @@
 # Remaining optimization opportunities
 
-## Current-source profile and R_ClipEdge promotion (2026-11-11)
+## Current-source profile and renderer promotions (2026-11-11)
 
-The committed source revision `23672ac` was profiled again at VGA 320x200 on
-the pinned DOSBox-X 486 configuration. The lower-overhead `demo1` parts pass
-ranks texture spans at 28.09%, world BSP at 13.37%, alias rasterization at
-12.65%, Z spans at 11.01%, edge scan at 10.02%, and surface cache at 9.09%.
-The parts and detailed captures are retained as
-[`parts`](../out/engine-profile-demo1-currentparts-20261111.json) and
-[`detailed`](../out/engine-profile-demo1-currentdetailed-20261111.json);
-their instrumented rates are diagnostic only.
+The post-clipdot source revision `68d05e4` was profiled at VGA 320x200 on the
+pinned DOSBox-X 486 configuration, with the then-default assembly BSP walk.
+The lower-overhead `demo1` parts pass completed 969 frames at 15.170257
+instrumented FPS and ranked these components:
 
-The detailed pass counted 789,805 `R_ClipEdge` calls and 1,479,208 plane tests.
-An endpoint-at-a-time x87 schedule removed five `FXCH` instructions per test
-pair while preserving the left-associative dot products and exact output. Three
-alternating uninstrumented `demo1` pairs improved mean FPS from 16.823771 to
-16.888323 (+0.383695%). All 970 color and Z records and the captured frame 482
-PCX matched; the complete strict i486 gate passed. This DOSBox-X result does
-not establish performance on physical 486 hardware. See the
-[promotion ledger](../../quake/docs/ledger/2026-11-11-r-clipedge-dot-product-stack-reschedule-promoted.md)
-for the exact samples and audit details.
+| Component | Profiled self time | Share |
+| --- | ---: | ---: |
+| Texture spans | 17.650799 s | 27.65% |
+| World BSP | 8.042513 s | 12.60% |
+| Alias rasterization | 7.830096 s | 12.27% |
+| Z spans | 7.126712 s | 11.16% |
+| Edge scan | 6.196171 s | 9.71% |
+| Surface cache | 5.923291 s | 9.28% |
+
+These are instrumented attributions, not release timing shares. The capture is
+[`engine-profile-demo1-currentparts-after-clipdot-20261111.json`](../out/engine-profile-demo1-currentparts-after-clipdot-20261111.json).
+The detailed capture for the preceding source revision `23672ac` counted
+789,805 `R_ClipEdge` calls and 1,479,208 plane tests; its counts ranked repeated
+work but are not timing evidence. See
+[`engine-profile-demo1-currentdetailed-20261111.json`](../out/engine-profile-demo1-currentdetailed-20261111.json).
+
+The `R_ClipEdge` endpoint-at-a-time x87 schedule removed five `FXCH`
+instructions per plane-test pair while preserving the left-associative dot
+products and exact output. Three alternating uninstrumented `demo1` pairs
+improved mean FPS from 16.823771 to 16.888323 (+0.383695%); all 970 color and Z
+records and the captured frame 482 PCX matched, and the complete strict i486
+gate passed. See the [promotion ledger](../../quake/docs/ledger/2026-11-11-r-clipedge-dot-product-stack-reschedule-promoted.md).
+
+The C BSP walk is now the i486 default after three alternating pairs measured
+it +0.024255% faster than assembly, with exact 970-record color/Z and frame 482
+PCX parity and complete strict i486 gates. Assembly remains explicitly
+selectable. See the [BSP-walk ledger](../../quake/docs/ledger/2026-11-11-bsp-walk-c-default-promoted.md).
+These results are DOSBox-X measurements, not physical-486 performance claims.
 
 ## Current-source refresh (2026-11-10)
 
@@ -83,8 +98,10 @@ and the [unit-stride census](../../quake/docs/ledger/2026-10-02-surf8-bundle-and
 Do not revive these exact paths. Any further texture-span change needs a
 different algorithm that reduces required work while preserving exact output.
 
-The next pass should rank remaining work from the current source profile. Any
-further texture-span candidate needs a different algorithm that reduces
-required work. Keep exact image/depth parity, the complete i486 ISA gate, and
-repeated matched uninstrumented timings as promotion requirements. DOSBox-X
-timing remains emulator evidence, not a physical-486 measurement.
+The 2026-11-11 parts profile used the assembly BSP walk, before the C walk
+became the default. Refresh the parts profile on that checked-in default before
+choosing the next candidate. Any further texture-span change needs a different
+algorithm that reduces required work. Keep exact image/depth parity, the
+complete i486 ISA gate, and repeated matched uninstrumented timings as
+promotion requirements. DOSBox-X timing remains emulator evidence, not a
+physical-486 measurement.
