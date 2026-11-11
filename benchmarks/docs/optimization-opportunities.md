@@ -1,8 +1,8 @@
 # Remaining optimization opportunities
 
-## Current-source profile and renderer promotions (2026-11-11)
+## Earlier profile and renderer promotions (2026-11-11)
 
-The post-clipdot source revision `68d05e4` was profiled at VGA 320x200 on the
+The pre-C-default source revision `68d05e4` was profiled at VGA 320x200 on the
 pinned DOSBox-X 486 configuration, with the then-default assembly BSP walk.
 The lower-overhead `demo1` parts pass completed 969 frames at 15.170257
 instrumented FPS and ranked these components:
@@ -35,6 +35,53 @@ it +0.024255% faster than assembly, with exact 970-record color/Z and frame 482
 PCX parity and complete strict i486 gates. Assembly remains explicitly
 selectable. See the [BSP-walk ledger](../../quake/docs/ledger/2026-11-11-bsp-walk-c-default-promoted.md).
 These results are DOSBox-X measurements, not physical-486 performance claims.
+
+## Current default-C parts and detailed profile (2026-11-11)
+
+After the C BSP walk became the default and mip-0 horizontal-flat rows were
+unrolled eight at a time, Build 871 profiled the checked-in game source at VGA
+320x200 using the pinned DOSBox-X 486 configuration. The source-tree fingerprint
+is `7921548FCDB5F5B1215C691BE8DF0939FC1A55DB151049C946AB44F8953C60C2`. Both
+passes completed 969 frames. The parts pass took 63.829079 seconds at 15.181169
+instrumented FPS; the detailed pass took 84.707108 seconds at 11.439418
+instrumented FPS. Instrumented FPS is not release timing evidence. The complete
+strict i486 audit passed.
+
+The parts timer-read floor was 5.779 microseconds per read. The table subtracts
+`instr_reads * 5.779 us` from each node's exclusive self time, then divides by
+the sum of corrected exclusive self times (61.371039 seconds):
+
+| Component | Corrected self time | Corrected share |
+| --- | ---: | ---: |
+| Texture spans | 17.336627 s | 28.249% |
+| World BSP | 8.002589 s | 13.040% |
+| Alias rasterization | 7.807875 s | 12.722% |
+| Z spans | 6.796941 s | 11.075% |
+| Edge scan | 6.176247 s | 10.064% |
+| Surface cache | 5.607413 s | 9.137% |
+
+The parts capture is
+[`engine-profile-currentparts-after-surf8-unroll8-20261111.json`](../out/engine-profile-currentparts-after-surf8-unroll8-20261111.json);
+the detailed capture is
+[`engine-profile-currentdetailed-after-surf8-unroll8-20261111.json`](../out/engine-profile-currentdetailed-after-surf8-unroll8-20261111.json).
+Detailed counters record 3,512,959 texture segments and 43,955,018 texture
+pixels, with zero unit-stride pixels; 3,846 alias models and 281,663 alias
+vertices; and 46,005 surface-cache hits, 8,354 rebuilds, and zero thrash
+frames. The mip-0 horizontal-flat path ran 6,607 blocks, including 4,753 fully
+flat blocks. These are DOSBox-X profile attributions for one scene, not
+physical-486 timing shares or general gameplay estimates.
+
+## Mip-0 horizontal-flat rows unrolled eight at a time (2026-11-11)
+
+The assembly block now processes eight rows per counter iteration instead of
+four. Three alternating uninstrumented pairs per scene improved mean FPS from
+16.937853000 to 16.937909000 on demo1 (+0.0003315%) and from 15.887078333 to
+15.887132333 on demo3 (+0.0003391%). Every candidate sample beat every
+control sample in its scene. All 970 demo1 and 1,091 demo3 color and Z records
+matched exactly, as did the captured PCX files, and the complete strict i486
+gate passed. These are small DOSBox-X results, not physical-486 measurements.
+See the [promotion ledger](../../quake/docs/ledger/2026-11-11-surf8-mip0-horizontal-flat-unroll8-promoted.md)
+for every timing sample, checksum hash, and artifact path.
 
 ## Current-source refresh (2026-11-10)
 
@@ -98,10 +145,8 @@ and the [unit-stride census](../../quake/docs/ledger/2026-10-02-surf8-bundle-and
 Do not revive these exact paths. Any further texture-span change needs a
 different algorithm that reduces required work while preserving exact output.
 
-The 2026-11-11 parts profile used the assembly BSP walk, before the C walk
-became the default. Refresh the parts profile on that checked-in default before
-choosing the next candidate. Any further texture-span change needs a different
-algorithm that reduces required work. Keep exact image/depth parity, the
-complete i486 ISA gate, and repeated matched uninstrumented timings as
-promotion requirements. DOSBox-X timing remains emulator evidence, not a
-physical-486 measurement.
+Use the corrected default-C profile above when selecting the next target. Any
+further texture-span change needs a different algorithm that reduces required
+work. Keep exact image/depth parity, the complete i486 ISA gate, and repeated
+matched uninstrumented timings as promotion requirements. DOSBox-X timing
+remains emulator evidence, not a physical-486 measurement.
