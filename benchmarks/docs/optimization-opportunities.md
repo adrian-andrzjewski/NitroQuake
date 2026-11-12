@@ -71,17 +71,19 @@ frames. The mip-0 horizontal-flat path ran 6,607 blocks, including 4,753 fully
 flat blocks. These are DOSBox-X profile attributions for one scene, not
 physical-486 timing shares or general gameplay estimates.
 
-## Mip-0 horizontal-flat rows unrolled eight at a time (2026-11-11)
+## Mip-0 horizontal-flat rows fully unrolled (2026-11-12)
 
-The assembly block now processes eight rows per counter iteration instead of
-four. Three alternating uninstrumented pairs per scene improved mean FPS from
-16.937853000 to 16.937909000 on demo1 (+0.0003315%) and from 15.887078333 to
-15.887132333 on demo3 (+0.0003391%). Every candidate sample beat every
-control sample in its scene. All 970 demo1 and 1,091 demo3 color and Z records
-matched exactly, as did the captured PCX files, and the complete strict i486
-gate passed. These are small DOSBox-X results, not physical-486 measurements.
-See the [promotion ledger](../../quake/docs/ledger/2026-11-11-surf8-mip0-horizontal-flat-unroll8-promoted.md)
-for every timing sample, checksum hash, and artifact path.
+The assembly block now emits all sixteen rows straight-line, removing the
+two-iteration counter loop from the eight-row version. Three alternating
+uninstrumented demo1 pairs improved mean FPS from 16.940373 to 16.940452
+(+0.0004656%); every candidate sample beat its matched control. Demo1 and demo3
+color and Z streams matched exactly, as did the frame-169 PCX captures, and
+the strict release and qbench i486 gates passed. The measured gain is small
+and comes from DOSBox-X, not physical-486 timing. See the
+[promotion ledger](../../quake/docs/ledger/2026-11-12-surf8-mip0-horizontal-flat-unroll16-promoted.md)
+for each timing sample, checksum hash, and artifact path. The earlier
+[eight-row promotion](../../quake/docs/ledger/2026-11-11-surf8-mip0-horizontal-flat-unroll8-promoted.md)
+remains in the ledger as the preceding step.
 
 ## Current-source refresh (2026-11-10)
 
