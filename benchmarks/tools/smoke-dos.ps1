@@ -285,6 +285,10 @@ param(
     [string]$TextureSpanTailStores = 'control',
     [ValidateSet('control', 'norowcross')]
     [string]$TextureSpanRowPath = 'control',
+    [ValidateSet('control', 'zerot')]
+    [string]$TextureSpanTZeroPath = 'control',
+    [ValidateSet('control', 'zerot')]
+    [string]$TextureSpanTailTZeroPath = 'control',
     [ValidateSet('control', 'nofxch')]
     [string]$ZSpanStartSchedule = 'control',
     [string]$AliasProjectImplementation = 'asm',
@@ -363,8 +367,14 @@ $DataRoot = Resolve-DataRoot -DataRoot $DataRoot -RepoRoot $repoRoot
 
 if ($TextureSpanStores -eq 'stosw' -and
 		($TextureSpanLoadOrder -ne 'control' -or
-		$TextureSpanAddressing -ne 'control')) {
-	throw 'The stosw texture-span store path requires control load order and addressing.'
+		$TextureSpanAddressing -ne 'control' -or
+		$TextureSpanRowPath -ne 'control' -or
+		$TextureSpanTZeroPath -ne 'control' -or
+		$TextureSpanTailTZeroPath -ne 'control')) {
+	throw 'The stosw texture-span store path requires control load order, addressing, row path, and T-zero paths.'
+}
+if ($TextureSpanTailTZeroPath -eq 'zerot' -and $TextureSpanTailStores -ne 'control') {
+	throw 'The exact-zero-T tail path requires -TextureSpanTailStores control.'
 }
 
 $toolManifest = Read-BenchmarkToolchainManifest -ToolsDirectory $PSScriptRoot
@@ -400,6 +410,10 @@ $buildParams = @{
     DlightContributesImplementation = $DlightContributesImplementation
     LightMapBuildImplementation = $LightMapBuildImplementation
     TextureSpanStores = $TextureSpanStores
+    TextureSpanTailStores = $TextureSpanTailStores
+    TextureSpanRowPath = $TextureSpanRowPath
+    TextureSpanTZeroPath = $TextureSpanTZeroPath
+    TextureSpanTailTZeroPath = $TextureSpanTailTZeroPath
     TextureSpanLoadOrder = $TextureSpanLoadOrder
     TextureSpanAddressing = $TextureSpanAddressing
     AliasSpanAddressing = $AliasSpanAddressing
@@ -598,6 +612,10 @@ $result = [ordered]@{
     textureAnimationImplementation = $TextureAnimationImplementation
     lightMapBuildImplementation = $LightMapBuildImplementation
     textureSpanStores = $TextureSpanStores
+    textureSpanTailStores = $TextureSpanTailStores
+    textureSpanRowPath = $TextureSpanRowPath
+    textureSpanTZeroPath = $TextureSpanTZeroPath
+    textureSpanTailTZeroPath = $TextureSpanTailTZeroPath
     aliasPrepareImplementation = $AliasPrepareImplementation
     aliasClipImplementation = $AliasClipImplementation
     aliasClipZImplementation = $AliasClipZImplementation
