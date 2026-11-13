@@ -5,6 +5,17 @@ repository. The outer repository owns the independent suite under `benchmarks/`.
 The suite can target another complete game checkout through `-GameRoot` (or
 `NITROQUAKE_GAME_ROOT`); the sibling `quake/` is only its workspace default.
 
+## Canonical checkouts and worktrees
+
+The primary outer checkout is `workspace` on `master`. The primary
+game checkout is `workspace\quake`, also on `master`. New linked
+worktrees belong under `workspace-worktrees\outer\<topic>` or
+`workspace-worktrees\quake\<topic>`; do not create NitroQuake or
+NQ worktree directories directly under `D:\`. Retired experiment output is
+kept under `benchmarks/out/worktree-archives/<date>/<former-worktree>/out`.
+The dated mapping in `docs/worktree-archive-map-2026-11-13.csv` records the
+checkout, branch, commit, and archived output location for this consolidation.
+
 ## Ownership
 
 | Game repository | Benchmarking repository |
@@ -46,9 +57,10 @@ rename; the manifest provides explicit source attribution without history rewrit
 
 Workspace branding now belongs to `quake/assets/branding/`. Local comparison
 executables moved to ignored `benchmarks/baselines/`, with a hash inventory.
-License files, canonical game PAKs, tool caches, Git worktrees, junctions,
-accepted artifacts and historical reports are preserved. Unreferenced experiment
-output is not assumed disposable.
+License files, canonical game PAKs, tool caches, junctions, accepted artifacts,
+and historical reports are preserved. Historical output from a retired
+worktree is moved byte-for-byte into the central archive above before its
+checkout is removed. Unreferenced experiment output is not assumed disposable.
 
 ## Verification procedure
 
