@@ -8,4 +8,25 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
 /benchmarks/.venv/
+
+# Temporary files, crash output, and local editor/OS metadata.
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+*.stackdump
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.DS_Store
+Thumbs.db
+Desktop.ini
