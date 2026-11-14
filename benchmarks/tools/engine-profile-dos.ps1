@@ -4,6 +4,7 @@ param(
     [Parameter(Mandatory=$true)][string]$LocalOutputDirectoryName,
     [ValidateSet('demo1','demo2','demo3','e1m1','e1m2')][string]$Workload='demo1',
     [ValidateSet('detailed','coarse','parts','off')][string]$Mode='detailed',
+    [ValidateSet('benchmark-control','i486-release')][string]$RendererProfile='benchmark-control',
     [ValidateSet('c','asm')][string]$HullCheckImplementation='asm',
     [ValidateSet('control','zerot')][string]$TextureSpanTZeroPath='control',
     [ValidateSet('control','zerot')][string]$TextureSpanTailTZeroPath='control',
@@ -46,6 +47,24 @@ $build=Join-Path $repoRoot 'tools/build-dos-experimental.ps1'
 $params=@{Benchmark=$true;CpuTarget='i486';LocalOutputDirectoryName=$LocalOutputDirectoryName;
     HullCheckImplementation=$HullCheckImplementation;
     TextureSpanTZeroPath=$TextureSpanTZeroPath;TextureSpanTailTZeroPath=$TextureSpanTailTZeroPath}
+$rendererProfileId=$RendererProfile
+$rendererProfileSha256=$null
+if ($RendererProfile -eq 'i486-release') {
+    $rendererProfilePath=Join-Path $repoRoot 'tools/renderer-profiles/i486-asm-selectable-current.json'
+    if (-not (Test-Path -LiteralPath $rendererProfilePath -PathType Leaf)) {
+        throw "The i486 release renderer profile is missing: '$rendererProfilePath'."
+    }
+    $rendererProfileData=Get-Content -LiteralPath $rendererProfilePath -Raw | ConvertFrom-Json
+    if ([int]$rendererProfileData.schemaVersion -ne 1 -or
+            $rendererProfileData.id -cne 'i486-asm-selectable-current' -or
+            $null -eq $rendererProfileData.selectors) {
+        throw "The i486 release renderer profile is invalid: '$rendererProfilePath'."
+    }
+    foreach ($selector in $rendererProfileData.selectors.PSObject.Properties) {
+        $params[$selector.Name]=[string]$selector.Value
+    }
+    $rendererProfileSha256=(Get-FileHash -LiteralPath $rendererProfilePath -Algorithm SHA256).Hash
+}
 if ($Instrumentation) { $params.Instrumentation=$true }
 $resolved=(& $build @params -DumpFlags | Out-String) | ConvertFrom-Json
 $fingerprint=Get-BuildFingerprint -RepoRoot $repoRoot -Resolved $resolved
@@ -118,8 +137,9 @@ if ($Mode -ne 'off') {
 }
 if ($Sound -and $report -notmatch 'sound 1 rate [1-9][0-9]* channels [12] bits (8|16)') { throw 'Audio device did not initialize.' }
 $result=[ordered]@{schemaVersion=1;workload=$Workload;mode=$Mode;instrumentation=[bool]$Instrumentation;sound=[bool]$Sound;
-    hullCheckImplementation=$HullCheckImplementation;
-    textureSpanTZeroPath=$TextureSpanTZeroPath;textureSpanTailTZeroPath=$TextureSpanTailTZeroPath;
+    rendererProfile=$rendererProfileId;rendererProfileSha256=$rendererProfileSha256;
+    hullCheckImplementation=$params.HullCheckImplementation;
+    textureSpanTZeroPath=$params.TextureSpanTZeroPath;textureSpanTailTZeroPath=$params.TextureSpanTailTZeroPath;
     diagnosticLog=[bool]$DiagnosticLog;
     frames=$expected;seconds=[double]::Parse($match.Groups[2].Value,[Globalization.CultureInfo]::InvariantCulture);
     fps=[double]::Parse($match.Groups[3].Value,[Globalization.CultureInfo]::InvariantCulture);hostSeconds=$watch.Elapsed.TotalSeconds;

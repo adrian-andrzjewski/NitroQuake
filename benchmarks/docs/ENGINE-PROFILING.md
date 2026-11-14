@@ -21,6 +21,34 @@ additionally uses the existing Matplotlib chart dependency. Optional
 `--game-root`, `--data-root` and `--tool-root` select independent checkouts and
 inputs. `--workloads` selects demo1/demo2/demo3/e1m1/e1m2; `--frames` bounds each
 local game, and `--runs` controls repeated controls/component captures.
+The default `--renderer-profile benchmark-control` uses the profiling runner's
+benchmark selector defaults. Pass `--renderer-profile i486-release` to load the
+committed i486 release selector set into both uninstrumented controls and
+instrumented profile builds; this records the profile ID and file hash in each
+run result and the session manifest. Both named builds must have been compiled
+with those same selectors. To prepare them from the committed profile:
+
+```powershell
+$rendererProfile = Get-Content quake/tools/renderer-profiles/i486-asm-selectable-current.json -Raw | ConvertFrom-Json
+$build = @{
+    Benchmark = $true
+    CpuTarget = 'i486'
+    NoBootstrap = $true
+    OptimizationProfile = 'aggressive'
+    TextureAxisCacheEntries = 256
+    LocalOutputDirectoryName = 'engine-control-release'
+}
+foreach ($selector in $rendererProfile.selectors.PSObject.Properties) {
+    $build[$selector.Name] = [string]$selector.Value
+}
+& quake/tools/build-dos-experimental.ps1 @build
+$build.LocalOutputDirectoryName = 'engine-profile-release'
+$build.Instrumentation = $true
+& quake/tools/build-dos-experimental.ps1 @build
+```
+
+Then pass `--control-build engine-control-release --profile-build
+engine-profile-release --renderer-profile i486-release` to the collector.
 Local scripts must fit a conservative 6,000-byte command-buffer budget; oversized
 frame/warm-up combinations fail before staging or launching DOSBox. The default
 256-frame capture and 64-frame warm-up fit this budget.

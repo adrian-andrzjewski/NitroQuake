@@ -36,7 +36,9 @@ def collect(args):
         for sound in ([False] if workload.startswith('demo') else [False,True]):
             jobs.append((workload,sound,'detailed',1))
     session=dict(schemaVersion=1,status='running',runnerSha256=digest(runner),
-        collectorSha256=digest(Path(__file__)),jobs=[],plannedJobs=len(jobs),frames=args.frames,builds={},
+        collectorSha256=digest(Path(__file__)),rendererProfile=args.renderer_profile,
+        rendererProfileSha256=None,
+        jobs=[],plannedJobs=len(jobs),frames=args.frames,builds={},
         startedUtc=datetime.now(timezone.utc).isoformat())
     shutil.copyfile(runner,root/runner.name)
     shutil.copyfile(Path(__file__),root/Path(__file__).name)
@@ -49,6 +51,7 @@ def collect(args):
             command=[pwsh,'-NoProfile','-File',str(runner),'-LocalOutputDirectoryName',
                 args.control_build if mode=='off' else args.profile_build,
                 '-Workload',workload,'-Mode',mode,'-Frames',str(args.frames),
+                '-RendererProfile',args.renderer_profile,
                 '-TimeoutSeconds',str(args.timeout),'-ResultJson',str(root/(name+'.json'))]
             if args.game_root:command+=['-GameRoot',str(args.game_root.resolve())]
             if args.data_root:command+=['-DataRoot',str(args.data_root.resolve())]
@@ -71,6 +74,12 @@ def collect(args):
             if 'environment' in session and session['environment']!=environment:
                 raise ValueError('Emulator, provider or input data changed during collection')
             session['environment']=environment
+            if data.get('rendererProfile')!=args.renderer_profile:
+                raise ValueError('Renderer profile changed during collection')
+            renderer_profile_sha=data.get('rendererProfileSha256')
+            if 'rendererProfileSha256' in session and session['rendererProfileSha256'] not in (None,renderer_profile_sha):
+                raise ValueError('Renderer profile file changed during collection')
+            session['rendererProfileSha256']=renderer_profile_sha
             source_tree=data['sourceTreeFingerprint']
             if 'sourceTreeFingerprint' in session and session['sourceTreeFingerprint']!=source_tree:
                 raise ValueError('Native source tree changed during collection')
@@ -106,6 +115,7 @@ if __name__=='__main__':
     parser.add_argument('--game-root',type=Path)
     parser.add_argument('--data-root',type=Path)
     parser.add_argument('--tool-root',type=Path)
+    parser.add_argument('--renderer-profile',choices=['benchmark-control','i486-release'],default='benchmark-control')
     parser.add_argument('--runs',type=int,default=2,choices=[1,2,3])
     parser.add_argument('--frames',type=int,default=256)
     parser.add_argument('--timeout',type=int,default=600)
