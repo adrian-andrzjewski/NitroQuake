@@ -80,6 +80,10 @@ passing checks, retained test debt and checks deferred by the external hold.
 Instrumented profiles rank costs; performance acceptance uses matched
 uninstrumented runs with deterministic correctness evidence. DOSBox timings
 are emulator measurements and do not establish physical 486 performance.
+Use the [physical 486 acceptance procedure](docs/PHYSICAL-486-ACCEPTANCE.md)
+when a real target is available; emulator runs cannot satisfy that gate.
+The [2026-11-15 release-profile report](docs/ENGINE-PROFILING-20261115.md)
+refreshes attribution against the current i486 release selector set.
 
 Compare the normal Nitro executable with the supplied stock executables using
 `tools/compare-executables.ps1 -NitroManifest <absolute-build-manifest-path>`.
