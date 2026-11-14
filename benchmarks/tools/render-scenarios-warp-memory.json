@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "validationAutoexecCommands": [
+    "host_framerate 0.0783"
+  ],
+  "warmupChecksumFrames": 6,
+  "defaultTolerance": {
+    "channel": 2,
+    "maxChangedPixelFraction": 0.0005,
+    "maxMeanAbsoluteError": 0.5
+  },
+  "scenarios": [
+    {
+      "id": "demo2-warp-storage-allocated",
+      "description": "demo2 underwater warp through renderer-owned scratch storage",
+      "demo": "demo2",
+      "quakeExtraArgs": "",
+      "autoexecCommands": [
+        "r_waterwarp 1",
+        "benchwarp_allocated",
+        "r_numsurfs 1",
+        "r_numedges 1",
+        "r_ambient -16",
+        "viewsize 50"
+      ],
+      "expectedFrames": 985,
+      "expectedChecksum": 1843917972,
+      "captureFrame": 169,
+      "repeatRuns": 1,
+      "reference": "tools/golden/render/demo2-viewcontrol-waterwarp-stress.pcx",
+      "tolerance": {
+        "channel": 0,
+        "maxChangedPixelFraction": 0,
+        "maxMeanAbsoluteError": 0
+      }
+    },
+    {
+      "id": "demo2-warp-storage-fallback",
+      "description": "demo2 underwater warp through the guarded stack fallback",
+      "demo": "demo2",
+      "quakeExtraArgs": "",
+      "autoexecCommands": [
+        "r_waterwarp 1",
+        "benchwarp_fallback",
+        "r_numsurfs 1",
+        "r_numedges 1",
+        "r_ambient -16",
+        "viewsize 50"
+      ],
+      "expectedFrames": 985,
+      "expectedChecksum": 1843917972,
+      "captureFrame": 169,
+      "repeatRuns": 1,
+      "reference": "tools/golden/render/demo2-viewcontrol-waterwarp-stress.pcx",
+      "tolerance": {
+        "channel": 0,
+        "maxChangedPixelFraction": 0,
+        "maxMeanAbsoluteError": 0
+      }
+    },
+    {
+      "id": "demo2-warp-storage-short-stack",
+      "description": "demo2 waterwarp is skipped when the fallback stack guard reports insufficient capacity",
+      "demo": "demo2",
+      "quakeExtraArgs": "",
+      "autoexecCommands": [
+        "r_waterwarp 1",
+        "benchwarp_short",
+        "r_numsurfs 1",
+        "r_numedges 1",
+        "r_ambient -16",
+        "viewsize 50"
+      ],
+      "expectedFrames": 985,
+      "expectedChecksum": 1843917972,
+      "captureFrame": 169,
+      "repeatRuns": 1,
+      "reference": "tools/golden/render/demo2-viewcontrol-waterwarp-stress.pcx",
+      "tolerance": {
+        "channel": 0,
+        "maxChangedPixelFraction": 0,
+        "maxMeanAbsoluteError": 0
+      }
+    },
+    {
+      "id": "demo2-warp-storage-disabled",
+      "description": "demo2 without underwater warp, for parity with the insufficient-stack fallback",
+      "demo": "demo2",
+      "quakeExtraArgs": "",
+      "autoexecCommands": [
+        "r_waterwarp 0",
+        "r_numsurfs 1",
+        "r_numedges 1",
+        "r_ambient -16",
+        "viewsize 50"
+      ],
+      "expectedFrames": 985,
+      "expectedChecksum": 1843917972,
+      "captureFrame": 169,
+      "repeatRuns": 1,
+      "reference": "tools/golden/render/demo2-viewcontrol-waterwarp-stress.pcx",
+      "tolerance": {
+        "channel": 0,
+        "maxChangedPixelFraction": 0,
+        "maxMeanAbsoluteError": 0
+      }
+    }
+  ]
+}

@@ -131,9 +131,6 @@ if (-not [string]::IsNullOrWhiteSpace($RendererSelectorProfile)) {
     }
     $timedemoSource = Get-Content -LiteralPath $timedemoScript -Raw
     foreach ($selector in $selectorProperties) {
-        if ($selector.Name -notmatch 'Implementation$') {
-            throw "Renderer profile selector '$($selector.Name)' is not an implementation selector."
-        }
         if ($selector.Value -isnot [string]) {
             throw "Renderer profile selector '$($selector.Name)' must have a string value."
         }

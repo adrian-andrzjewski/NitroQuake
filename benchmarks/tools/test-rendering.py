@@ -1040,6 +1040,12 @@ class RenderingComparisonTests(unittest.TestCase):
                 if choices is not None:
                     self.assertIn(value, re.findall(r"'([^']*)'", choices))
 
+    def test_render_validation_accepts_timedemo_configuration_selectors(self) -> None:
+        validation_source = (BENCHMARK_ROOT / "tools/render-validation-dos.ps1").read_text(encoding="utf-8")
+        self.assertNotRegex(validation_source, r"\$selector\.Name\s+-notmatch\s+'Implementation\$'")
+        self.assertIn("$timedemoSource", validation_source)
+        self.assertIn("$selector.Name", validation_source)
+
     def test_hullcheck_assembly_routes_general_entity_and_world_traces(self) -> None:
         profiles = ROOT / "tools/renderer-profiles"
         assembly = load_json(
@@ -2519,6 +2525,88 @@ class RenderingComparisonTests(unittest.TestCase):
                 )
                 self.assertIn("subl\t$24, %esp", body)
                 self.assertEqual(tailcall_cleanup, ["20", "20"])
+
+    def test_warp_scratch_is_renderer_owned_and_fallback_is_stack_guarded(self) -> None:
+        source = (ROOT / "src/r_main.c").read_text(encoding="utf-8")
+        render_view = source.split("void R_RenderView_ (void)", 1)[1].split(
+            "void R_RenderView (void)", 1
+        )[0]
+        self.assertNotRegex(render_view, r"\bwarpbuffer\s*\[")
+        self.assertIn("r_warpbuffer_storage = (byte *)malloc (R_WARP_BUFFER_BYTES)", source)
+        self.assertIn('Sys_FileOpenWrite ("warp-stack.txt")', source)
+        self.assertIn("benchwarp: renderer warp buffer allocation failed", source)
+        self.assertIn("actual_available=%lu", source)
+        self.assertIn("extern unsigned __djgpp_stack_limit", source)
+        self.assertIn("extern unsigned __djgpp_stack_top", source)
+        self.assertIn("R_WARP_FALLBACK_FRAME_BYTES\t64012UL", source)
+        self.assertIn("BSP leaf zero", source)
+        self.assertIn("if (depth + 1 > maxdepth)", source)
+        self.assertIn("R_WARP_TREE_STEP_BYTES\t\t136UL", source)
+        self.assertIn("R_WARP_TREE_STEP_BYTES\t\t128UL", source)
+        self.assertIn("R_WARP_TREE_STEP_BYTES\t\t124UL", source)
+        self.assertIn('"movl %%esp, %0"', source)
+        self.assertIn("*available_out = stack_pointer - __djgpp_stack_limit", source)
+
+        fallback = source.split("static void R_RenderViewStackFallback", 1)[1].split(
+            "static void R_RenderViewWithoutWarp", 1
+        )[0]
+        self.assertRegex(fallback, r"byte\s+warpbuffer\[R_WARP_BUFFER_BYTES\]")
+        self.assertIn("r_warpbuffer = warpbuffer", fallback)
+        self.assertIn("render_view ();", fallback)
+
+        for source_name, frame_size in (
+            ("r_framecontrol_release.inc", "12"),
+            ("r_framecontrol_profile.inc", "36"),
+        ):
+            with self.subTest(source=source_name):
+                generated = (ROOT / "src" / source_name).read_text(encoding="utf-8")
+                body = generated.split("_R_RenderView_:", 1)[1].split(".p2align", 1)[0]
+                self.assertIn(f"subl\t${frame_size}, %esp", body)
+                self.assertIn("_R_RenderViewDispatch", generated)
+                self.assertIn("call\t_R_InitWarpBuffer", generated)
+
+        provenance = load_json(
+            (ROOT / "docs/renderer-assembly/frame-control-provenance.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        render_view_entries = [
+            item
+            for item in provenance["functions"]
+            if item["originalFunction"] == "R_RenderView_"
+        ]
+        self.assertEqual(len(render_view_entries), 2)
+        self.assertEqual(render_view_entries[0]["stackReservations"][0], "12")
+        self.assertEqual(render_view_entries[1]["stackReservations"][0], "36")
+
+        scenarios = load_json(
+            (BENCHMARK_ROOT / "tools/render-scenarios-warp-memory.json").read_text(
+                encoding="utf-8"
+            )
+        )["scenarios"]
+        self.assertEqual(
+            {item["id"] for item in scenarios},
+            {
+                "demo2-warp-storage-allocated",
+                "demo2-warp-storage-fallback",
+                "demo2-warp-storage-short-stack",
+                "demo2-warp-storage-disabled",
+            },
+        )
+        for item in scenarios:
+            with self.subTest(scenario=item["id"]):
+                commands = item["autoexecCommands"]
+                if item["id"] == "demo2-warp-storage-allocated":
+                    self.assertIn("benchwarp_allocated", commands)
+                elif item["id"] == "demo2-warp-storage-fallback":
+                    self.assertIn("benchwarp_fallback", commands)
+                elif item["id"] == "demo2-warp-storage-short-stack":
+                    self.assertIn("benchwarp_short", commands)
+                self.assertTrue(
+                    "r_waterwarp 1" in commands
+                    or item["id"] == "demo2-warp-storage-disabled"
+                    and "r_waterwarp 0" in commands
+                )
 
     def test_drawingdriver_outgoing_calls_align_and_restore_the_cdecl_stack(self) -> None:
         source = (ROOT / "src/d_driverasm.s").read_text(encoding="utf-8")
