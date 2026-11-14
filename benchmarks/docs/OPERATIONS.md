@@ -663,7 +663,7 @@ coff-go32.
 ### Alias triangle rasterization
 
 `D_RasterizeAliasPolySmooth` has selectable C and assembly paths. The assembly
-entry in `src/d_polysa.s` performs the original edge-table, span-package, and
+entry in `src/renderer/d_polysa.s` performs the original edge-table, span-package, and
 fixed-point step setup, then delegates to the existing gradient, line-scan,
 left-edge, and span-draw routines. It preserves EBX, ESI, EDI, and EBP and uses
 only 386 integer instructions in its orchestration. The C implementation stays
@@ -1055,7 +1055,7 @@ The 16-pixel texture-span store loop is independently selectable with
 ~~~
 
 The old negative-gradient Z-span unroll selector has been retired with the
-direct, auditable pair loop in `src/d_draw.s`. The earlier timing comparison is
+direct, auditable pair loop in `src/renderer/d_draw.s`. The earlier timing comparison is
 historical only: both variants completed 969 frames with checksum `1047377823`,
 while control measured `59.408069` seconds median and `unroll8` measured
 `59.408076` seconds. The `-ZSpanNegativeUnroll` option is no longer accepted.
@@ -1159,7 +1159,7 @@ $mount = (Resolve-Path '.\out\dos-smoke').Path.Replace('\', '/')
 
 ### Current seeded A/B reference
 
-For current PROFILE486 work, src/cl_demo.c seeds srand(1) when a timedemo
+For current PROFILE486 work, src/client/cl_demo.c seeds srand(1) when a timedemo
 begins. This stabilizes random entity animation phases for performance
 comparisons. The resulting current-worktree framebuffer checksum is
 1047377823; the older 4154140932 value in historical experiment records is not
@@ -1868,7 +1868,7 @@ clip helpers, then handles recursion, leaf marking, face ordering, and polygon
 queueing in assembly. World-face, B-model face setup, and cached-edge insertion
 have independent assembly selectors; `R_StoreEfrags` has its own selector.
 `R_ClipEdge` and edge projection/emission are handwritten in legacy
-`src/r_drawa.s` under `id386`. `R_RenderPoly` belongs to the optional
+`src/renderer/r_drawa.s` under `id386`. `R_RenderPoly` belongs to the optional
 polygon-driver branch; normal DOS span rendering leaves `r_drawpolys=0` and
 `D_DrawPoly()` is a no-op.
 Validate this selector with DOS smoke and the pinned timedemo:

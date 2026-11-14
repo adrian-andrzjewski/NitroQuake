@@ -397,7 +397,7 @@ class BlobExplosionWorkflowWiringTests(unittest.TestCase):
             "ParseParticleEffectImplementation": "asm",
             "RunParticleEffectImplementation": "c",
         })
-        parser = (GAME / "src" / "cl_parse.c").read_text(encoding="utf-8")
+        parser = (GAME / "src" / "client" / "cl_parse.c").read_text(encoding="utf-8")
         particle_case = parser.split("case svc_particle:", 1)[1].split("case svc_spawnbaseline:", 1)[0]
         self.assertIn("R_ParseParticleEffect ();", particle_case)
         self.assertIn("Bench486RecordRunParticleEffectEvent ();", particle_case)

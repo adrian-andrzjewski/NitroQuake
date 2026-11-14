@@ -25,7 +25,7 @@ def read(relative: str) -> str:
 
 class RunParticleEffectSourceContractTests(unittest.TestCase):
     def test_i486_assembly_uses_only_reviewed_integer_and_x87_mnemonics(self) -> None:
-        source = read("src/r_runparticleeffectasm.s")
+        source = read("src/renderer/r_runparticleeffectasm.s")
         self.assertTrue(".arch i486" in source, "assembly must declare i486")
         self.assertTrue(".arch .387" in source, "assembly must declare x87")
 
@@ -53,9 +53,9 @@ class RunParticleEffectSourceContractTests(unittest.TestCase):
         ), "post-486 or SIMD mnemonic found")
 
     def test_c_oracle_and_direct_fixture_pin_both_particle_modes(self) -> None:
-        c_source = read("src/r_part.c")
-        fixture = read("src/bench486_runparticleeffect.h")
-        host = read("src/host_cmd.c")
+        c_source = read("src/renderer/r_part.c")
+        fixture = read("src/tests/bench486/bench486_runparticleeffect.h")
+        host = read("src/core/host_cmd.c")
         for contract in (
             "#define R_RunParticleEffect R_RunParticleEffect_C",
             "#if !defined(ASM486_RUN_PARTICLE_EFFECT) || defined(BENCH486)",

@@ -2,8 +2,8 @@
 /* ABI headers require the Quake types declared by quakedef.h. */
 /* clang-format off */
 #include "quakedef.h"
-#include "asm_cliplinks.h"
-#include "asm_clipmovetoentity.h"
+#include "collision/asm_cliplinks.h"
+#include "collision/asm_clipmovetoentity.h"
 /* clang-format on */
 #include <setjmp.h>
 #include <string.h>

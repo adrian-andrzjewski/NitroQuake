@@ -35,15 +35,15 @@ flowchart LR
 
 ### Runtime flow
 
-The frame loop in [host.c](../quake/src/host.c#L681) polls networking, advances server/game state, reads client state, and updates the screen. Rendering flows through [screen.c](../quake/src/screen.c#L1133), [view.c](../quake/src/view.c#L1090), and [r_main.c](../quake/src/r_main.c#L1079). The software renderer traverses BSP/world surfaces, builds spans and rasterizes textures, depth, aliases, sprites, and particles before VGA/VESA presentation. Game logic includes a QuakeC interpreter in [pr_exec.c](../quake/src/pr_exec.c#L361), entity physics in [sv_phys.c](../quake/src/sv_phys.c#L1507), and world collision/area-tree code.
+The frame loop in [host.c](../quake/src/core/host.c#L681) polls networking, advances server/game state, reads client state, and updates the screen. Rendering flows through [screen.c](../quake/src/client/screen.c#L1133), [view.c](../quake/src/client/view.c#L1090), and [r_main.c](../quake/src/renderer/r_main.c#L1079). The software renderer traverses BSP/world surfaces, builds spans and rasterizes textures, depth, aliases, sprites, and particles before VGA/VESA presentation. Game logic includes a QuakeC interpreter in [pr_exec.c](../quake/src/server/pr_exec.c#L361), entity physics in [sv_phys.c](../quake/src/server/sv_phys.c#L1507), and world collision/area-tree code.
 
 This is a tightly integrated, predominantly single-process engine. Rendering and game subsystems communicate through shared globals and legacy headers rather than independently owned services. That is consistent with the original engine's constraints, but makes local changes harder to reason about and increases the cost of proving C/assembly calling-convention and state parity.
 
 ### Memory and rendering model
 
-The game uses contiguous DOS-oriented arena allocations for low/high hunk memory, zone, cache, and video-related buffers. Surface cache sizing is explicit in [d_local.h](../quake/src/d_local.h#L64), with a 2.4 MiB default and recorded tradeoff. Current profiling notes report no surface-cache thrash for the reviewed scenario. This specialized model is a strength for predictable DOS memory ownership; preserve it unless measurements identify a concrete limitation.
+The game uses contiguous DOS-oriented arena allocations for low/high hunk memory, zone, cache, and video-related buffers. Surface cache sizing is explicit in [d_local.h](../quake/src/renderer/d_local.h#L64), with a 2.4 MiB default and recorded tradeoff. Current profiling notes report no surface-cache thrash for the reviewed scenario. This specialized model is a strength for predictable DOS memory ownership; preserve it unless measurements identify a concrete limitation.
 
-The renderer selects a warp buffer through [d_init.c](../quake/src/d_init.c#L147). The render frame-control assembly include reserves the 320x200-byte buffer as part of the render stack frame; details and the risk are in finding A1 below.
+The renderer selects a warp buffer through [d_init.c](../quake/src/renderer/d_init.c#L147). The render frame-control assembly include reserves the 320x200-byte buffer as part of the render stack frame; details and the risk are in finding A1 below.
 
 ## Strengths to preserve
 
@@ -69,7 +69,7 @@ Ratings are qualitative: **Impact** is the expected architectural or user-visibl
 
 ### A1. Move the warp buffer out of the render stack frame
 
-**Evidence.** `WARP_WIDTH` × `WARP_HEIGHT` is 320 × 200 in [d_iface.h](../quake/src/d_iface.h#L22). [r_main.c](../quake/src/r_main.c#L1081) declares the 64,000-byte local buffer. [r_framecontrol_release.inc](../quake/src/r_framecontrol_release.inc#L2539) records its frame-local lifetime and reserves 64,012 bytes with `subl $64012, %esp` at line 2544. Warp rendering is conditional, but the frame reservation occurs on entry. A stack-depth check exists in `r_main.c` around lines 1218–1224, while the DOS stack high-water check in [sys_dos.c](../quake/src/sys_dos.c#L75) is disabled under `#if 0`.
+**Evidence.** `WARP_WIDTH` × `WARP_HEIGHT` is 320 × 200 in [d_iface.h](../quake/src/d_iface.h#L22). [r_main.c](../quake/src/renderer/r_main.c#L1081) declares the 64,000-byte local buffer. [r_framecontrol_release.inc](../quake/src/renderer/r_framecontrol_release.inc#L2539) records its frame-local lifetime and reserves 64,012 bytes with `subl $64012, %esp` at line 2544. Warp rendering is conditional, but the frame reservation occurs on entry. A stack-depth check exists in `r_main.c` around lines 1218–1224, while the DOS stack high-water check in [sys_dos.c](../quake/src/platform/dos/sys_dos.c#L75) is disabled under `#if 0`.
 
 **Why it matters.** A 64 KiB frame is large relative to DOS stack budgets and consumes that stack capacity even on non-warp frames. This is a concrete memory-safety and headroom concern, not a measured crash report. It can also make future stack use in the render call chain harder to validate.
 
@@ -95,7 +95,7 @@ Ratings are qualitative: **Impact** is the expected architectural or user-visibl
 
 ### A4. Narrow subsystem interfaces incrementally
 
-**Evidence.** `quake/src` is a flat source directory. The reviewed inventory found 83 C files, 86 assembly files, 230 headers, and 36 include fragments. Seventy-nine of 83 C files include the broad [quakedef.h](../quake/src/quakedef.h). [d_local.h](../quake/src/d_local.h) exposes renderer scratch, callbacks, and rasterizer state. The renderer and game flow therefore share a wide compile-time dependency surface.
+**Evidence.** `quake/src` is a flat source directory. The reviewed inventory found 83 C files, 86 assembly files, 230 headers, and 36 include fragments. Seventy-nine of 83 C files include the broad [quakedef.h](../quake/src/quakedef.h). [d_local.h](../quake/src/renderer/d_local.h) exposes renderer scratch, callbacks, and rasterizer state. The renderer and game flow therefore share a wide compile-time dependency surface.
 
 **Why it matters.** Broad headers make otherwise local changes trigger wide rebuilds and encourage direct access to unrelated global state. The flat layout also makes ownership harder to discover. This is accumulated legacy coupling, not a reason to rewrite Quake's data model wholesale.
 

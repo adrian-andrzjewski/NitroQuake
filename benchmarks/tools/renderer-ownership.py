@@ -514,7 +514,14 @@ def resolve_pdrawfunc_targets(manifest: dict, units: dict[str, dict],
 def inventory(manifest: dict, objects: Path, repo: Path, objdump: Path, roots: list[str], boundaries: list[str]) -> dict:
     source_by_object = {Path(name).stem + ".obj": name
                         for name in manifest["cSources"] + manifest["assemblySources"]}
-    c_names = {name: c_functions(repo / "src" / name) for name in manifest["cSources"]}
+    source_paths = manifest.get("sourcePaths", {})
+    c_source_paths = source_paths.get("c", manifest["cSources"])
+    if len(c_source_paths) != len(manifest["cSources"]):
+        raise ValueError("sourcePaths.c must match cSources")
+    c_names = {
+        name: c_functions(repo / "src" / path)
+        for name, path in zip(manifest["cSources"], c_source_paths)
+    }
     units: dict[str, dict] = {}
     paths = [objects / name for name in source_by_object]
     missing = [str(path) for path in paths if not path.is_file()]

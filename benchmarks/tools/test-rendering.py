@@ -834,11 +834,11 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("damageParseOnly = [bool]$DamageParseOnly", source)
 
     def test_bonus_flash_is_covered_by_palette_assembly_and_exact_fixture(self) -> None:
-        source = (ROOT / "src/view.c").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/v_paletteasm.s").read_text(encoding="utf-8")
-        layout = (ROOT / "src/asm_palette.h").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_palette.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/view.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/v_paletteasm.s").read_text(encoding="utf-8")
+        layout = (ROOT / "src/renderer/asm_palette.h").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_palette.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
 
         self.assertIn("CSHIFT_BONUS==p_shift_bonus", source)
@@ -868,9 +868,9 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("paletteOnly = [bool]$PaletteOnly", runner)
 
     def test_cshift_command_preserves_atoi_and_contents_shift_behavior(self) -> None:
-        source = (ROOT / "src/view.c").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/v_paletteasm.s").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_palette.h").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/view.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/v_paletteasm.s").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_palette.h").read_text(encoding="utf-8")
 
         self.assertIn("void V_cshift_f_C (void)", source)
         self.assertIn("void V_cshift_f_asm486 (void);", source)
@@ -899,10 +899,10 @@ class RenderingComparisonTests(unittest.TestCase):
                 self.assertIn(case, fixture)
 
     def test_v_init_assembly_preserves_registration_order_and_gamma_setup(self) -> None:
-        source = (ROOT / "src/view.c").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/v_viewcontrolasm.s").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_vinit.h").read_text(encoding="utf-8")
-        host = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/view.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/v_viewcontrolasm.s").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_vinit.h").read_text(encoding="utf-8")
+        host = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
 
         self.assertIn("void V_Init_View_C (void)", source)
         self.assertIn("V_INIT_BUILD_GAMMA BuildGammaTable_C", source)
@@ -923,7 +923,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("BVINIT_PRE_GAMMA_CVAR_COUNT 25", fixture)
         self.assertIn("BVINIT_CVAR_COUNT 26", fixture)
         self.assertIn("Bench486VInitCases (void)", fixture)
-        self.assertIn('#include "bench486_vinit.h"', host)
+        self.assertIn('#include "tests/bench486/bench486_vinit.h"', host)
         self.assertGreaterEqual(host.count("Bench486VInitCases ();"), 2)
 
     def test_damage_parse_profiles_isolate_the_new_assembly_candidate(self) -> None:
@@ -1057,10 +1057,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertEqual(assembly["selectors"]["HullCheckImplementation"], "asm")
         self.assertEqual(reference["selectors"]["HullCheckImplementation"], "c")
 
-        world = (ROOT / "src/world.c").read_text(encoding="utf-8")
-        assembly_body = (ROOT / "src/sv_hullcheck_asm.inc").read_text(encoding="utf-8")
-        assembly_source = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_hullcheck.h").read_text(encoding="utf-8")
+        world = (ROOT / "src/collision/world.c").read_text(encoding="utf-8")
+        assembly_body = (ROOT / "src/collision/sv_hullcheck_asm.inc").read_text(encoding="utf-8")
+        assembly_source = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_hullcheck.h").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
 
@@ -1091,12 +1091,12 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertEqual(reference["selectors"]["ClipToLinksImplementation"], "c")
         self.assertEqual(reference["selectors"]["FindTouchedLeafsImplementation"], "c")
 
-        world = (ROOT / "src/world.c").read_text(encoding="utf-8")
-        assembly_body = (ROOT / "src/sv_hullforentity_asm.inc").read_text(encoding="utf-8")
-        clipmove_body = (ROOT / "src/sv_clipmovetoentity_asm.inc").read_text(encoding="utf-8")
-        assembly_source = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_hullforentity.h").read_text(encoding="utf-8")
-        clipmove_fixture = (ROOT / "src/bench486_hullcheck.h").read_text(encoding="utf-8")
+        world = (ROOT / "src/collision/world.c").read_text(encoding="utf-8")
+        assembly_body = (ROOT / "src/collision/sv_hullforentity_asm.inc").read_text(encoding="utf-8")
+        clipmove_body = (ROOT / "src/collision/sv_clipmovetoentity_asm.inc").read_text(encoding="utf-8")
+        assembly_source = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_hullforentity.h").read_text(encoding="utf-8")
+        clipmove_fixture = (ROOT / "src/tests/bench486/bench486_hullcheck.h").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
 
         self.assertIn("SV_HullForEntity_C", world)
@@ -1162,7 +1162,7 @@ class RenderingComparisonTests(unittest.TestCase):
         )
 
     def test_mark_lights_fixture_is_independent_of_lightmap_dispatcher(self) -> None:
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         self.assertIn(
             "#if defined(ASM486_MARK_LIGHTS) && defined(BENCH486)\n"
             "static int Bench486MarkLightsParity (void)",
@@ -1198,7 +1198,7 @@ class RenderingComparisonTests(unittest.TestCase):
             },
         )
 
-        source = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        source = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         self.assertIn(
             "#if defined(ASM486_DYNAMIC_LIGHT_PUSH) && defined(BENCH486)\n"
             "typedef struct\n{\n\tdouble time;",
@@ -1489,8 +1489,8 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertEqual(len(selectable85["selectors"]), 85)
         self.assertEqual(selectable85["selectors"], expected85)
 
-        fixture = (ROOT / "src/bench486_linegraph.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_linegraph.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         self.assertIn("#define LG_FIXTURE_VISIBLE_WIDTH 64", fixture)
         self.assertIn("#define LG_FIXTURE_ROWBYTES      72", fixture)
@@ -1510,7 +1510,7 @@ class RenderingComparisonTests(unittest.TestCase):
         ):
             self.assertIn(case, fixture)
         self.assertIn('Bench486Printf ("linegraph fixture begin', fixture)
-        self.assertIn('#include "bench486_linegraph.h"', host_commands)
+        self.assertIn('#include "tests/bench486/bench486_linegraph.h"', host_commands)
         self.assertIn('COM_CheckParm ("-benchlinegraph")', host_commands)
         self.assertIn("Bench486LineGraphCases ();", host_commands)
         self.assertIn("[switch]$LineGraphOnly", bench_runner)
@@ -1552,10 +1552,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertEqual(focused["selectors"], expected_focused)
         self.assertEqual(cumulative["selectors"]["TimeGraphImplementation"], "asm")
 
-        assembly = (ROOT / "src/r_timegraphasm.s").read_text(encoding="utf-8")
-        source = (ROOT / "src/r_misc.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_timegraph.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_timegraphasm.s").read_text(encoding="utf-8")
+        source = (ROOT / "src/renderer/r_misc.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_timegraph.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         self.assertIn(".arch i486", assembly)
@@ -1567,7 +1567,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("Bench486TimeGraphBuildExpected", fixture)
         self.assertIn("Bench486TimeGraphCanariesAreValid", fixture)
         self.assertIn("timegraph progress", fixture)
-        self.assertIn('#include "bench486_timegraph.h"', host_commands)
+        self.assertIn('#include "tests/bench486/bench486_timegraph.h"', host_commands)
         self.assertIn('COM_CheckParm ("-benchtimegraph")', host_commands)
         self.assertIn("Bench486TimeGraphCases ();", host_commands)
         self.assertIn("[switch]$TimeGraphOnly", bench_runner)
@@ -1600,10 +1600,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertEqual(len(selectable86["selectors"]), 86)
         self.assertEqual(selectable86, expected86)
 
-        assembly = (ROOT / "src/r_aliasstatsasm.s").read_text(encoding="utf-8")
-        oracle = (ROOT / "src/r_misc.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_aliasstats.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_aliasstatsasm.s").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/r_misc.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_aliasstats.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         self.assertIn(".arch i486", assembly)
@@ -1632,7 +1632,7 @@ class RenderingComparisonTests(unittest.TestCase):
             self.assertIn(case, fixture)
         self.assertIn("Bench486AliasStatsRestore (&saved);", fixture)
         self.assertIn("Bench486AliasStatsSave (&saved);", fixture)
-        self.assertIn('#include "bench486_aliasstats.h"', host_commands)
+        self.assertIn('#include "tests/bench486/bench486_aliasstats.h"', host_commands)
         self.assertIn('COM_CheckParm ("-benchaliasstats")', host_commands)
         self.assertIn("Bench486AliasStatsCases ();", host_commands)
         self.assertIn("[switch]$AliasStatsOnly", bench_runner)
@@ -1673,10 +1673,10 @@ class RenderingComparisonTests(unittest.TestCase):
         expected87["selectors"]["PrintTimesImplementation"] = "asm"
         self.assertEqual(selectable87, expected87)
 
-        assembly = (ROOT / "src/r_printtimesasm.s").read_text(encoding="utf-8")
-        oracle = (ROOT / "src/r_misc.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_printtimes.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_printtimesasm.s").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/r_misc.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_printtimes.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         self.assertIn(".arch i486", assembly)
@@ -1737,7 +1737,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("abi_flags & 16", fixture)
         self.assertNotIn("movl %%esp,%0", fixture)
         self.assertIn("Con_Printf (\"\\n\")", fixture)
-        self.assertIn('#include "bench486_printtimes.h"', host_commands)
+        self.assertIn('#include "tests/bench486/bench486_printtimes.h"', host_commands)
         self.assertIn('COM_CheckParm ("-benchprinttimes")', host_commands)
         self.assertIn("Bench486PrintTimesCases ();", host_commands)
         self.assertIn("Bench486PrintDSpeedsCases ();", host_commands)
@@ -1755,10 +1755,10 @@ class RenderingComparisonTests(unittest.TestCase):
             )
 
     def test_forward_span_fixture_has_c_oracle_guards_and_isolated_runner(self) -> None:
-        assembly = (ROOT / "src/r_edgea.s").read_text(encoding="utf-8")
-        oracle = (ROOT / "src/r_edge.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_forwardspans.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_edgea.s").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/r_edge.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_forwardspans.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         ownership = (BENCHMARK_ROOT / "tools/renderer-ownership.py").read_text(encoding="utf-8")
 
@@ -1780,7 +1780,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertNotIn("fstps\tLtemp", assembly)
         self.assertIn("BFS_GUARD_WORDS", fixture)
         self.assertIn("Bench486Call_asm486", fixture)
-        self.assertIn('#include "bench486_forwardspans.h"', host_commands)
+        self.assertIn('#include "tests/bench486/bench486_forwardspans.h"', host_commands)
         self.assertIn('COM_CheckParm ("-benchforwardspans")', host_commands)
         self.assertIn("Bench486ForwardSpansCases ();", host_commands)
         self.assertIn("[switch]$ForwardSpansOnly", bench_runner)
@@ -1788,10 +1788,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn('"_R_GenerateSpans_asm486": "r_edgea.s"', ownership)
 
     def test_zspan_fixture_compares_assembly_to_retained_c_oracle(self) -> None:
-        assembly = (ROOT / "src/d_draw.s").read_text(encoding="utf-8")
-        oracle = (ROOT / "src/d_scan.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_zspans.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/d_draw.s").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/d_scan.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_zspans.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
 
         self.assertIn("C(D_DrawZSpans):", assembly)
@@ -1808,7 +1808,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("LFNegPairDone:", assembly)
         self.assertIn("LFNegativeDepthPair:", assembly)
         self.assertIn("LZeroStepNegativeStore:", assembly)
-        self.assertIn('#include "bench486_zspans.h"', host_commands)
+        self.assertIn('#include "tests/bench486/bench486_zspans.h"', host_commands)
         self.assertIn('COM_CheckParm ("-benchzspans")', host_commands)
         self.assertIn("Bench486ZSpansCases ();", host_commands)
         self.assertIn("[switch]$ZSpansOnly", bench_runner)
@@ -1869,10 +1869,10 @@ class RenderingComparisonTests(unittest.TestCase):
         expected88["selectors"]["ParticleExplosion2Implementation"] = "asm"
         self.assertEqual(selectable88, expected88)
 
-        assembly = (ROOT / "src/r_particleexplosion2asm.s").read_text(encoding="utf-8")
-        oracle = (ROOT / "src/r_part.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_particleexplosion2.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_particleexplosion2asm.s").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/r_part.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_particleexplosion2.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         self.assertIn(".arch i486", assembly)
@@ -1887,7 +1887,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("almost-full", fixture)
         self.assertIn("Bench486Call_asm486", fixture)
         self.assertIn("particle-explosion2 %d/%d %s", fixture)
-        self.assertIn('#include "bench486_particleexplosion2.h"', host_commands)
+        self.assertIn('#include "tests/bench486/bench486_particleexplosion2.h"', host_commands)
         self.assertIn('COM_CheckParm ("-benchparticleexplosion2")', host_commands)
         self.assertIn("Bench486ParticleExplosion2Cases ();", host_commands)
         self.assertIn("[switch]$ParticleExplosion2Only", bench_runner)
@@ -1931,10 +1931,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertEqual(selectable90, expected90)
         self.assertEqual(len(selectable90["selectors"]), 90)
 
-        assembly = (ROOT / "src/r_particleexplosionasm.s").read_text(encoding="utf-8")
-        oracle = (ROOT / "src/r_part.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_particleexplosion.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_particleexplosionasm.s").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/r_part.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_particleexplosion.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         self.assertIn(".arch i486", assembly)
@@ -1947,7 +1947,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("INT_MIN", fixture)
         self.assertIn("one-extra-libc-rand", fixture)
         self.assertIn("seven rand calls per particle", assembly)
-        self.assertIn('#include "bench486_particleexplosion.h"', host_commands)
+        self.assertIn('#include "tests/bench486/bench486_particleexplosion.h"', host_commands)
         self.assertIn('COM_CheckParm ("-benchparticleexplosion")', host_commands)
         self.assertIn("Bench486ParticleExplosionCases ();", host_commands)
         self.assertIn("[switch]$ParticleExplosionOnly", bench_runner)
@@ -1968,10 +1968,10 @@ class RenderingComparisonTests(unittest.TestCase):
         cumulative = load_json((profiles / "i486-asm-selectable-current.json").read_text(encoding="utf-8"))
         self.assertEqual(cumulative["selectors"]["ParseParticleEffectImplementation"], "asm")
 
-        assembly = (ROOT / "src/r_parseparticleeffectasm.s").read_text(encoding="utf-8")
-        oracle = (ROOT / "src/r_part.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_parseparticleeffect.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_parseparticleeffectasm.s").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/r_part.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_parseparticleeffect.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
         build_script = (ROOT / "tools/build-dos-experimental.ps1").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
@@ -2019,10 +2019,10 @@ class RenderingComparisonTests(unittest.TestCase):
         expected92["selectors"]["BlobExplosionImplementation"] = "asm"
         self.assertEqual(selectable92, expected92)
 
-        assembly = (ROOT / "src/r_blobexplosionasm.s").read_text(encoding="utf-8")
-        oracle = (ROOT / "src/r_part.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_blobexplosion.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_blobexplosionasm.s").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/r_part.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_blobexplosion.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         self.assertIn(".arch i486", assembly)
@@ -2034,7 +2034,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("ASM486_BLOB_EXPLOSION", selectors)
         self.assertIn("emitted * 8", fixture)
         self.assertIn("Bench486Call_asm486", fixture)
-        self.assertIn('#include "bench486_blobexplosion.h"', host_commands)
+        self.assertIn('#include "tests/bench486/bench486_blobexplosion.h"', host_commands)
         self.assertIn('COM_CheckParm ("-benchblobexplosion")', host_commands)
         self.assertIn("Bench486BlobExplosionCases ();", host_commands)
         self.assertIn("[switch]$BlobExplosionOnly", bench_runner)
@@ -2069,10 +2069,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertEqual(len(selectable90["selectors"]), 90)
         self.assertEqual(selectable90["selectors"]["TransformPlaneImplementation"], "asm")
 
-        assembly = (ROOT / "src/r_transformplaneasm.s").read_text(encoding="utf-8")
-        oracle = (ROOT / "src/r_misc.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_transformplane.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_transformplaneasm.s").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/r_misc.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_transformplane.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         self.assertIn(".arch i486", assembly)
@@ -2084,7 +2084,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("ASM486_TRANSFORM_PLANE", selectors)
         self.assertIn("precision-sensitive-cancel", fixture)
         self.assertIn("Bench486Call_asm486", fixture)
-        self.assertIn('#include "bench486_transformplane.h"', host_commands)
+        self.assertIn('#include "tests/bench486/bench486_transformplane.h"', host_commands)
         self.assertIn('COM_CheckParm ("-benchtransformplane")', host_commands)
         self.assertIn("Bench486TransformPlaneCases ();", host_commands)
         self.assertIn("[switch]$TransformPlaneOnly", bench_runner)
@@ -2123,10 +2123,10 @@ class RenderingComparisonTests(unittest.TestCase):
         expected91["selectors"]["RocketTrailImplementation"] = "asm"
         self.assertEqual(selectable91, expected91)
 
-        assembly = (ROOT / "src/r_rockettrailasm.s").read_text(encoding="utf-8")
-        oracle = (ROOT / "src/r_part.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_rockettrail.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_rockettrailasm.s").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/r_part.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_rockettrail.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         self.assertIn(".arch i486", assembly)
@@ -2142,7 +2142,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("bench486_rockettrail_c_tracercount", fixture)
         self.assertIn("bench486_rockettrail_asm_tracercount", fixture)
         self.assertIn("Bench486Call_asm486", fixture)
-        self.assertIn('#include "bench486_rockettrail.h"', host_commands)
+        self.assertIn('#include "tests/bench486/bench486_rockettrail.h"', host_commands)
         self.assertIn('COM_CheckParm ("-benchrockettrail")', host_commands)
         self.assertIn("Bench486RocketTrailCases ();", host_commands)
         self.assertIn("requires -benchexit to isolate libc RNG state", host_commands)
@@ -2325,7 +2325,7 @@ class RenderingComparisonTests(unittest.TestCase):
                     self.assertEqual(value, expected, name)
 
     def test_submodel_assembly_reads_cdecl_arguments_after_return_address(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(R_DrawSubmodelPolygons_asm486\):(?P<body>.*?"
             r"\.Lsubmodel_polygons_finish:.*?\bret)",
@@ -2352,7 +2352,7 @@ class RenderingComparisonTests(unittest.TestCase):
         }
         self.assertEqual(changed, {"RenderPolyImplementation", "ZSubmodelPolygonsImplementation"})
 
-        assembly = (ROOT / "src/r_zsubmodelasm.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_zsubmodelasm.s").read_text(encoding="utf-8")
         self.assertIn("ZSUBMODEL_BODY C(R_ZDrawSubmodelPolys_asm486), 0", assembly)
         self.assertIn("fcompl\t.Lzsubmodel_negative_epsilon", assembly)
         self.assertIn("fcompl\t.Lzsubmodel_positive_epsilon", assembly)
@@ -2360,7 +2360,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("testb\t$69,%ah", assembly)
         self.assertIn("call\tC(R_RenderPoly)", assembly)
 
-        layout = (ROOT / "src/asm_zsubmodel.h").read_text(encoding="utf-8")
+        layout = (ROOT / "src/renderer/asm_zsubmodel.h").read_text(encoding="utf-8")
         for contract in (
             "offsetof(model_t, firstmodelsurface)",
             "offsetof(model_t, nummodelsurfaces)",
@@ -2373,8 +2373,8 @@ class RenderingComparisonTests(unittest.TestCase):
             with self.subTest(contract=contract):
                 self.assertIn(contract, layout)
 
-        oracle = (ROOT / "src/r_draw.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_zsubmodel.h").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/r_draw.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_zsubmodel.h").read_text(encoding="utf-8")
         bench = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         self.assertIn("R_ZDrawSubmodelPolys_C", oracle)
         self.assertIn("4096 continuous calls", fixture)
@@ -2383,8 +2383,8 @@ class RenderingComparisonTests(unittest.TestCase):
         combined = load_json((profiles / "i486-asm-selectable-84.json").read_text(encoding="utf-8"))
         self.assertEqual(combined["selectors"]["PublicBindingsImplementation"], "asm")
         self.assertEqual(combined["selectors"]["ZSubmodelPolygonsImplementation"], "asm")
-        binding = (ROOT / "src/r_publicbindingsasm.s").read_text(encoding="utf-8")
-        public_fixture = (ROOT / "src/bench486_publicbindings.h").read_text(encoding="utf-8")
+        binding = (ROOT / "src/renderer/r_publicbindingsasm.s").read_text(encoding="utf-8")
+        public_fixture = (ROOT / "src/tests/bench486/bench486_publicbindings.h").read_text(encoding="utf-8")
         self.assertRegex(
             binding,
             r"(?s)#ifdef ASM486_DRAW_Z_SUBMODEL_POLYS\s+\.p2align 2\s+\.globl _R_ZDrawSubmodelPolys\s+"
@@ -2394,11 +2394,11 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("#if !defined(ASM486_PUBLIC_BINDINGS)", oracle)
 
     def test_render_poly_has_direct_raw_bit_c_assembly_oracle(self) -> None:
-        fixture = (ROOT / "src/bench486_renderpoly.h").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
-        reference = (ROOT / "src/r_draw.c").read_text(encoding="utf-8")
-        draw_driver = (ROOT / "src/d_edge.c").read_text(encoding="utf-8")
-        public_fixture = (ROOT / "src/bench486_publicbindings.h").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_renderpoly.h").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
+        reference = (ROOT / "src/renderer/r_draw.c").read_text(encoding="utf-8")
+        draw_driver = (ROOT / "src/renderer/d_edge.c").read_text(encoding="utf-8")
+        public_fixture = (ROOT / "src/tests/bench486/bench486_publicbindings.h").read_text(encoding="utf-8")
 
         self.assertIn("#define RPP_EXPECTED_PAIRS 168", fixture)
         self.assertIn("static const unsigned short control_words[12]", fixture)
@@ -2435,7 +2435,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn(".long 0x42c80000", assembly)
         self.assertIn("defined(BENCH486) && defined(ASM486_PUBLIC_BINDINGS)", draw_driver)
         self.assertIn("bench486_renderpoly_draw_hook ();", draw_driver)
-        self.assertIn('#include "bench486_renderpoly.h"', public_fixture)
+        self.assertIn('#include "tests/bench486/bench486_renderpoly.h"', public_fixture)
         self.assertIn("Bench486RenderPolyCases();", public_fixture)
 
     def test_frustum_transform_assembly_has_an_isolated_profile_and_guarded_oracle(self) -> None:
@@ -2452,7 +2452,7 @@ class RenderingComparisonTests(unittest.TestCase):
         }
         self.assertEqual(changed, {"TransformFrustumImplementation"})
 
-        assembly = (ROOT / "src/r_frustumasm.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_frustumasm.s").read_text(encoding="utf-8")
         self.assertIn(".arch i486", assembly)
         self.assertIn(".arch .387", assembly)
         self.assertIn("C(R_TransformFrustum):", assembly)
@@ -2485,7 +2485,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("popl\t%edi", assembly)
         self.assertNotRegex(assembly, r"(?i)\b(?:cmov\w*|mm\w*|[sv]se\w*)\b")
 
-        layout = (ROOT / "src/asm_frustum.h").read_text(encoding="utf-8")
+        layout = (ROOT / "src/renderer/asm_frustum.h").read_text(encoding="utf-8")
         for contract in (
             "sizeof(mplane_t) == FR_SCREEN_STRIDE",
             "offsetof(mplane_t, normal) == FR_SCREEN_NORMAL_X",
@@ -2496,8 +2496,8 @@ class RenderingComparisonTests(unittest.TestCase):
             with self.subTest(contract=contract):
                 self.assertIn(contract, layout)
 
-        oracle = (ROOT / "src/r_misc.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_frustum.h").read_text(encoding="utf-8")
+        oracle = (ROOT / "src/renderer/r_misc.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_frustum.h").read_text(encoding="utf-8")
         bench = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         self.assertIn("R_TransformFrustumCore_C", oracle)
         self.assertIn("R_SetUpFrustumIndexes_C", oracle)
@@ -2513,7 +2513,7 @@ class RenderingComparisonTests(unittest.TestCase):
             "r_framecontrol_profile.inc",
         ):
             with self.subTest(source=source_name):
-                source = (ROOT / "src" / source_name).read_text(encoding="utf-8")
+                source = (ROOT / "src" / "renderer" / source_name).read_text(encoding="utf-8")
                 body = source.split("_R_ViewChanged:", 1)[1].split("/* R_MarkLeaves", 1)[0]
                 tailcall_cleanup = re.findall(
                     r"addl\s+\$(\d+),\s*%esp[^\n]*\n"
@@ -2527,7 +2527,7 @@ class RenderingComparisonTests(unittest.TestCase):
                 self.assertEqual(tailcall_cleanup, ["20", "20"])
 
     def test_warp_scratch_is_renderer_owned_and_fallback_is_stack_guarded(self) -> None:
-        source = (ROOT / "src/r_main.c").read_text(encoding="utf-8")
+        source = (ROOT / "src/renderer/r_main.c").read_text(encoding="utf-8")
         render_view = source.split("void R_RenderView_ (void)", 1)[1].split(
             "void R_RenderView (void)", 1
         )[0]
@@ -2559,7 +2559,7 @@ class RenderingComparisonTests(unittest.TestCase):
             ("r_framecontrol_profile.inc", "36"),
         ):
             with self.subTest(source=source_name):
-                generated = (ROOT / "src" / source_name).read_text(encoding="utf-8")
+                generated = (ROOT / "src" / "renderer" / source_name).read_text(encoding="utf-8")
                 body = generated.split("_R_RenderView_:", 1)[1].split(".p2align", 1)[0]
                 self.assertIn(f"subl\t${frame_size}, %esp", body)
                 self.assertIn("_R_RenderViewDispatch", generated)
@@ -2609,7 +2609,7 @@ class RenderingComparisonTests(unittest.TestCase):
                 )
 
     def test_drawingdriver_outgoing_calls_align_and_restore_the_cdecl_stack(self) -> None:
-        source = (ROOT / "src/d_driverasm.s").read_text(encoding="utf-8")
+        source = (ROOT / "src/renderer/d_driverasm.s").read_text(encoding="utf-8")
         macro = source.split(".macro DRIVER_CALL", 1)[1].split(".endm", 1)[0]
         self.assertIn("subl $4,%esp", macro)
         self.assertIn("pushl %eax", macro)
@@ -2637,11 +2637,11 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertEqual(candidate["selectors"], {"ViewControlImplementation": "asm"})
         self.assertEqual(reference["selectors"], {"ViewControlImplementation": "c"})
 
-        dispatch = (ROOT / "src/v_viewcontrolasm.s").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/r_setupframe_asm.inc").read_text(encoding="utf-8")
-        c_source = (ROOT / "src/r_misc.c").read_text(encoding="utf-8")
-        layout = (ROOT / "src/asm_viewcontrol.h").read_text(encoding="utf-8")
-        self.assertIn('#include "r_setupframe_asm.inc"', dispatch)
+        dispatch = (ROOT / "src/client/v_viewcontrolasm.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_setupframe_asm.inc").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/r_misc.c").read_text(encoding="utf-8")
+        layout = (ROOT / "src/client/asm_viewcontrol.h").read_text(encoding="utf-8")
+        self.assertIn('#include "renderer/r_setupframe_asm.inc"', dispatch)
         self.assertIn(".globl _R_SetupFrame", assembly)
         self.assertIn("_R_SetupFrame:", assembly)
         for call in (
@@ -2664,10 +2664,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertNotRegex(assembly, r"(?i)\b(?:cmov\w*|mm\w*|[sv]se\w*|fisttp|fcomi\w*)\b")
 
     def test_calc_fov_assembly_matches_the_c_oracle_under_x87_modes(self) -> None:
-        assembly = (ROOT / "src/screen_fovasm.s").read_text(encoding="utf-8")
-        source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
-        layout = (ROOT / "src/asm_screenfov.h").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_viewcontrol.h").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_fovasm.s").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/screen.c").read_text(encoding="utf-8")
+        layout = (ROOT / "src/client/asm_screenfov.h").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_viewcontrol.h").read_text(encoding="utf-8")
 
         self.assertIn(".arch i486", assembly)
         self.assertIn(".arch .387", assembly)
@@ -2733,7 +2733,7 @@ class RenderingComparisonTests(unittest.TestCase):
         )
 
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/screen_notifyasm.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_notifyasm.s").read_text(encoding="utf-8")
         self.assertIn("ASM486_SCREEN_NOTIFY", selectors)
         self.assertIn(".arch i486", assembly)
         self.assertNotRegex(assembly, r"(?i)\b(?:cmov\w*|mm\w*|[sv]se\w*|fisttp|fcomi\w*)\b")
@@ -2753,9 +2753,9 @@ class RenderingComparisonTests(unittest.TestCase):
             )
 
     def test_screen_notify_fixture_pins_x87_layout_and_line_consumption(self) -> None:
-        assembly = (ROOT / "src/screen_notifyasm.s").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_screennotify.h").read_text(encoding="utf-8")
-        source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_notifyasm.s").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_screennotify.h").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/screen.c").read_text(encoding="utf-8")
         runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
 
         for instruction in (
@@ -2817,10 +2817,10 @@ class RenderingComparisonTests(unittest.TestCase):
         )
 
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/screen_centerasm.s").read_text(encoding="utf-8")
-        source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_screencenter.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_centerasm.s").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/screen.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_screencenter.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         self.assertIn("ASM486_SCREEN_CENTER_STRING", selectors)
         self.assertIn(".arch i486", assembly)
         self.assertIn(".arch .387", assembly)
@@ -2879,10 +2879,10 @@ class RenderingComparisonTests(unittest.TestCase):
         )
 
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/screen_eraseasm.s").read_text(encoding="utf-8")
-        source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_screenerase.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_eraseasm.s").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/screen.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_screenerase.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         ownership = (BENCHMARK_ROOT / "tools/renderer-ownership.py").read_text(encoding="utf-8")
         self.assertIn("ASM486_SCREEN_ERASE_CENTER_STRING", selectors)
         self.assertIn(".arch i486", assembly)
@@ -2937,10 +2937,10 @@ class RenderingComparisonTests(unittest.TestCase):
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
         build = (ROOT / "tools/build-dos-experimental.ps1").read_text(encoding="utf-8")
         runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/screen_consolesetupasm.s").read_text(encoding="utf-8")
-        source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_screenconsolesetup.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_consolesetupasm.s").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/screen.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_screenconsolesetup.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         cumulative = json.loads((ROOT / "tools/renderer-profiles/i486-asm-selectable-current.json").read_text(encoding="utf-8"))
 
         self.assertIn("ScreenConsoleSetupImplementation", selectors)
@@ -2971,10 +2971,10 @@ class RenderingComparisonTests(unittest.TestCase):
         reference = load_json((profiles / "i486-screen-refdef-c.json").read_text(encoding="utf-8"))
         candidate = load_json((profiles / "i486-screen-refdef-asm.json").read_text(encoding="utf-8"))
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/screen_refdefasm.s").read_text(encoding="utf-8")
-        source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_screenrefdef.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_refdefasm.s").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/screen.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_screenrefdef.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         ownership = (BENCHMARK_ROOT / "tools/renderer-ownership.py").read_text(encoding="utf-8")
 
         self.assertEqual(reference["id"], "i486-screen-refdef-c")
@@ -3047,11 +3047,11 @@ class RenderingComparisonTests(unittest.TestCase):
         candidate = load_json((profiles / "i486-screen-drawram-asm.json").read_text(encoding="utf-8"))
         current = load_json((profiles / "i486-asm-selectable-current.json").read_text(encoding="utf-8"))
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/screen_drawramasm.s").read_text(encoding="utf-8")
-        header = (ROOT / "src/asm_screendrawram.h").read_text(encoding="utf-8")
-        source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_screendrawram.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_drawramasm.s").read_text(encoding="utf-8")
+        header = (ROOT / "src/client/asm_screendrawram.h").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/screen.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_screendrawram.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         ownership = (BENCHMARK_ROOT / "tools/renderer-ownership.py").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         timedemo_runner = (BENCHMARK_ROOT / "tools/timedemo-dos.ps1").read_text(encoding="utf-8")
@@ -3104,11 +3104,11 @@ class RenderingComparisonTests(unittest.TestCase):
         candidate = load_json((profiles / "i486-screen-overlays-asm.json").read_text(encoding="utf-8"))
         current = load_json((profiles / "i486-asm-selectable-current.json").read_text(encoding="utf-8"))
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/screen_overlaysasm.s").read_text(encoding="utf-8")
-        header = (ROOT / "src/asm_screenoverlays.h").read_text(encoding="utf-8")
-        source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_screenoverlays.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_overlaysasm.s").read_text(encoding="utf-8")
+        header = (ROOT / "src/client/asm_screenoverlays.h").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/screen.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_screenoverlays.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         ownership = (BENCHMARK_ROOT / "tools/renderer-ownership.py").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         timedemo_runner = (BENCHMARK_ROOT / "tools/timedemo-dos.ps1").read_text(encoding="utf-8")
@@ -3187,11 +3187,11 @@ class RenderingComparisonTests(unittest.TestCase):
         candidate = load_json((profiles / "i486-screen-update-asm.json").read_text(encoding="utf-8"))
         current = load_json((profiles / "i486-asm-selectable-current.json").read_text(encoding="utf-8"))
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/screen_updateasm.s").read_text(encoding="utf-8")
-        header = (ROOT / "src/asm_screenupdate.h").read_text(encoding="utf-8")
-        source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_screenupdate.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_updateasm.s").read_text(encoding="utf-8")
+        header = (ROOT / "src/client/asm_screenupdate.h").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/screen.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_screenupdate.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         ownership = (BENCHMARK_ROOT / "tools/renderer-ownership.py").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
 
@@ -3241,11 +3241,11 @@ class RenderingComparisonTests(unittest.TestCase):
         candidate = load_json((profiles / "i486-screen-net-asm.json").read_text(encoding="utf-8"))
         current = load_json((profiles / "i486-asm-selectable-current.json").read_text(encoding="utf-8"))
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/screen_netasm.s").read_text(encoding="utf-8")
-        header = (ROOT / "src/asm_screennet.h").read_text(encoding="utf-8")
-        source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_screennet.h").read_text(encoding="utf-8")
-        overlay_assembly = (ROOT / "src/screen_overlaysasm.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_netasm.s").read_text(encoding="utf-8")
+        header = (ROOT / "src/client/asm_screennet.h").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/screen.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_screennet.h").read_text(encoding="utf-8")
+        overlay_assembly = (ROOT / "src/client/screen_overlaysasm.s").read_text(encoding="utf-8")
         ownership = (BENCHMARK_ROOT / "tools/renderer-ownership.py").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
 
@@ -3293,32 +3293,32 @@ class RenderingComparisonTests(unittest.TestCase):
     def test_screen_benchmark_hooks_are_fixture_scoped(self) -> None:
         cases = (
             (
-                "screen_notifyasm.s",
+                "client/screen_notifyasm.s",
                 "bench486_screen_notify_fixture_active",
                 "Bench486ScreenNotifyCharacter",
                 "Draw_Character",
-                "bench486_screennotify.h",
+                "tests/bench486/bench486_screennotify.h",
             ),
             (
-                "screen_centerasm.s",
+                "client/screen_centerasm.s",
                 "bench486_screen_center_fixture_active",
                 "Bench486ScreenCenterStringCharacter",
                 "Draw_Character",
-                "bench486_screencenter.h",
+                "tests/bench486/bench486_screencenter.h",
             ),
             (
-                "screen_eraseasm.s",
+                "client/screen_eraseasm.s",
                 "bench486_screen_erase_fixture_active",
                 "Bench486ScreenEraseTileClear",
                 "Draw_TileClear",
-                "bench486_screenerase.h",
+                "tests/bench486/bench486_screenerase.h",
             ),
             (
-                "screen_consolesetupasm.s",
+                "client/screen_consolesetupasm.s",
                 "bench486_screen_console_setup_fixture_active",
                 "Bench486ScreenConsoleSetupTileClear",
                 "Draw_TileClear",
-                "bench486_screenconsolesetup.h",
+                "tests/bench486/bench486_screenconsolesetup.h",
             ),
         )
         for assembly_name, flag, hook, live_call, fixture_name in cases:
@@ -3334,14 +3334,14 @@ class RenderingComparisonTests(unittest.TestCase):
                     rf"{flag}\s*=\s*1;\s*abi\s*=\s*Bench486Call_asm486\s*\(function, 0, NULL, NULL\);\s*{flag}\s*=\s*0;",
                 )
 
-        console_assembly = (ROOT / "src/screen_consolesetupasm.s").read_text(encoding="utf-8")
+        console_assembly = (ROOT / "src/client/screen_consolesetupasm.s").read_text(encoding="utf-8")
         self.assertIn("C(Bench486ScreenConsoleSetupCheckResize)", console_assembly)
         self.assertIn("C(Con_CheckResize)", console_assembly)
         self.assertIn("C(Bench486ScreenConsoleSetupSbarChanged)", console_assembly)
         self.assertIn("C(Sbar_Changed)", console_assembly)
 
     def test_alias_light_conversion_truncates_like_the_c_cast(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(R_AliasTransformFinalVert_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3355,11 +3355,11 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertRegex(body, r"(?m)^\s*fistpl\s+Lalias_transform_temp\s*$")
         self.assertRegex(body, r"(?m)^\s*fldcw\s+0\(%esp\)\s*$")
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         self.assertIn('Bench486AliasTransformFinalCase ("fractional-cast", 3);', benchmark)
 
     def test_alias_transform_preserves_reference_x87_row_order(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(R_AliasTransformFinalVert_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3386,11 +3386,11 @@ class RenderingComparisonTests(unittest.TestCase):
             third_vertex = "\tfildl\tLalias_transform_coords+8\n"
             self.assertLess(row.index(translation), row.index(third_vertex))
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         self.assertIn('Bench486AliasTransformFinalCase ("x87-row-order", 4);', benchmark)
 
     def test_alias_bbox_vector_transform_preserves_reference_x87_row_order(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(R_AliasTransformVector_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3418,11 +3418,11 @@ class RenderingComparisonTests(unittest.TestCase):
 
         self.assertRegex(body, r"(?m)^\s*movl\s+12\(%esp\),%esi\s+// input vector$")
         self.assertRegex(body, r"(?m)^\s*movl\s+16\(%esp\),%edi\s+// output vector$")
-        c_source = (ROOT / "src/r_alias.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/r_alias.c").read_text(encoding="utf-8")
         self.assertIn("R_AliasTransformVector_asm486 (in, out);", c_source)
 
     def test_alias_transform_matrix_assembly_preserves_reference_order(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         macro = re.search(
             r"(?m)^\s*\.macro\s+CONCAT_TRANSFORM.*?^\s*\.endm\s*$",
             assembly,
@@ -3435,9 +3435,9 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertLess(body.index("fadds"), body.rindex("fmuls"))
         self.assertLess(body.rindex("fmuls"), body.rindex("faddp"))
         self.assertIn("CONCAT_TRANSFORM 12, 0, 12, 4, 28, 8, 44, 12", assembly)
-        self.assertIn("R_ConcatTransforms_asm486 (t2matrix, tmatrix, rotationmatrix);", (ROOT / "src/r_alias.c").read_text(encoding="utf-8"))
-        self.assertIn('Bench486AliasMatrixComposeCase ("translation-order", 1);', (ROOT / "src/host_cmd.c").read_text(encoding="utf-8"))
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        self.assertIn("R_ConcatTransforms_asm486 (t2matrix, tmatrix, rotationmatrix);", (ROOT / "src/renderer/r_alias.c").read_text(encoding="utf-8"))
+        self.assertIn('Bench486AliasMatrixComposeCase ("translation-order", 1);', (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8"))
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         self.assertIn('Bench486AliasTransformVectorCase ("x87-row-order", 1);', benchmark)
 
         view = re.search(
@@ -3453,11 +3453,11 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("popl\t%edi", view_body)
         self.assertIn("popl\t%ebx", view_body)
         self.assertNotRegex(view_body, r"(?i)\b(cmov[a-z]*|movnti|emms)\b")
-        self.assertIn("R_AliasSetViewMatrix_asm486 (vright, vup, vpn", (ROOT / "src/r_alias.c").read_text(encoding="utf-8"))
+        self.assertIn("R_AliasSetViewMatrix_asm486 (vright, vup, vpn", (ROOT / "src/renderer/r_alias.c").read_text(encoding="utf-8"))
         self.assertIn('Bench486AliasViewMatrixCase (names[i], vectors[i][0]', benchmark)
 
     def test_alias_setup_lighting_assembly_matches_reference_boundary(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(R_AliasSetupLighting_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3474,17 +3474,17 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("fchs", body)
         self.assertNotRegex(body, r"(?i)\b(cmov[a-z]*|movnti|emms)\b")
 
-        c_source = (ROOT / "src/r_alias.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/r_alias.c").read_text(encoding="utf-8")
         self.assertIn("void R_AliasSetupLighting_C (alight_t *plighting", c_source)
         self.assertIn("R_AliasSetupLighting_asm486 (plighting, alias_forward", c_source)
         self.assertIn("R_AliasSetupLighting_C (plighting, alias_forward", c_source)
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in ("ambient-clamps", "negative-shade", "fractional-axes", "large-light-vector"):
             self.assertIn(f'{{"{case}",', benchmark)
         self.assertIn("Bench486AliasSetupLightingCase (&tests[step], mode, test_cw);", benchmark)
 
     def test_alias_setup_frame_assembly_matches_reference_boundary(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(R_AliasSetupFrame_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3505,14 +3505,14 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("leal\t(%edx,%edx,2),%ecx", body)
         self.assertNotRegex(body, r"(?i)\b(cmov[a-z]*|movnti|emms)\b")
 
-        c_source = (ROOT / "src/r_alias.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/r_alias.c").read_text(encoding="utf-8")
         self.assertIn("void R_AliasSetupFrame_C (int frame, double cltime, float syncbase)", c_source)
         self.assertIn("R_AliasSetupFrame_asm486 (frame, cl.time, currententity->syncbase);", c_source)
         self.assertIn("R_AliasSetupFrame_C (frame, cl.time, currententity->syncbase);", c_source)
         self.assertIn("offsetof(maliasframedesc_t, frame) == 12", c_source)
         self.assertIn("offsetof(maliasgroup_t, frames) == 8", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in ("single-frame", "boundary-first", "wrap-period", "negative-truncate-zero", "one-frame-group"):
             self.assertIn(f'{{"{case}",', benchmark)
         self.assertIn("4 * (int)(sizeof(tests)/sizeof(tests[0]))", benchmark)
@@ -3528,7 +3528,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-benchaliassetupframe -benchexit", bench_runner)
 
     def test_alias_setup_skin_assembly_matches_reference_boundary(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(R_AliasSetupSkinSelect_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3548,14 +3548,14 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("leal\t8(%eax,%ecx,4),%eax", body)
         self.assertNotRegex(body, r"(?i)\b(cmov[a-z]*|movnti|emms)\b")
 
-        c_source = (ROOT / "src/r_alias.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/r_alias.c").read_text(encoding="utf-8")
         self.assertIn("maliasskindesc_t *R_AliasSetupSkinSelect_C", c_source)
         self.assertIn("R_AliasSetupSkinSelect_asm486 (skinnum, cl.time", c_source)
         self.assertIn("R_AliasSetupSkinSelect_C (skinnum, cl.time", c_source)
         self.assertIn("offsetof(maliasskindesc_t, skin) == 8", c_source)
         self.assertIn("offsetof(maliasskingroup_t, skindescs) == 8", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in ("single-skin", "boundary-first", "wrap-period", "negative-truncate-zero", "one-skin-group"):
             self.assertIn(f'{{"{case}",', benchmark)
         self.assertIn("4 * (int)(sizeof(tests)/sizeof(tests[0]))", benchmark)
@@ -3571,7 +3571,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-benchaliassetupskin -benchexit", bench_runner)
 
     def test_alias_triangle_gradients_assembly_matches_reference_boundary(self) -> None:
-        assembly = (ROOT / "src/d_polysa.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/d_polysa.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(D_PolysetCalcGradients_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3587,14 +3587,14 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("imull\tskinwidth(%esp)", body)
         self.assertNotRegex(body, r"(?i)\b(cmov[a-z]*|movnti|emms)\b")
 
-        c_source = (ROOT / "src/d_polyse.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/d_polyse.c").read_text(encoding="utf-8")
         self.assertIn("void D_PolysetCalcGradients_C (int skinwidth)", c_source)
         self.assertIn("D_PolysetCalcGradients_asm486 (skinwidth);", c_source)
         self.assertIn("d_xdenom = d_xdenom_int;", c_source)
         self.assertIn("D_PolysetCalcGradients_C (skinwidth);", c_source)
         self.assertIn("int\t\t\td_xdenom_int;", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in ("standard-positive", "reverse-denominator", "negative-texture-slopes", "fractional-light-ceil", "large-fixed-coordinates"):
             self.assertIn(f'{{"{case}",', benchmark)
         self.assertIn("D_PolysetCalcGradients_C (test->skinwidth);", benchmark)
@@ -3610,7 +3610,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-benchaliasgradients -benchexit", bench_runner)
 
     def test_alias_line_scan_assembly_matches_reference_boundary(self) -> None:
-        assembly = (ROOT / "src/d_polysa.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/d_polysa.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(D_PolysetSetUpForLineScan_asm486\):(?P<body>.*?)(?=//-+\n// recursive subdivision)",
             assembly,
@@ -3625,13 +3625,13 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("C(D_PolysetSetUpForLineScan_C)", body)
         self.assertNotRegex(body, r"(?i)\b(cmov[a-z]*|movnti|emms|fisttp)\b")
 
-        c_source = (ROOT / "src/d_polyse.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/d_polyse.c").read_text(encoding="utf-8")
         self.assertIn("adivtab_t\tadivtab[64*64]", c_source)
         self.assertIn("void D_PolysetSetUpForLineScan_C", c_source)
         self.assertIn("D_PolysetSetUpForLineScan_asm486 (startvertu", c_source)
         self.assertIn("bench486_line_setup_calls++", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         self.assertIn("for (tm=-31 ; tm<=32 ; tm++)", benchmark)
         self.assertIn("D_PolysetSetUpForLineScan_C (0, 0, tm, tn);", benchmark)
         self.assertIn("D_PolysetSetUpForLineScan_asm486 (0, 0, tm, tn);", benchmark)
@@ -3646,7 +3646,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-benchaliaslinescan -benchexit", bench_runner)
 
     def test_alias_edge_table_assembly_matches_reference_boundary(self) -> None:
-        assembly = (ROOT / "src/d_polysa.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/d_polysa.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(D_PolysetSetEdgeTable_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3660,12 +3660,12 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("leal\tC(edgetables)(,%eax,4),%eax", body)
         self.assertNotRegex(body, r"(?i)\b(cmov[a-z]*|movnti|emms|fisttp)\b")
 
-        c_source = (ROOT / "src/d_polyse.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/d_polyse.c").read_text(encoding="utf-8")
         self.assertIn("typedef char edgetable_i486_size[(sizeof(edgetable) == 36) ? 1 : -1];", c_source)
         self.assertIn("void D_PolysetSetEdgeTable_C (void)", c_source)
         self.assertIn("D_PolysetSetEdgeTable_asm486 ();", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         self.assertIn("static void Bench486AliasEdgeTableCases (void)", benchmark)
         self.assertIn("D_PolysetSetEdgeTable_C ();", benchmark)
         self.assertIn("D_PolysetSetEdgeTable_asm486 ();", benchmark)
@@ -3680,7 +3680,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-benchaliasedgetable -benchexit", bench_runner)
 
     def test_alias_skin_table_assembly_matches_reference_cache(self) -> None:
-        assembly = (ROOT / "src/d_polysa.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/d_polysa.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(D_PolysetUpdateTables_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3701,12 +3701,12 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("addl\t$4,%esi", body)
         self.assertNotRegex(body, r"(?i)\b(cmov[a-z]*|movnti|emms|fisttp)\b")
 
-        c_source = (ROOT / "src/d_polyse.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/d_polyse.c").read_text(encoding="utf-8")
         self.assertIn("void D_PolysetUpdateTables_C (void)", c_source)
         self.assertIn("D_PolysetUpdateTables_asm486 ();", c_source)
         self.assertIn("typedef char skintable_i486_rows", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         self.assertIn("static void Bench486AliasSkinTableCases (void)", benchmark)
         self.assertIn("D_PolysetUpdateTables_C ();", benchmark)
         self.assertIn("D_PolysetUpdateTables_asm486 ();", benchmark)
@@ -3721,7 +3721,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-benchaliasskintable -benchexit", bench_runner)
 
     def test_sprite_beam_translation_assembly_matches_reference_boundary(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(R_RotateSprite_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3738,17 +3738,17 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertRegex(body, r"(?m)^\s*fadds\s+0\(%esp\)")
         self.assertRegex(body, r"(?m)^\s*fsubs\s+0\(%esp\)")
 
-        c_source = (ROOT / "src/r_sprite.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/r_sprite.c").read_text(encoding="utf-8")
         self.assertIn("void R_RotateSprite_C (float beamlength)", c_source)
         self.assertIn("#ifdef ASM486_SPRITE_BEAM", c_source)
         self.assertIn("R_RotateSprite_asm486 (beamlength);", c_source)
         self.assertIn("R_RotateSprite_C (beamlength);", c_source)
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in ("zero", "negative-zero", "positive", "negative", "fractional", "small"):
             self.assertIn(f'Bench486SpriteBeamCase ("{case}",', benchmark)
 
     def test_sprite_face_clipping_assembly_matches_reference_boundary(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(R_ClipSpriteFace_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3771,14 +3771,14 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertRegex(body, r"(?m)^\s*fstp\s+%st\(0\)$")
         self.assertEqual(body.count("fstps\t"), 6)
 
-        c_source = (ROOT / "src/r_sprite.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/r_sprite.c").read_text(encoding="utf-8")
         self.assertIn("int R_ClipSpriteFace_C (int nump, clipplane_t *pclipplane)", c_source)
         self.assertIn("#ifdef ASM486_SPRITE_CLIP", c_source)
         self.assertIn("return R_ClipSpriteFace_asm486 (nump, pclipplane);", c_source)
         self.assertIn("return R_ClipSpriteFace_C (nump, pclipplane);", c_source)
         self.assertIn("sizeof(clip_verts[0]) == 400", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in (
             "all-front-alt-buffer",
             "all-back",
@@ -3790,7 +3790,7 @@ class RenderingComparisonTests(unittest.TestCase):
             self.assertIn(f'Bench486SpriteClipCase ("{case}",', benchmark)
 
     def test_sprite_frame_selection_assembly_matches_reference_boundary(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(R_GetSpriteframe_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3808,15 +3808,15 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertRegex(body, r"(?m)^\s*fldcw\s+-16\(%ebp\)$")
         self.assertRegex(body, r"(?m)^\s*fstp\s+%st\(0\)$")
 
-        c_source = (ROOT / "src/r_sprite.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/r_sprite.c").read_text(encoding="utf-8")
         self.assertIn("R_GetSpriteframe_C (msprite_t *psprite)", c_source)
         self.assertIn("#ifndef ASM486_SPRITE_FRAME", c_source)
-        public_assembly = (ROOT / "src/r_spriteasm.s").read_text(encoding="utf-8")
+        public_assembly = (ROOT / "src/renderer/r_spriteasm.s").read_text(encoding="utf-8")
         self.assertIn(".globl C(R_GetSpriteframe)", public_assembly)
         self.assertIn("call    C(R_GetSpriteframe_asm486)", public_assembly)
         self.assertIn("sizeof(mspriteframedesc_t) == 8", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in (
             "single-frame",
             "group-start",
@@ -3834,7 +3834,7 @@ class RenderingComparisonTests(unittest.TestCase):
             self.assertIn(f'Bench486SpriteFrameCase ("{case}",', benchmark)
 
     def test_sprite_gradient_assembly_matches_reference_contract(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(D_SpriteCalculateGradients_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3850,18 +3850,18 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertEqual(body.count("fistpl\t-60(%ebp)"), 2)
         self.assertEqual(body.count("fldcw\t-54(%ebp)"), 2)
 
-        c_source = (ROOT / "src/d_sprite.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/d_sprite.c").read_text(encoding="utf-8")
         self.assertIn("D_SpriteCalculateGradients_C (void)", c_source)
         self.assertIn("#ifdef ASM486_SPRITE_GRADIENTS", c_source)
         self.assertIn("D_SpriteCalculateGradients_asm486 (sprite_height);", c_source)
         self.assertIn("offsetof(spritedesc_t, vpn) == 36", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in ("oblique-camera", "positive-plane-distance", "large-viewport"):
             self.assertIn(f'Bench486SpriteGradientCase ("{case}",', benchmark)
 
     def test_sprite_scan_left_assembly_matches_reference_contract(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(D_SpriteScanLeftEdge_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3873,18 +3873,18 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("fistpl", body)
         self.assertIn("fstps", body)
 
-        c_source = (ROOT / "src/d_sprite.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/d_sprite.c").read_text(encoding="utf-8")
         self.assertIn("D_SpriteScanLeftEdge_C (void)", c_source)
         self.assertIn("#ifdef ASM486_SPRITE_SCAN_LEFT", c_source)
         self.assertIn("D_SpriteScanLeftEdge_asm486 (sprite_spans, minindex, maxindex,", c_source)
         self.assertIn("offsetof(emitpoint_t, v) == 4", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in ("fractional-quad-wrap", "five-vertex-nonzero-start", "negative-u"):
             self.assertIn(f'Bench486SpriteScanLeftCase ("{case}",', benchmark)
 
     def test_sprite_scan_right_assembly_matches_reference_contract(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(D_SpriteScanRightEdge_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3897,18 +3897,18 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("fistpl", body)
         self.assertIn("fstps", body)
 
-        c_source = (ROOT / "src/d_sprite.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/d_sprite.c").read_text(encoding="utf-8")
         self.assertIn("D_SpriteScanRightEdge_C (void)", c_source)
         self.assertIn("#ifdef ASM486_SPRITE_SCAN_RIGHT", c_source)
         self.assertIn("r_refdef.fvrectright_adj", c_source)
         self.assertIn("D_SpriteScanRightEdge_asm486 (sprite_spans, minindex, maxindex,", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in ("fractional-quad", "viewport-clamp-wrap", "negative-slope-narrow-view"):
             self.assertIn(f'Bench486SpriteScanRightCase ("{case}",', benchmark)
 
     def test_sprite_draw_assembly_matches_reference_contract(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(D_DrawSprite_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3925,14 +3925,14 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("call\tC(D_SpriteDrawSpans)", body)
         self.assertIn("fldcw\t-46(%ebp)", body)
 
-        c_source = (ROOT / "src/d_sprite.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/d_sprite.c").read_text(encoding="utf-8")
         self.assertIn("void D_DrawSprite_C (void)", c_source)
         self.assertIn("#ifdef ASM486_SPRITE_DRAW", c_source)
         self.assertIn("D_DrawSprite_asm486 (r_spritedesc.nump, r_spritedesc.pverts,", c_source)
         self.assertIn("sizeof(sspan_t) == 12", c_source)
         self.assertIn("sizeof(emitpoint_t) == 20", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in ("fractional-rectangle", "viewport-clamp", "zero-scan"):
             self.assertIn(f'Bench486SpriteDrawCase ("{case}",', benchmark)
         self.assertIn('COM_CheckParm ("-benchspritedraw")', benchmark)
@@ -3945,7 +3945,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("$SpriteDrawOnly -and $SpriteDrawImplementation -ne 'asm'", bench_runner)
 
     def test_sprite_setup_assembly_matches_reference_contract(self) -> None:
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         routine = re.search(
             r"C\(R_SetupAndDrawSprite_asm486\):(?P<body>.*?^\s*ret\s*$)",
             assembly,
@@ -3960,14 +3960,14 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("jp\t.Lsprite_setup_depth_ready", body)
         self.assertIn("imull\t$400,%eax", body)
 
-        c_source = (ROOT / "src/r_sprite.c").read_text(encoding="utf-8")
+        c_source = (ROOT / "src/renderer/r_sprite.c").read_text(encoding="utf-8")
         self.assertIn("void R_SetupAndDrawSprite_C (void)", c_source)
         self.assertIn("#ifdef ASM486_SPRITE_SETUP", c_source)
         self.assertIn("R_SetupAndDrawSprite_asm486 ();", c_source)
         self.assertIn("offsetof(clipplane_t, dist) == 12", c_source)
         self.assertIn("offsetof(mspriteframe_t, right) == 24", c_source)
 
-        benchmark = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         for case in ("centered", "frustum-clipped", "near-plane", "outside-frustum", "backface"):
             self.assertIn(f'Bench486SpriteSetupCase ("{case}",', benchmark)
         self.assertIn('COM_CheckParm ("-benchspritesetup")', benchmark)
@@ -3992,12 +3992,12 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("$SpriteSetupOnly -and $SpriteSetupImplementation -ne 'asm'", bench_runner)
 
     def test_r_check_variables_assembly_preserves_the_compiled_reference_behavior(self) -> None:
-        assembly = (ROOT / "src/r_checkvariables_asm.inc").read_text(encoding="utf-8")
-        module = (ROOT / "src/v_viewcontrolasm.s").read_text(encoding="utf-8")
-        reference = (ROOT / "src/r_misc.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_viewcontrol.h").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/r_checkvariables_asm.inc").read_text(encoding="utf-8")
+        module = (ROOT / "src/client/v_viewcontrolasm.s").read_text(encoding="utf-8")
+        reference = (ROOT / "src/renderer/r_misc.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_viewcontrol.h").read_text(encoding="utf-8")
 
-        self.assertIn('#include "r_checkvariables_asm.inc"', module)
+        self.assertIn('#include "renderer/r_checkvariables_asm.inc"', module)
         self.assertRegex(assembly, r"(?m)^_R_CheckVariables:")
         self.assertIn("fcoms\tRCHECK_OLDBRIGHT", assembly)
         self.assertIn("fnstsw\t%ax", assembly)
@@ -4012,9 +4012,9 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("R_CheckVariables,0,NULL,NULL", fixture)
 
     def test_efrag_store_has_exact_c_asm_state_fixture_and_isolated_runner(self) -> None:
-        source = (ROOT / "src/r_efrag.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_efragstore.h").read_text(encoding="utf-8")
-        host = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        source = (ROOT / "src/renderer/r_efrag.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_efragstore.h").read_text(encoding="utf-8")
+        host = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         traceability = (ROOT / "docs/ledger/2026-10-10-efrag-store-parity-fixture.md").read_text(
             encoding="utf-8"
@@ -4032,7 +4032,7 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn('"full-capacity"', fixture)
         self.assertIn("bench486_efragstore_c_result", fixture)
         self.assertIn("bench486_efragstore_asm_result", fixture)
-        self.assertIn('#include "bench486_efragstore.h"', host)
+        self.assertIn('#include "tests/bench486/bench486_efragstore.h"', host)
         self.assertIn('COM_CheckParm ("-benchefragstore")', host)
         self.assertGreaterEqual(host.count("Bench486EfragStoreCases ();"), 2)
         self.assertIn("[switch]$EfragStoreOnly", runner)
@@ -4046,10 +4046,10 @@ class RenderingComparisonTests(unittest.TestCase):
         )
 
     def test_particle_update_has_multiframe_exact_c_asm_fixture_and_runner(self) -> None:
-        fixture = (ROOT / "src/bench486_particleupdate.h").read_text(encoding="utf-8")
-        host = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_particleupdate.h").read_text(encoding="utf-8")
+        host = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/asm486_experiments.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/renderer/asm486_experiments.s").read_text(encoding="utf-8")
         traceability = (ROOT / "docs/ledger/2026-10-10-particle-update-parity-fixture.md").read_text(
             encoding="utf-8"
         )
@@ -4074,7 +4074,7 @@ class RenderingComparisonTests(unittest.TestCase):
                                 block.index("fsubs\t-36(%ebp)"))
                 self.assertLess(block.index("fsubs\t-36(%ebp)"),
                                 block.index("fstps\tpt_vel+8(%ebx)"))
-        self.assertIn('#include "bench486_particleupdate.h"', host)
+        self.assertIn('#include "tests/bench486/bench486_particleupdate.h"', host)
         self.assertIn('COM_CheckParm ("-benchparticleupdate")', host)
         self.assertIn("[switch]$ParticleUpdateOnly", runner)
         self.assertIn("$ParticleUpdateOnly -and $ParticleUpdateImplementation -ne 'asm'", runner)
@@ -4110,11 +4110,11 @@ class RenderingComparisonTests(unittest.TestCase):
         candidate = load_json((profiles / "i486-screen-turtle-asm.json").read_text(encoding="utf-8"))
         current = load_json((profiles / "i486-asm-selectable-current.json").read_text(encoding="utf-8"))
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/screen_turtleasm.s").read_text(encoding="utf-8")
-        header = (ROOT / "src/asm_screenturtle.h").read_text(encoding="utf-8")
-        source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_screenturtle.h").read_text(encoding="utf-8")
-        overlay_assembly = (ROOT / "src/screen_overlaysasm.s").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/screen_turtleasm.s").read_text(encoding="utf-8")
+        header = (ROOT / "src/client/asm_screenturtle.h").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/screen.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_screenturtle.h").read_text(encoding="utf-8")
+        overlay_assembly = (ROOT / "src/client/screen_overlaysasm.s").read_text(encoding="utf-8")
         ownership = (BENCHMARK_ROOT / "tools/renderer-ownership.py").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
 
@@ -4175,11 +4175,11 @@ class RenderingComparisonTests(unittest.TestCase):
         profiles = ROOT / "tools/renderer-profiles"
         reference = load_json((profiles / "i486-c-reference.json").read_text(encoding="utf-8"))
         current = load_json((profiles / "i486-asm-selectable-current.json").read_text(encoding="utf-8"))
-        source = (ROOT / "src/sbar.c").read_text(encoding="utf-8")
-        fixture = (ROOT / "src/bench486_sbarinventory.h").read_text(encoding="utf-8")
-        assembly = (ROOT / "src/sbar_inventory_asm.inc").read_text(encoding="utf-8")
-        selector_header = (ROOT / "src/asm_sbar.h").read_text(encoding="utf-8")
-        host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
+        source = (ROOT / "src/client/sbar.c").read_text(encoding="utf-8")
+        fixture = (ROOT / "src/tests/bench486/bench486_sbarinventory.h").read_text(encoding="utf-8")
+        assembly = (ROOT / "src/client/sbar_inventory_asm.inc").read_text(encoding="utf-8")
+        selector_header = (ROOT / "src/client/asm_sbar.h").read_text(encoding="utf-8")
+        host_commands = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
         runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
 
         self.assertEqual(reference["selectors"]["SbarInventoryImplementation"], "c")

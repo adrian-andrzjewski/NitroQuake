@@ -25,7 +25,7 @@ def read(relative: str) -> str:
 
 class LavaSplashSourceContractTests(unittest.TestCase):
     def test_i486_source_uses_only_audited_integer_and_x87_mnemonics(self) -> None:
-        source = read("src/r_lavasplashasm.s")
+        source = read("src/renderer/r_lavasplashasm.s")
         self.assertIn(".arch i486", source)
         self.assertIn(".arch .387", source)
 
@@ -52,9 +52,9 @@ class LavaSplashSourceContractTests(unittest.TestCase):
         self.assertNotRegex(source, r"(?im)^\s*(?:cmov\w*|emms|movq|padd\w*|psub\w*|\w*s[sd]\w*)\b")
 
     def test_c_oracle_and_guarded_fixture_cover_pool_and_rng_boundaries(self) -> None:
-        c_source = read("src/r_part.c")
-        fixture = read("src/bench486_lavasplash.h")
-        host = read("src/host_cmd.c")
+        c_source = read("src/renderer/r_part.c")
+        fixture = read("src/tests/bench486/bench486_lavasplash.h")
+        host = read("src/core/host_cmd.c")
         for contract in (
             "#define R_LavaSplash R_LavaSplash_C",
             "#if !defined(ASM486_LAVA_SPLASH) || defined(BENCH486)",
@@ -82,14 +82,14 @@ class LavaSplashSourceContractTests(unittest.TestCase):
             self.assertIn(contract, fixture + host)
 
     def test_timedemo_records_lavasplash_after_the_renderer_returns(self) -> None:
-        temp_entities = read("src/cl_tent.c")
+        temp_entities = read("src/client/cl_tent.c")
         start = temp_entities.index("case TE_LAVASPLASH:")
         end = temp_entities.index("case TE_TELEPORT:", start)
         branch = temp_entities[start:end]
         self.assertLess(branch.index("R_LavaSplash (pos);"), branch.index("Bench486RecordLavaSplashEvent ();"))
         self.assertIn("#ifdef BENCH486", branch)
 
-        host = read("src/host_cmd.c")
+        host = read("src/core/host_cmd.c")
         header = read("src/quakedef.h")
         for contract in (
             "BENCH486_LAVA_SPLASH_EVENT_MAX 32",

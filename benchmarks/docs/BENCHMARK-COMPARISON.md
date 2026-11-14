@@ -147,7 +147,7 @@ file hash:
 | `tools\dosbox-x-486-high.conf` (profile) | SHA-256 | `F3948708A493A0AD3B7D167230065CAF3827CD16DD350E83C6B547E48DDD8E45` |
 
 `qbench.exe` deliberately has **no SHA-256 recorded here**. It embeds
-`__TIME__`/`__DATE__` in a startup banner (`src\host.c:912`), so it is not
+`__TIME__`/`__DATE__` in a startup banner (`src\core\host.c:912`), so it is not
 byte-reproducible: six stamp bytes differ between any two builds of identical
 source, and any hash would describe one incidental build rather than the code.
 Recording a checksum and not a hash is the accurate choice, not a

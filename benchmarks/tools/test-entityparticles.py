@@ -25,7 +25,7 @@ def read(relative: str) -> str:
 
 class EntityParticlesSourceContractTests(unittest.TestCase):
     def test_assembly_declares_i486_and_uses_reviewed_integer_x87_instructions(self) -> None:
-        source = read("src/r_entityparticlesasm.s")
+        source = read("src/renderer/r_entityparticlesasm.s")
         self.assertIn(".arch i486", source)
         self.assertIn(".arch .387", source)
 
@@ -52,9 +52,9 @@ class EntityParticlesSourceContractTests(unittest.TestCase):
         ), "post-486 or SIMD mnemonic found")
 
     def test_c_oracle_layout_and_direct_fixture_cover_state_and_rng(self) -> None:
-        c_source = read("src/r_part.c")
-        fixture = read("src/bench486_entityparticles.h")
-        host = read("src/host_cmd.c")
+        c_source = read("src/renderer/r_part.c")
+        fixture = read("src/tests/bench486/bench486_entityparticles.h")
+        host = read("src/core/host_cmd.c")
         for contract in (
             "#define R_EntityParticles R_EntityParticles_C",
             "#if !defined(ASM486_ENTITY_PARTICLES) || defined(BENCH486)",

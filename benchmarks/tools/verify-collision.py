@@ -138,7 +138,7 @@ def verify(args):
             for suffix, root in [('Control', reference), ('Candidate', candidate)]:
                 target = directory / suffix.lower()
                 if unit == 'move':
-                    source = (root / 'src/world.c').read_text(encoding='utf-8-sig')
+                    source = (root / 'src/collision/world.c').read_text(encoding='utf-8-sig')
                     bodies = '\n\n'.join(extract(source, fn) for fn in ('SV_MoveBounds', 'SV_Move'))
                     for fn in ('SV_MoveBounds', 'SV_Move'):
                         bodies = re.sub(r'\b' + fn + r'\b', fn + suffix, bodies)
@@ -148,7 +148,7 @@ def verify(args):
                                       + bodies + '\n', encoding='utf-8')
                     compile_command([*cflags, '-Wall', '-c', str(target), '-o', str(target.with_suffix('.obj'))])
                 else:
-                    source = (root / 'src/sv_cliptolinks_asm.inc').read_text(encoding='utf-8-sig')
+                    source = (root / 'src/collision/sv_cliptolinks_asm.inc').read_text(encoding='utf-8-sig')
                     source, changed = re.subn(r'C\(\s*SV_ClipToLinks\s*\)',
                                              'C(SV_ClipToLinks' + suffix + ')', source)
                     if not changed:

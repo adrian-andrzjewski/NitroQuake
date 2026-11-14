@@ -37,7 +37,7 @@ def verify(args):
     output = args.output.resolve()
     if output.exists():
         raise ValueError('Choose a fresh output directory')
-    sources = [(root / 'src/pr_exec.c').read_text(encoding='utf-8-sig')
+    sources = [(root / 'src/server/pr_exec.c').read_text(encoding='utf-8-sig')
                for root in (reference, candidate)]
     before, after = [function(source) for source in sources]
     if before[0] != after[0]:
@@ -64,7 +64,7 @@ def verify(args):
     flags = resolved['cFlags'] + resolved.get('cSourceExtraFlags', {}).get('pr_exec.c', [])
     output.mkdir(parents=True)
     state = dict(schemaVersion=1, status='building', reference=str(reference), candidate=str(candidate),
-                 sourceSha256={str(root): digest(root / 'src/pr_exec.c') for root in (reference, candidate)},
+                 sourceSha256={str(root): digest(root / 'src/server/pr_exec.c') for root in (reference, candidate)},
                  compiler=str(compiler), compilerSha256=digest(compiler), flags=flags,
                  driverSha256=digest(__file__), headerCount=len(headers[0]),
                  normalizedHeaderSha256={name: hashlib.sha256(data).hexdigest()

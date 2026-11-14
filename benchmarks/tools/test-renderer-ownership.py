@@ -186,9 +186,9 @@ class RendererOwnershipTests(unittest.TestCase):
     def test_clone_callee_is_reported_with_its_root_trace(self):
         with tempfile.TemporaryDirectory(prefix="quake-ownership-") as directory:
             root = Path(directory)
-            (root / "src").mkdir()
+            (root / "src/assets").mkdir(parents=True)
             (root / "obj").mkdir()
-            (root / "src/model.c").write_text(
+            (root / "src/assets/model.c").write_text(
                 "void Mod_DecompressVis(void) {}\nint dispatch_table[4];\n", encoding="ascii")
             for name in ("r_entry", "model"):
                 (root / "obj" / (name + ".obj")).touch()
@@ -209,7 +209,11 @@ class RendererOwnershipTests(unittest.TestCase):
 """
             with patch.object(ownership.subprocess, "run", return_value=SimpleNamespace(stdout=listing)):
                 report = ownership.inventory(
-                    {"cSources": ["model.c"], "assemblySources": ["r_entry.s"]},
+                    {
+                        "cSources": ["model.c"],
+                        "assemblySources": ["r_entry.s"],
+                        "sourcePaths": {"c": ["assets/model.c"], "assembly": ["client/r_entry.s"]},
+                    },
                     root / "obj", root, root / "objdump.exe", ["_R_RenderView"], [])
             self.assertFalse(report["completeCallGraph"])
             self.assertEqual(report["summary"]["directlyReachableRendererC"], 1)

@@ -194,7 +194,7 @@ soldier, incoming damage and final health 68. Its uncached server share was 10.1
 That is another workload point, not an isolated experiment on combat versus idle.
 
 The accepted 1,536-byte immutable leaf-query cache is already present in
-[pr_cmds.c](../../quake/src/pr_cmds.c). Across 18 retained off-mode samples, its
+[pr_cmds.c](../../quake/src/server/pr_cmds.c). Across 18 retained off-mode samples, its
 frame-weighted diagnostic gain was 0.387% (0.288–0.493% by workload). It preserves
 target/PVS decisions rather than caching mutable AI state. This is an existing
 improvement, not a new gain from this analysis or a physical-hardware speed claim.

@@ -25,7 +25,7 @@ def read(relative: str) -> str:
 
 class TeleportSplashSourceContractTests(unittest.TestCase):
     def test_i486_source_uses_only_reviewed_integer_and_x87_mnemonics(self) -> None:
-        source = read("src/r_teleportsplashasm.s")
+        source = read("src/renderer/r_teleportsplashasm.s")
         self.assertIn(".arch i486", source, "assembly must declare the target ISA")
         self.assertIn(".arch .387", source, "assembly must declare its x87 requirement")
 
@@ -61,9 +61,9 @@ class TeleportSplashSourceContractTests(unittest.TestCase):
         )
 
     def test_c_oracle_and_guarded_fixture_cover_lattice_and_pool_boundaries(self) -> None:
-        c_source = read("src/r_part.c")
-        fixture = read("src/bench486_teleportsplash.h")
-        host = read("src/host_cmd.c")
+        c_source = read("src/renderer/r_part.c")
+        fixture = read("src/tests/bench486/bench486_teleportsplash.h")
+        host = read("src/core/host_cmd.c")
         for contract in (
             "#define R_TeleportSplash R_TeleportSplash_C",
             "#if !defined(ASM486_TELEPORT_SPLASH) || defined(BENCH486)",
