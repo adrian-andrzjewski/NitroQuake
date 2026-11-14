@@ -73,7 +73,7 @@ foreach ($runner in @('bench-dos.ps1', 'timedemo-dos.ps1', 'smoke-dos.ps1', 'cov
             }
             $checks++
         }
-        $resolved = (& (Join-Path $gameToolsDirectory 'build-dos.ps1') @forwarded -DumpFlags | Out-String) | ConvertFrom-Json
+        $resolved = (& (Join-Path $gameToolsDirectory 'build-dos-experimental.ps1') @forwarded -DumpFlags | Out-String) | ConvertFrom-Json
         foreach ($selector in $script:SelectorTable) {
             if (-not $requested.ContainsKey($selector.Param)) { continue }
             $value = [string]$requested[$selector.Param]

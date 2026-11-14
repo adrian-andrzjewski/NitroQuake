@@ -32,11 +32,13 @@ Native BENCH486 fixtures are optional game test code, not Python orchestration.
 
 ## Integration contracts
 
-The game owns `tools/build-dos.ps1`, its resolved `-DumpFlags` configuration,
-generated build identity, build manifests, native artifacts, and ISA proofs.
-Benchmarking consumes those interfaces and records its own tooling revision
-separately from the game revision. Emulator staging and new measurement output
-belong under `benchmarks/out/`; game compilation output remains under `quake/out/`.
+The game owns `tools/build-dos.ps1` and its two named configurations,
+`i486-release` and `c-reference`, along with resolved `-DumpFlags` output,
+generated build identity, manifests, native artifacts, and ISA proofs. The
+benchmark suite owns per-routine selector and probe controls and calls the game's
+internal `tools/build-dos-experimental.ps1` backend for comparisons. Emulator
+staging and new measurement output belong under `benchmarks/out/`; game
+compilation output remains under `quake/out/`.
 Historical output is an archive and is preserved in place.
 
 The game bootstrap installs only the compiler toolchain. The benchmark bootstrap

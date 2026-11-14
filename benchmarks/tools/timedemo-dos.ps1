@@ -79,7 +79,7 @@ param(
     [ValidateSet('control', 'hoist')]
     [string]$SurfaceBlockMip1IndexHoist = 'hoist',
     # Dead-scratch probe over one edge-scan block; measurement only, never a
-    # candidate.  See build-dos.ps1 for what the probe actually duplicates.
+    # candidate. See build-dos-experimental.ps1 for what the probe actually duplicates.
     [ValidateSet('control', 'entry', 'step', 'trailing', 'emit', 'insert', 'sort', 'newtop', 'leadin', 'insertexit')]
     [string]$EdgeScanProbe = 'control',
     # Dead-scratch probe at the head of the span16 per-segment setup.
@@ -727,7 +727,7 @@ $buildParams = @{
     ToolRoot                             = $ToolRoot
 }
 
-$build = Join-Path $gameToolsDirectory 'build-dos.ps1'
+$build = Join-Path $gameToolsDirectory 'build-dos-experimental.ps1'
 if (-not [string]::IsNullOrWhiteSpace($LocalOutputDirectoryName)) {
     $buildParams['LocalOutputDirectoryName'] = $LocalOutputDirectoryName
 }
@@ -813,7 +813,7 @@ if ((-not $executableExists) -or $staleBuild) {
         if ($staleBuild) {
             throw "Benchmark executable '$benchmarkExe' is stale with respect to the current sources (fingerprint $sourceFingerprint). Rerun without -SkipBuild to rebuild; see ASM486-HANDOFF.md 'the timedemo runner will not rebuild after a source edit'."
         }
-        throw "Benchmark executable not found at '$benchmarkExe'. Run build-dos.ps1 -Benchmark first or omit -SkipBuild."
+        throw "Benchmark executable not found at '$benchmarkExe'. Run this benchmark runner or build-dos-experimental.ps1 first, or omit -SkipBuild."
     }
 
     Write-Host ("Benchmark build is stale (fingerprint {0}); rebuilding." -f $freshness.FingerprintPrefix)

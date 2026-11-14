@@ -179,7 +179,7 @@ def run_batch(args):
     if not pwsh: raise RuntimeError('PowerShell 7 (pwsh) is required')
     params = build_parameters(args)
     resolved = json.loads(subprocess.check_output(
-        [pwsh, '-NoProfile', '-File', str(root/'tools/build-dos.ps1'), *params, '-DumpFlags'], text=True))
+        [pwsh, '-NoProfile', '-File', str(root/'tools/build-dos-experimental.ps1'), *params, '-DumpFlags'], text=True))
     session = dict(schemaVersion=1, status='building', label=args.label, protocol=protocol,
                    startedUtc=datetime.now(timezone.utc).isoformat(),
                    gameRoot=str(root), resolvedBuild=resolved,
@@ -194,7 +194,7 @@ def run_batch(args):
         if not args.skip_build:
             print('Building the benchmark executable and strict ISA proofs...', flush=True)
             session['buildWallSeconds'] = run_process(
-                [pwsh, '-NoProfile', '-File', str(root/'tools/build-dos.ps1'), *params,
+                [pwsh, '-NoProfile', '-File', str(root/'tools/build-dos-experimental.ps1'), *params,
                  *(['-NoBootstrap'] if args.no_bootstrap else [])], output/'build.log', root, args.build_timeout)
         else:
             session['buildWallSeconds'] = 0.0

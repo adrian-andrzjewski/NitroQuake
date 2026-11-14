@@ -118,7 +118,7 @@ if (-not [string]::IsNullOrWhiteSpace($DataRoot)) { $common.DataRoot = $DataRoot
 if (-not [string]::IsNullOrWhiteSpace($ToolRoot)) { $common.ToolRoot = $ToolRoot }
 
 if (-not $SkipBuild) {
-    $build = Join-Path $gameToolsDirectory 'build-dos.ps1'
+    $build = Join-Path $gameToolsDirectory 'build-dos-experimental.ps1'
     # A hashtable splat, not an array of strings.  Array splatting binds
     # POSITIONALLY when the target is a PowerShell script, so the previous
     # @('-Benchmark') did not set the Benchmark switch -- '-Benchmark' was taken

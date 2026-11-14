@@ -42,7 +42,7 @@ if ([Text.Encoding]::ASCII.GetByteCount($commandText) -gt 6000) {
     throw 'Local capture script exceeds the command-buffer budget; reduce Frames or WarmupFrames.'
 }
 $repoRoot=$script:GameRepositoryRoot
-$build=Join-Path $repoRoot 'tools/build-dos.ps1'
+$build=Join-Path $repoRoot 'tools/build-dos-experimental.ps1'
 $params=@{Benchmark=$true;CpuTarget='i486';LocalOutputDirectoryName=$LocalOutputDirectoryName;
     HullCheckImplementation=$HullCheckImplementation;
     TextureSpanTZeroPath=$TextureSpanTZeroPath;TextureSpanTailTZeroPath=$TextureSpanTailTZeroPath}

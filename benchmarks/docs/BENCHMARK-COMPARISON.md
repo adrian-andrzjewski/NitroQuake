@@ -115,7 +115,7 @@ uses the promoted `SurfaceBlockMip0Rows=unroll16`,
 defaults. `unroll16` and the index hoist were bundled with a fully-flat mip-1
 body on 2026-10-02 for 0.0620%; this line previously said `unroll4`, which was
 correct when written and is now two promotions out of date.
-`tools\build-dos.ps1:36-46` is the authority. See
+`tools\build-dos-experimental.ps1` is the authority. See
 `docs/PURE-ASSEMBLER-CANDIDATES.md` for the matched samples and
 correctness evidence behind those promotions.
 

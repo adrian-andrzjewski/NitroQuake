@@ -707,7 +707,7 @@ if ($TextureSpanTailTZeroPath -eq 'zerot' -and $TextureSpanTailStores -ne 'contr
 }
 
 $toolManifest = Read-BenchmarkToolchainManifest -ToolsDirectory $PSScriptRoot
-$build = Join-Path $gameToolsDirectory 'build-dos.ps1'
+$build = Join-Path $gameToolsDirectory 'build-dos-experimental.ps1'
 if (-not [string]::IsNullOrWhiteSpace($LocalOutputDirectoryName) -and $SkipIsaAudit) {
     throw '-LocalOutputDirectoryName requires the normal i486 ISA audit; it cannot be combined with -SkipIsaAudit.'
 }
@@ -879,7 +879,7 @@ if ((-not $executableExists) -or $staleBuild) {
         if ($staleBuild) {
             throw "Benchmark executable '$benchmarkExe' is stale with respect to the current sources (fingerprint $sourceFingerprint). Rerun without -SkipBuild to rebuild."
         }
-        throw "Benchmark executable not found at '$benchmarkExe'. Run build-dos.ps1 -Benchmark first or omit -SkipBuild."
+        throw "Benchmark executable not found at '$benchmarkExe'. Run this benchmark runner or build-dos-experimental.ps1 first, or omit -SkipBuild."
     }
 
     if ($staleBuild) {

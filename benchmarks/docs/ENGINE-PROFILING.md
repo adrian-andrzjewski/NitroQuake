@@ -10,8 +10,8 @@ It does not measure physical Intel 486 pipeline cycles or cache misses.
 From the workspace root, choose fresh native output names and a fresh session:
 
 ```powershell
-pwsh -NoProfile -File quake/tools/build-dos.ps1 -Benchmark -CpuTarget i486 -NoBootstrap -LocalOutputDirectoryName engine-control
-pwsh -NoProfile -File quake/tools/build-dos.ps1 -Benchmark -Instrumentation -CpuTarget i486 -NoBootstrap -LocalOutputDirectoryName engine-profile
+pwsh -NoProfile -File quake/tools/build-dos-experimental.ps1 -Benchmark -CpuTarget i486 -NoBootstrap -LocalOutputDirectoryName engine-control
+pwsh -NoProfile -File quake/tools/build-dos-experimental.ps1 -Benchmark -Instrumentation -CpuTarget i486 -NoBootstrap -LocalOutputDirectoryName engine-profile
 python benchmarks/tools/profile-engine.py --control-build engine-control --profile-build engine-profile --output benchmarks/out/engine-profile-session
 python benchmarks/tools/analyze-engine-profiles.py benchmarks/out/engine-profile-session
 ```

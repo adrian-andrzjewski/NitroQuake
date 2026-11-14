@@ -26,8 +26,8 @@
     this project.
 
 .NOTES
-    The linked executable is stripped by the build (build-dos.ps1:522 passes
-    -s), so per-function attribution is impossible from the image. Linked-image
+    The linked executable is stripped by the build (build-dos-experimental.ps1
+    passes -s), so per-function attribution is impossible from the image. Linked-image
     facts are therefore exact but coarse (.text total, x87 total); per-path x87
     accounting is done against the assembler sources, where labels and line
     numbers exist.
@@ -133,7 +133,7 @@ if (-not (Test-Path -LiteralPath $Objdump -PathType Leaf)) {
 
 if ([string]::IsNullOrWhiteSpace($Executable)) {
     # Never pick a recent binary from an archived experiment or nested worktree.
-    $resolved = (& (Join-Path $gameToolsDirectory 'build-dos.ps1') -Benchmark -DumpFlags | Out-String) | ConvertFrom-Json
+    $resolved = (& (Join-Path $gameToolsDirectory 'build-dos-experimental.ps1') -Benchmark -DumpFlags | Out-String) | ConvertFrom-Json
     $Executable = [string]$resolved.executable
 }
 $Executable = Resolve-InputPath $Executable
@@ -341,7 +341,7 @@ foreach ($line in $disasmLines) {
 # ---------------------------------------------------------------------------
 # Section 1b - per-object x87 accounting from the retained .obj files.
 #
-# The linked image is stripped (build-dos.ps1:522 passes -s), so objdump -d on
+# The linked image is stripped (build-dos-experimental.ps1 passes -s), so objdump -d on
 # it reports no symbols and every function is anonymous. The objects are
 # retained next to the executable, and an unstripped .obj disassembles with
 # its symbol table intact, which is what makes per-function attribution

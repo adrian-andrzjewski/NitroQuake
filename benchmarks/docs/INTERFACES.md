@@ -2,11 +2,14 @@
 
 ## Native build API
 
-The game owns `tools/build-dos.ps1 -DumpFlags`: JSON describing resolved selectors,
-flags, sources, executable, object directory and build manifest. Runners invoke
-the same builder to compile and use the game-owned `tools/common.ps1` API for
-selector verification, freshness and source-bound ISA proofs. The suite imports
-the game API; the game never imports the suite.
+The game owns `tools/build-dos.ps1 -DumpFlags`: JSON describing resolved flags,
+sources, executable, object directory and build manifest for the selected
+`i486-release` or `c-reference` configuration. Runners use this stable builder
+for supported configurations and the game-owned `tools/common.ps1` API for
+selector verification, freshness and source-bound ISA proofs. Benchmark runners
+send per-routine comparisons and probes to the internal
+`tools/build-dos-experimental.ps1` backend. The suite imports the game API; the
+game never imports the suite.
 
 Build identity comes from the game's full Git history and optimization ledger.
 Moving tooling does not count as an optimization attempt. Product identity and

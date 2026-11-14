@@ -27,7 +27,7 @@ was preserved byte for byte and is excluded from the video change.
 ## Build and focused checks
 
 - Normal DJGPP build: `tools/build-dos.ps1 -NoBootstrap` passed.
-- Benchmark build: `tools/build-dos.ps1 -Benchmark -DynamicLightImplementation asm -NoBootstrap` passed.
+- Benchmark build: `tools/build-dos-experimental.ps1 -Benchmark -DynamicLightImplementation asm -NoBootstrap` passed.
   Use Windows PowerShell 5.1, as documented in BUILD-DOS.md.
 - `tools/smoke-dos.ps1 -NoBootstrap -SkipBuild` passed.
 - `python tools/test-video-dos.py` passed with native GCC. It compiles the
@@ -73,7 +73,7 @@ The same legal Steam `id1`, `demo1`, CWSDPMI, executable, and compiler flags
 are used for both backends. The forced VGA command adds only `-stdvid`.
 
 ```powershell
-./tools/build-dos.ps1 -Benchmark -DynamicLightImplementation asm -NoBootstrap
+./tools/build-dos-experimental.ps1 -Benchmark -DynamicLightImplementation asm -NoBootstrap
 ./tools/timedemo-dos.ps1 -NoBootstrap -SkipBuild -DynamicLightImplementation asm -Runs 3 -NoFpsStats
 ./tools/timedemo-dos.ps1 -NoBootstrap -SkipBuild -DynamicLightImplementation asm -Runs 3 -NoFpsStats -QuakeExtraArgs '-stdvid'
 ```

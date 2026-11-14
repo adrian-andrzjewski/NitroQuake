@@ -58,7 +58,7 @@ def verify(args):
     if not compiler.is_file():
         raise ValueError('Install the game compiler toolchain before running the fixture')
     resolved = json.loads(subprocess.run([
-        pwsh, '-NoProfile', '-File', str(candidate / 'tools/build-dos.ps1'),
+        pwsh, '-NoProfile', '-File', str(candidate / 'tools/build-dos-experimental.ps1'),
         '-Benchmark', '-CpuTarget', 'i486', '-LocalOutputDirectoryName', 'qc-fixture', '-DumpFlags'],
         check=True, capture_output=True, text=True).stdout)
     flags = resolved['cFlags'] + resolved.get('cSourceExtraFlags', {}).get('pr_exec.c', [])

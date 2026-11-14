@@ -54,7 +54,7 @@ param(
     [string]$AliasClipImplementation = 'c',
     [ValidateSet('c', 'asm')]
     [string]$AliasClipZImplementation = 'c',
-    # 'asm' to match build-dos.ps1, bench-dos.ps1 and timedemo-dos.ps1.  This
+    # 'asm' to match build-dos-experimental.ps1, bench-dos.ps1 and timedemo-dos.ps1.  This
     # used to be 'c', and because this runner computed the profile suffix itself
     # it then looked for out\dos-memasm-...-fusedlightmapasm\quake.exe while the
     # release build lives in out\dos-memasm-...-fusedlightmapasm-dlightasm\.
@@ -378,7 +378,7 @@ if ($TextureSpanTailTZeroPath -eq 'zerot' -and $TextureSpanTailStores -ne 'contr
 }
 
 $toolManifest = Read-BenchmarkToolchainManifest -ToolsDirectory $PSScriptRoot
-$build = Join-Path $gameToolsDirectory 'build-dos.ps1'
+$build = Join-Path $gameToolsDirectory 'build-dos-experimental.ps1'
 $buildParams = @{
     ToolRoot = $ToolRoot
     CpuTarget = $CpuTarget
@@ -513,7 +513,7 @@ if ((-not $freshness.Exists) -or $freshness.Stale) {
         if ($freshness.Stale) {
             throw "DOS executable '$djgppExe' is stale with respect to the current sources (fingerprint $sourceFingerprint). Rerun without -SkipBuild to rebuild."
         }
-        throw "DOS executable not found at '$djgppExe'. Run build-dos.ps1 first or omit -SkipBuild."
+        throw "DOS executable not found at '$djgppExe'. Run smoke-dos.ps1 without -SkipBuild."
     }
     if ($freshness.Stale) {
         Write-Host ("Release build is stale (fingerprint {0}); rebuilding." -f $freshness.FingerprintPrefix)

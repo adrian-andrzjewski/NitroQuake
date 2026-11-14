@@ -139,23 +139,22 @@ running, benchmarking, and interpreting the results.
 
 ## The i386 target, and what it is and is not
 
-`build-dos.ps1` has a `-CpuTarget i486|i386` switch.  `i486` is the default and
-the retained release profile; `i386` is a separate codepath with its own output
-tree, its own object directory, its own executable, and its own manifest.  The
-two can never collide, and `build-dos.ps1` asserts that before it compiles or
-deletes anything.
+The supported builder exposes two configurations: `i486-release` and
+`c-reference`. The optional `-CpuTarget i386` is valid with `c-reference`; its
+output tree, object directory, executable, and manifest remain separate from
+the i486 build. The builder checks those paths before it compiles or deletes
+anything.
 
 ```powershell
-.\tools\build-dos.ps1 -Clean -CpuTarget i386 -NoBootstrap
+.\tools\build-dos.ps1 -Clean -Configuration c-reference -CpuTarget i386 -NoBootstrap
 .\tools\smoke-dos.ps1   -CpuTarget i386 -SkipBuild -TimeoutSeconds 90
 .\tools\bench-dos.ps1   -CpuTarget i386
 .\tools\timedemo-dos.ps1 -CpuTarget i386 -Runs 3
 ```
 
-The i386 build writes to `out\dos-i386-memasm-zneg4-...`, builds with
-`-march=i386 -mtune=i386`, and additionally defines `TARGET_I386` for both the C
-and the assembly compiler.  `TARGET_I386` is the only selector that differs, and
-it is used in exactly three files.
+The i386 C-reference build uses `-march=i386 -mtune=i386` and defines
+`TARGET_I386` for both the C and assembly compilers. Benchmark runners can still
+select experimental combinations when measuring a specific routine.
 
 ### Read this before calling it a 386 binary
 
@@ -286,7 +285,7 @@ The i486 release is pinned three ways, and all three are checked by
   itself, `smoke-dos.ps1 -SkipBuild` looked for
   `out\dos-memasm-...-fusedlightmapasm\quake.exe` while the release build lives
   in `out\dos-memasm-...-fusedlightmapasm-dlightasm\` — so it was not testing the
-  release binary.  All three runners now ask `build-dos.ps1 -DumpFlags` where the
+  release binary. All three runners now ask `build-dos-experimental.ps1 -DumpFlags` where the
   output is instead of recomputing it, which is what made the divergence visible.
 * `bench-dos.ps1` rebuilt only when `qbench.exe` was *missing*, with no source
   fingerprint, so an existing binary was benchmarked indefinitely regardless of
@@ -297,7 +296,7 @@ The i486 release is pinned three ways, and all three are checked by
 ### The fingerprint, and who records it
 
 All four runners hash the sources plus the builder's resolved configuration before
-testing an executable, and `build-dos.ps1` records that hash after a successful
+testing an executable, and the builder records that hash after a successful
 link.  Three details are load-bearing.
 
 The hash covers the resolved configuration — the profile suffix, both flag lists,
@@ -449,7 +448,7 @@ cost a cycle:
 ### `-SpanSetupProbe` — the span16 per-segment setup (2026-10-02)
 
 ```powershell
-.\tools\build-dos.ps1 -Benchmark -NoBootstrap -SpanSetupProbe setup
+.\tools\build-dos-experimental.ps1 -Benchmark -NoBootstrap -SpanSetupProbe setup
 .\tools\timedemo-dos.ps1 -NoBootstrap -Runs 1 -NoFpsStats -SpanSetupProbe setup
 ```
 
@@ -473,7 +472,7 @@ See `docs/ledger/2026-10-02-edge-scan-and-texture-spans.md`, under "The span16 p
 ### `-RenderFaceProbe` — the same switch for C, and two C-only traps (2026-10-02)
 
 ```powershell
-.\tools\build-dos.ps1 -Benchmark -NoBootstrap -RenderFaceProbe prologue
+.\tools\build-dos-experimental.ps1 -Benchmark -NoBootstrap -RenderFaceProbe prologue
 .\tools\timedemo-dos.ps1 -NoBootstrap -Runs 1 -NoFpsStats -RenderFaceProbe prologue
 ```
 
@@ -528,7 +527,7 @@ fusion is measured at 0.0000%".
 ### `-EdgeScanProbe` — dead-scratch measurement switch, never a candidate (2026-10-02)
 
 ```powershell
-.\tools\build-dos.ps1 -Benchmark -NoBootstrap -EdgeScanProbe entry
+.\tools\build-dos-experimental.ps1 -Benchmark -NoBootstrap -EdgeScanProbe entry
 .\tools\timedemo-dos.ps1 -NoBootstrap -Runs 1 -NoFpsStats -EdgeScanProbe entry
 ```
 
@@ -671,8 +670,8 @@ only 386 integer instructions in its orchestration. The C implementation stays
 available as `D_RasterizeAliasPolySmooth_C`.
 
 ~~~powershell
-.\tools\build-dos.ps1 -AliasRasterizeImplementation c
-.\tools\build-dos.ps1 -AliasRasterizeImplementation asm
+.\tools\build-dos-experimental.ps1 -AliasRasterizeImplementation c
+.\tools\build-dos-experimental.ps1 -AliasRasterizeImplementation asm
 .\tools\render-parity-dos.ps1 `
   -ReferenceProfile .\tools\renderer-profiles\i486-c-reference.json `
   -CandidateProfile .\tools\renderer-profiles\i486-asm-alias-rasterize.json `
@@ -709,8 +708,8 @@ entry points through the hand-written 486 routines without changing the C
 reference bodies.  Select it at build time:
 
 ~~~powershell
-.\tools\build-dos.ps1 -Benchmark -MemoryImplementation c
-.\tools\build-dos.ps1 -Benchmark -MemoryImplementation asm
+.\tools\build-dos-experimental.ps1 -Benchmark -MemoryImplementation c
+.\tools\build-dos-experimental.ps1 -Benchmark -MemoryImplementation asm
 ~~~
 
 `asm` is now the 486-oriented default and writes to `out\dos-memasm`; `c`
@@ -724,8 +723,8 @@ The texture-axis cache-key probe is independently selectable with
 `-TextureAxisImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -Benchmark -TextureAxisImplementation c
-.\tools\build-dos.ps1 -Benchmark -TextureAxisImplementation asm
+.\tools\build-dos-experimental.ps1 -Benchmark -TextureAxisImplementation c
+.\tools\build-dos-experimental.ps1 -Benchmark -TextureAxisImplementation asm
 ~~~
 
 `c` is the default and shares `out\dos`; `asm` writes to `out\dos-axisasm`.
@@ -736,8 +735,8 @@ The surface-cache miss-path and allocator assembly are selectable with
 `-SurfaceCacheImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -Benchmark -SurfaceCacheImplementation c
-.\tools\build-dos.ps1 -Benchmark -SurfaceCacheImplementation asm
+.\tools\build-dos-experimental.ps1 -Benchmark -SurfaceCacheImplementation c
+.\tools\build-dos-experimental.ps1 -Benchmark -SurfaceCacheImplementation asm
 ~~~
 
 `c` is the default and shares `out\dos`; `asm` writes to
@@ -754,8 +753,8 @@ The complete `R_TextureAnimation` entry is selectable with
 `-TextureAnimationImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -TextureAnimationImplementation c
-.\tools\build-dos.ps1 -TextureAnimationImplementation asm
+.\tools\build-dos-experimental.ps1 -TextureAnimationImplementation c
+.\tools\build-dos-experimental.ps1 -TextureAnimationImplementation asm
 .\tools\bench-dos.ps1 -TextureAnimationImplementation asm -TextureAnimationOnly
 .\tools\smoke-dos.ps1 -TextureAnimationImplementation asm
 .\tools\timedemo-dos.ps1 -TextureAnimationImplementation asm -Runs 1
@@ -773,8 +772,8 @@ The mip-level threshold selector is independently selectable with
 `-MipLevelImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -Benchmark -MipLevelImplementation c
-.\tools\build-dos.ps1 -Benchmark -MipLevelImplementation asm
+.\tools\build-dos-experimental.ps1 -Benchmark -MipLevelImplementation c
+.\tools\build-dos-experimental.ps1 -Benchmark -MipLevelImplementation asm
 .\tools\bench-dos.ps1 -MipLevelImplementation asm -MipLevelOnly
 .\tools\smoke-dos.ps1 -MipLevelImplementation asm
 ~~~
@@ -789,9 +788,9 @@ The turbulent-span store loop is independently selectable with
 `-TurbulentImplementation c|asm|stosb`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -Benchmark -TurbulentImplementation c
-.\tools\build-dos.ps1 -Benchmark -TurbulentImplementation asm
-.\tools\build-dos.ps1 -Benchmark -TurbulentImplementation stosb
+.\tools\build-dos-experimental.ps1 -Benchmark -TurbulentImplementation c
+.\tools\build-dos-experimental.ps1 -Benchmark -TurbulentImplementation asm
+.\tools\build-dos-experimental.ps1 -Benchmark -TurbulentImplementation stosb
 ~~~
 
 `stosb` is the measured target default, `asm` is the existing 486 assembly
@@ -804,8 +803,8 @@ The `Turbulent8` scan setup and interpolation are independently selectable with
 `-TurbulentScanImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -TurbulentScanImplementation c
-.\tools\build-dos.ps1 -TurbulentScanImplementation asm
+.\tools\build-dos-experimental.ps1 -TurbulentScanImplementation c
+.\tools\build-dos-experimental.ps1 -TurbulentScanImplementation asm
 ~~~
 
 `c` is the default and retains the full C entry point. `asm` selects the
@@ -818,8 +817,8 @@ The surface-level `R_BuildLightMap` dispatcher is selectable with
 `-LightMapBuildImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -LightMapBuildImplementation c
-.\tools\build-dos.ps1 -LightMapBuildImplementation asm
+.\tools\build-dos-experimental.ps1 -LightMapBuildImplementation c
+.\tools\build-dos-experimental.ps1 -LightMapBuildImplementation asm
 .\tools\bench-dos.ps1 -LightMapBuildImplementation asm -LightMapBuildOnly
 ~~~
 
@@ -833,8 +832,8 @@ The sparse dynamic-light orchestration is independently selectable with
 `-DynamicLightOrchestrationImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -DynamicLightOrchestrationImplementation c
-.\tools\build-dos.ps1 -DynamicLightOrchestrationImplementation asm
+.\tools\build-dos-experimental.ps1 -DynamicLightOrchestrationImplementation c
+.\tools\build-dos-experimental.ps1 -DynamicLightOrchestrationImplementation asm
 .\tools\bench-dos.ps1 -DynamicLightOrchestrationImplementation asm -LightMapBuildImplementation asm -LightMapBuildOnly
 ~~~
 
@@ -849,8 +848,8 @@ The surface-cache dynamic-light predicate is independently selectable with
 `-DlightContributesImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -DlightContributesImplementation c
-.\tools\build-dos.ps1 -DlightContributesImplementation asm
+.\tools\build-dos-experimental.ps1 -DlightContributesImplementation c
+.\tools\build-dos-experimental.ps1 -DlightContributesImplementation asm
 .\tools\bench-dos.ps1 -DlightContributesImplementation asm -LightMapBuildImplementation asm -LightMapBuildOnly
 ~~~
 
@@ -866,8 +865,8 @@ This selector covers the 32 light-slot deadline/radius checks and dispatches
 eligible lights through the independently selected `MarkLightsImplementation`.
 
 ~~~powershell
-.\tools\build-dos.ps1 -DynamicLightPushImplementation c
-.\tools\build-dos.ps1 -DynamicLightPushImplementation asm
+.\tools\build-dos-experimental.ps1 -DynamicLightPushImplementation c
+.\tools\build-dos-experimental.ps1 -DynamicLightPushImplementation asm
 .\tools\bench-dos.ps1 -NoBootstrap -DynamicLightPushImplementation asm -MarkLightsImplementation c -LightMapBuildOnly
 ~~~
 
@@ -885,8 +884,8 @@ The sprite setup routine `R_SetupAndDrawSprite` has an independent
 assembly path; i386 and explicit `c` builds use the C reference.
 
 ~~~powershell
-.\tools\build-dos.ps1 -SpriteSetupImplementation c
-.\tools\build-dos.ps1 -SpriteSetupImplementation asm
+.\tools\build-dos-experimental.ps1 -SpriteSetupImplementation c
+.\tools\build-dos-experimental.ps1 -SpriteSetupImplementation asm
 .\tools\bench-dos.ps1 -NoBootstrap -SpriteSetupImplementation asm -SpriteSetupOnly
 ~~~
 
@@ -901,8 +900,8 @@ The sprite draw entry `D_DrawSprite` has a separate
 assembly; i386 and explicit `c` builds use C.
 
 ~~~powershell
-.\tools\build-dos.ps1 -SpriteDrawImplementation c
-.\tools\build-dos.ps1 -SpriteDrawImplementation asm
+.\tools\build-dos-experimental.ps1 -SpriteDrawImplementation c
+.\tools\build-dos-experimental.ps1 -SpriteDrawImplementation asm
 .\tools\bench-dos.ps1 -NoBootstrap -SpriteDrawImplementation asm -SpriteDrawOnly
 ~~~
 
@@ -920,8 +919,8 @@ The animated sprite-frame resolver `R_GetSpriteframe` has an independent
 i386 and explicit `c` builds use the C reference.
 
 ~~~powershell
-.\tools\build-dos.ps1 -SpriteFrameImplementation c
-.\tools\build-dos.ps1 -SpriteFrameImplementation asm
+.\tools\build-dos-experimental.ps1 -SpriteFrameImplementation c
+.\tools\build-dos-experimental.ps1 -SpriteFrameImplementation asm
 .\tools\bench-dos.ps1 -NoBootstrap -SpriteFrameImplementation asm -SpriteFrameOnly
 ~~~
 
@@ -936,8 +935,8 @@ hit check, key loads, miss-path metadata, texture/style tags, allocator,
 attachment, draw dispatch, and dynamic-light tag update:
 
 ~~~powershell
-.\tools\build-dos.ps1 -SurfaceCacheImplementation c
-.\tools\build-dos.ps1 -SurfaceCacheImplementation asm
+.\tools\build-dos-experimental.ps1 -SurfaceCacheImplementation c
+.\tools\build-dos-experimental.ps1 -SurfaceCacheImplementation asm
 .\tools\bench-dos.ps1 -SurfaceCacheImplementation asm -SurfaceCacheOnly
 .\tools\smoke-dos.ps1 -SurfaceCacheImplementation asm
 .\tools\timedemo-dos.ps1 -SurfaceCacheImplementation asm -Runs 1
@@ -967,8 +966,8 @@ The full surface draw setup is selectable independently with
 `-SurfaceDrawImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -SurfaceDrawImplementation c
-.\tools\build-dos.ps1 -SurfaceDrawImplementation asm
+.\tools\build-dos-experimental.ps1 -SurfaceDrawImplementation c
+.\tools\build-dos-experimental.ps1 -SurfaceDrawImplementation asm
 .\tools\bench-dos.ps1 -SurfaceDrawImplementation asm -SurfaceDrawOnly
 .\tools\smoke-dos.ps1 -SurfaceDrawImplementation asm
 .\tools\timedemo-dos.ps1 -SurfaceDrawImplementation asm -Runs 1
@@ -987,8 +986,8 @@ The per-face Z-gradient setup is selectable with
 `-SurfaceZGradientImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -SurfaceZGradientImplementation c
-.\tools\build-dos.ps1 -SurfaceZGradientImplementation asm
+.\tools\build-dos-experimental.ps1 -SurfaceZGradientImplementation c
+.\tools\build-dos-experimental.ps1 -SurfaceZGradientImplementation asm
 .\tools\bench-dos.ps1 -SurfaceZGradientImplementation asm -SurfaceZGradientOnly
 .\tools\smoke-dos.ps1 -SurfaceZGradientImplementation asm
 .\tools\timedemo-dos.ps1 -SurfaceZGradientImplementation asm -Runs 1
@@ -1006,8 +1005,8 @@ single timing is not a speed comparison.
 `-SurfaceGradientImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -SurfaceGradientImplementation c
-.\tools\build-dos.ps1 -SurfaceGradientImplementation asm
+.\tools\build-dos-experimental.ps1 -SurfaceGradientImplementation c
+.\tools\build-dos-experimental.ps1 -SurfaceGradientImplementation asm
 .\tools\bench-dos.ps1 -SurfaceGradientImplementation asm -SurfaceGradientOnly
 .\tools\smoke-dos.ps1 -SurfaceGradientImplementation asm
 .\tools\timedemo-dos.ps1 -SurfaceGradientImplementation asm -Runs 1
@@ -1027,8 +1026,8 @@ The per-frame `D_DrawSurfaces` dispatcher is selectable with
 `-SurfaceDispatcherImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -SurfaceDispatcherImplementation c
-.\tools\build-dos.ps1 -SurfaceDispatcherImplementation asm
+.\tools\build-dos-experimental.ps1 -SurfaceDispatcherImplementation c
+.\tools\build-dos-experimental.ps1 -SurfaceDispatcherImplementation asm
 .\tools\smoke-dos.ps1 -SurfaceDispatcherImplementation asm
 .\tools\timedemo-dos.ps1 -SurfaceDispatcherImplementation asm -Runs 1
 ~~~
@@ -1049,10 +1048,10 @@ The 16-pixel texture-span store loop is independently selectable with
 `-TextureSpanStores word|byte|dword|loop`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -Benchmark -TextureSpanStores word
-.\tools\build-dos.ps1 -Benchmark -TextureSpanStores byte
-.\tools\build-dos.ps1 -Benchmark -TextureSpanStores dword
-.\tools\build-dos.ps1 -Benchmark -TextureSpanStores loop
+.\tools\build-dos-experimental.ps1 -Benchmark -TextureSpanStores word
+.\tools\build-dos-experimental.ps1 -Benchmark -TextureSpanStores byte
+.\tools\build-dos-experimental.ps1 -Benchmark -TextureSpanStores dword
+.\tools\build-dos-experimental.ps1 -Benchmark -TextureSpanStores loop
 ~~~
 
 The old negative-gradient Z-span unroll selector has been retired with the
@@ -1213,7 +1212,7 @@ copying executables:
 It stages a fresh DOS directory for every run, hardlinking `pak*.pak` from
 `testdata\id1` instead of copying them, so `out\` stays small, writes six-decimal
 timing data, and reports the median FPS.  The runner only compiles `qbench.exe` when that
-file is missing; after source changes run `.\tools\build-dos.ps1 -Benchmark`
+file is missing; after source changes run `.\tools\build-dos-experimental.ps1 -Benchmark`
 first, then `timedemo-dos.ps1 -SkipBuild`.  Keep the demo name, DOSBox-X
 version, 486 profile, fixed cycle count, video mode, optimization profile, and
 command-line options unchanged when comparing results.  By default it adds `-fpsstats`, preserving
@@ -1749,7 +1748,7 @@ The renderer's per-frame texture-axis cache can be screened at 64, 128, or
 build directory:
 
 ~~~powershell
-.\tools\build-dos.ps1 -Benchmark -TextureAxisCacheEntries 128
+.\tools\build-dos-experimental.ps1 -Benchmark -TextureAxisCacheEntries 128
 .\tools\timedemo-dos.ps1 -TextureAxisCacheEntries 128 -Runs 3
 ~~~
 
@@ -1791,7 +1790,7 @@ Build an isolated, DOS 8.3-compatible benchmark executable so the normal
 `quake.exe` is not overwritten:
 
 ~~~powershell
-.\tools\build-dos.ps1 -Benchmark
+.\tools\build-dos-experimental.ps1 -Benchmark
 ~~~
 
 With Quake data available, the repository runner can stage and execute the
@@ -1857,7 +1856,7 @@ frame-local polygon queue, dispatches the selected BSP walk, and replays queued
 polygons when requested. Use the same selector for build, smoke, and timedemo:
 
 ~~~powershell
-.\tools\build-dos.ps1 -RenderWorldImplementation asm
+.\tools\build-dos-experimental.ps1 -RenderWorldImplementation asm
 .\tools\smoke-dos.ps1 -RenderWorldImplementation asm
 .\tools\timedemo-dos.ps1 -RenderWorldImplementation asm -Runs 1
 ~~~
@@ -1875,7 +1874,7 @@ polygon-driver branch; normal DOS span rendering leaves `r_drawpolys=0` and
 Validate this selector with DOS smoke and the pinned timedemo:
 
 ~~~powershell
-.\tools\build-dos.ps1 -BspWalkImplementation asm
+.\tools\build-dos-experimental.ps1 -BspWalkImplementation asm
 .\tools\smoke-dos.ps1 -BspWalkImplementation asm
 .\tools\timedemo-dos.ps1 -BspWalkImplementation asm -Runs 1
 ~~~
@@ -1884,7 +1883,7 @@ The world `R_RenderFace` path is independently selectable with
 `-RenderFaceImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -RenderFaceImplementation asm
+.\tools\build-dos-experimental.ps1 -RenderFaceImplementation asm
 .\tools\smoke-dos.ps1 -RenderFaceImplementation asm
 .\tools\timedemo-dos.ps1 -RenderFaceImplementation asm -Runs 1
 ~~~
@@ -1901,7 +1900,7 @@ Brush-model face setup is selectable with
 `-RenderBmodelFaceImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -RenderBmodelFaceImplementation asm
+.\tools\build-dos-experimental.ps1 -RenderBmodelFaceImplementation asm
 .\tools\smoke-dos.ps1 -RenderBmodelFaceImplementation asm
 .\tools\timedemo-dos.ps1 -RenderBmodelFaceImplementation asm -Runs 1
 ~~~
@@ -1920,7 +1919,7 @@ Cached-edge insertion is independently selectable with
 `-EmitCachedEdgeImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -EmitCachedEdgeImplementation asm
+.\tools\build-dos-experimental.ps1 -EmitCachedEdgeImplementation asm
 .\tools\smoke-dos.ps1 -EmitCachedEdgeImplementation asm
 .\tools\timedemo-dos.ps1 -EmitCachedEdgeImplementation asm -Runs 1
 ~~~
@@ -1936,7 +1935,7 @@ Submodel surface traversal is independently selectable with
 `-SubmodelPolygonsImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -SubmodelPolygonsImplementation asm
+.\tools\build-dos-experimental.ps1 -SubmodelPolygonsImplementation asm
 .\tools\smoke-dos.ps1 -SubmodelPolygonsImplementation asm
 .\tools\timedemo-dos.ps1 -SubmodelPolygonsImplementation asm -Runs 1
 ~~~
@@ -1953,7 +1952,7 @@ The optional Z-only brush-submodel polygon pass has its own selector,
 `-ZSubmodelPolygonsImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -ZSubmodelPolygonsImplementation asm
+.\tools\build-dos-experimental.ps1 -ZSubmodelPolygonsImplementation asm
 .\tools\smoke-dos.ps1 -ZSubmodelPolygonsImplementation asm
 .\tools\timedemo-dos.ps1 -ZSubmodelPolygonsImplementation asm -Runs 1
 ~~~
@@ -1975,7 +1974,7 @@ Frame-level edge drawing is independently selectable with
 `-EdgeDrawingImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -EdgeDrawingImplementation asm
+.\tools\build-dos-experimental.ps1 -EdgeDrawingImplementation asm
 .\tools\smoke-dos.ps1 -EdgeDrawingImplementation asm
 .\tools\timedemo-dos.ps1 -EdgeDrawingImplementation asm -Runs 1
 ~~~
@@ -1991,7 +1990,7 @@ The scanline edge loop is independently selectable with
 `-ScanEdgesImplementation c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -ScanEdgesImplementation asm
+.\tools\build-dos-experimental.ps1 -ScanEdgesImplementation asm
 .\tools\smoke-dos.ps1 -ScanEdgesImplementation asm
 .\tools\timedemo-dos.ps1 -ScanEdgesImplementation asm -Runs 1
 ~~~
@@ -2006,7 +2005,7 @@ Active-edge maintenance has three selectable choices with
 `-EdgeListMaintenanceImplementation legacy|c|asm`:
 
 ~~~powershell
-.\tools\build-dos.ps1 -EdgeListMaintenanceImplementation c
+.\tools\build-dos-experimental.ps1 -EdgeListMaintenanceImplementation c
 .\tools\smoke-dos.ps1 -EdgeListMaintenanceImplementation asm
 .\tools\timedemo-dos.ps1 -EdgeListMaintenanceImplementation asm -Runs 1
 ~~~
@@ -2028,7 +2027,7 @@ The default build is the measured `aggressive` profile (`-O3`,
 available for A/B comparison and writes beside the default build:
 
 ~~~powershell
-.\tools\build-dos.ps1 -Benchmark -OptimizationProfile baseline
+.\tools\build-dos-experimental.ps1 -Benchmark -OptimizationProfile baseline
 .\tools\timedemo-dos.ps1 -OptimizationProfile baseline -Runs 3
 ~~~
 

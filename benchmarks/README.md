@@ -5,6 +5,10 @@ Core parsing, fixture generation and comparisons use Python's standard library.
 The optional chart command additionally needs Matplotlib; install it in a local
 virtual environment using `python -m pip install -r requirements-charts.txt`.
 The game builder has its own compiler manifest and no Matplotlib dependency.
+The game exposes two supported DOS configurations, `i486-release` and
+`c-reference`. Per-routine selector combinations, experimental variants and
+dead-scratch probes belong to this benchmark suite and are forwarded to the
+game's internal selector-driven build backend.
 
 For per-frame FPS/time graphs across demo1, demo2 and demo3, see the
 [frame timeline workflow](docs/FRAME-TIMING.md):

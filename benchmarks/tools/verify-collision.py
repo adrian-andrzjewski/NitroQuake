@@ -61,7 +61,7 @@ def verify(args):
     if not compiler.is_file():
         raise ValueError('Install the pinned game compiler toolchain before running this fixture')
     resolved = json.loads(subprocess.run([
-        pwsh, '-NoProfile', '-File', str(candidate / 'tools/build-dos.ps1'), '-Benchmark',
+        pwsh, '-NoProfile', '-File', str(candidate / 'tools/build-dos-experimental.ps1'), '-Benchmark',
         '-CpuTarget', 'i486', '-LocalOutputDirectoryName', 'collision-fixture', '-DumpFlags'],
         check=True, capture_output=True, text=True).stdout)
     cflags = resolved['cFlags'] + resolved.get('cSourceExtraFlags', {}).get('world.c', [])

@@ -81,7 +81,7 @@ if ([string]::IsNullOrWhiteSpace($NitroExecutable)) {
         [Guid]::NewGuid().ToString('N').Substring(0, 6)
     $buildScript = Join-Path $gameRoot 'tools/build-dos.ps1'
     Write-Host "Building the i486 NitroQuake executable ($gameBuildName)."
-    & $buildScript -CpuTarget i486 -LocalOutputDirectoryName $gameBuildName -ToolRoot $ToolRoot
+    & $buildScript -Configuration i486-release -CpuTarget i486 -LocalOutputDirectoryName $gameBuildName -ToolRoot $ToolRoot
     $NitroExecutable = Join-Path $gameRoot ("out/local-{0}/quake.exe" -f $gameBuildName)
 } else {
     $NitroExecutable = [IO.Path]::GetFullPath($NitroExecutable)

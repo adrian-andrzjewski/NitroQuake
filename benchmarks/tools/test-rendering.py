@@ -58,6 +58,11 @@ def load_json(text: str) -> dict:
     return document
 
 
+def read_runner(runner_name: str) -> str:
+    root = ROOT if runner_name in ("build-dos-experimental.ps1", "selectors.ps1") else BENCHMARK_ROOT
+    return (root / "tools" / runner_name).read_text(encoding="utf-8")
+
+
 def make_pcx(path: Path, width: int, height: int, pixels: bytes, palette: bytes) -> None:
     assert len(pixels) == width * height
     assert len(palette) == 768
@@ -1505,8 +1510,8 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("[switch]$LineGraphOnly", bench_runner)
         self.assertIn("$LineGraphOnly -and $LineGraphImplementation -ne 'asm'", bench_runner)
         self.assertIn("+bench486 -benchlinegraph -benchexit", bench_runner)
-        for runner_name in ("build-dos.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+        for runner_name in ("build-dos-experimental.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -1628,8 +1633,8 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("$AliasStatsOnly -and $AliasStatsImplementation -ne 'asm'", bench_runner)
         self.assertIn("+bench486 -benchaliasstats -benchexit", bench_runner)
 
-        for runner_name in ("build-dos.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+        for runner_name in ("build-dos-experimental.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -1734,8 +1739,8 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("$PrintTimesOnly -and $PrintTimesImplementation -ne 'asm'", bench_runner)
         self.assertIn("+bench486 -benchprinttimes -benchexit", bench_runner)
 
-        for runner_name in ("build-dos.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+        for runner_name in ("build-dos-experimental.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -1802,9 +1807,9 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("Bench486ZSpansCases ();", host_commands)
         self.assertIn("[switch]$ZSpansOnly", bench_runner)
         self.assertIn("+bench486 -benchzspans -benchexit", bench_runner)
-        for runner_name in ("build-dos.ps1", "bench-dos.ps1", "smoke-dos.ps1",
+        for runner_name in ("build-dos-experimental.ps1", "bench-dos.ps1", "smoke-dos.ps1",
                 "timedemo-dos.ps1", "selectors.ps1"):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+            runner = read_runner(runner_name)
             self.assertNotIn("ZSpanNegativeUnroll", runner)
 
     def test_screen_update_and_assembly_are_in_renderer_ownership_closure(self) -> None:
@@ -1883,8 +1888,8 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-ParticleExplosion2Only requires -ParticleExplosion2Implementation asm", bench_runner)
         self.assertIn("+bench486 -benchparticleexplosion2 -benchexit", bench_runner)
 
-        for runner_name in ("build-dos.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+        for runner_name in ("build-dos-experimental.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -1943,8 +1948,8 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-ParticleExplosionOnly requires -ParticleExplosionImplementation asm", bench_runner)
         self.assertIn("+bench486 -benchparticleexplosion -benchexit", bench_runner)
 
-        for runner_name in ("build-dos.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+        for runner_name in ("build-dos-experimental.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -1962,7 +1967,7 @@ class RenderingComparisonTests(unittest.TestCase):
         fixture = (ROOT / "src/bench486_parseparticleeffect.h").read_text(encoding="utf-8")
         host_commands = (ROOT / "src/host_cmd.c").read_text(encoding="utf-8")
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
-        build_script = (ROOT / "tools/build-dos.ps1").read_text(encoding="utf-8")
+        build_script = (ROOT / "tools/build-dos-experimental.ps1").read_text(encoding="utf-8")
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
 
         self.assertIn(".arch i486", assembly)
@@ -2030,8 +2035,8 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-BlobExplosionOnly requires -BlobExplosionImplementation asm", bench_runner)
         self.assertIn("+bench486 -benchblobexplosion -benchexit", bench_runner)
 
-        for runner_name in ("build-dos.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+        for runner_name in ("build-dos-experimental.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -2080,8 +2085,8 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-TransformPlaneOnly requires -TransformPlaneImplementation asm", bench_runner)
         self.assertIn("+bench486 -benchtransformplane -benchexit", bench_runner)
 
-        for runner_name in ("build-dos.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+        for runner_name in ("build-dos-experimental.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -2139,8 +2144,8 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-RocketTrailOnly requires -RocketTrailImplementation asm", bench_runner)
         self.assertIn("+bench486 -benchrockettrail -benchexit", bench_runner)
 
-        for runner_name in ("build-dos.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+        for runner_name in ("build-dos-experimental.ps1", "bench-dos.ps1", "smoke-dos.ps1", "timedemo-dos.ps1"):
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -2609,13 +2614,13 @@ class RenderingComparisonTests(unittest.TestCase):
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
         self.assertIn("ASM486_CONSOLE_INPUT", selectors)
         for runner_name in (
-            "build-dos.ps1",
+            "build-dos-experimental.ps1",
             "bench-dos.ps1",
             "timedemo-dos.ps1",
             "smoke-dos.ps1",
             "coverage-dos.ps1",
         ):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -2645,13 +2650,13 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn(".arch i486", assembly)
         self.assertNotRegex(assembly, r"(?i)\b(?:cmov\w*|mm\w*|[sv]se\w*|fisttp|fcomi\w*)\b")
         for runner_name in (
-            "build-dos.ps1",
+            "build-dos-experimental.ps1",
             "bench-dos.ps1",
             "timedemo-dos.ps1",
             "smoke-dos.ps1",
             "coverage-dos.ps1",
         ):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -2752,13 +2757,13 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("COM_CheckParm (\"-benchcenterstring\")", host_commands)
         self.assertIn("Bench486ScreenCenterCases ();", host_commands)
         for runner_name in (
-            "build-dos.ps1",
+            "build-dos-experimental.ps1",
             "bench-dos.ps1",
             "timedemo-dos.ps1",
             "smoke-dos.ps1",
             "coverage-dos.ps1",
         ):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -2823,13 +2828,13 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn('COM_CheckParm ("-benchcentererase")', host_commands)
         self.assertIn("Bench486ScreenEraseCenterCases ();", host_commands)
         for runner_name in (
-            "build-dos.ps1",
+            "build-dos-experimental.ps1",
             "bench-dos.ps1",
             "timedemo-dos.ps1",
             "smoke-dos.ps1",
             "coverage-dos.ps1",
         ):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -2842,7 +2847,7 @@ class RenderingComparisonTests(unittest.TestCase):
 
     def test_screen_console_setup_selector_has_c_default_and_focused_benchmark(self) -> None:
         selectors = (ROOT / "tools/selectors.ps1").read_text(encoding="utf-8")
-        build = (ROOT / "tools/build-dos.ps1").read_text(encoding="utf-8")
+        build = (ROOT / "tools/build-dos-experimental.ps1").read_text(encoding="utf-8")
         runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
         assembly = (ROOT / "src/screen_consolesetupasm.s").read_text(encoding="utf-8")
         source = (ROOT / "src/screen.c").read_text(encoding="utf-8")
@@ -2937,10 +2942,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-ScreenRefdefOnly requires -ScreenRefdefImplementation asm.", bench_runner)
         self.assertIn("+bench486 -benchscreenrefdef -benchexit", bench_runner)
         for runner_name in (
-            "build-dos.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
+            "build-dos-experimental.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
             "smoke-dos.ps1", "coverage-dos.ps1",
         ):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -2994,10 +2999,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("-ScreenDrawRamOnly requires -ScreenDrawRamImplementation asm.", bench_runner)
         self.assertIn("+bench486 -benchscreenram -benchexit", bench_runner)
         for runner_name in (
-            "build-dos.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
+            "build-dos-experimental.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
             "smoke-dos.ps1", "coverage-dos.ps1",
         ):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -3058,10 +3063,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("LocalPrefix = \"$LocalOutputDirectoryPrefix-r\"", parity_runner)
         self.assertIn("LocalPrefix = \"$LocalOutputDirectoryPrefix-a\"", parity_runner)
         for runner_name in (
-            "build-dos.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
+            "build-dos-experimental.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
             "smoke-dos.ps1", "coverage-dos.ps1",
         ):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -3131,10 +3136,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("+bench486 -benchscreenupdate -benchexit", bench_runner)
         self.assertNotRegex(assembly, r"(?i)\b(?:cmov\w*|mm\w*|[sv]se\w*|fisttp|fcomi\w*)\b")
         for runner_name in (
-            "build-dos.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
+            "build-dos-experimental.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
             "smoke-dos.ps1", "coverage-dos.ps1",
         ):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -3186,10 +3191,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("+bench486 -benchscreennet -benchexit", bench_runner)
         self.assertNotRegex(assembly, r"(?i)\b(?:cmov\w*|mm\w*|[sv]se\w*|fisttp|fcomi\w*)\b")
         for runner_name in (
-            "build-dos.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
+            "build-dos-experimental.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
             "smoke-dos.ps1", "coverage-dos.ps1",
         ):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"
@@ -4066,10 +4071,10 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("+bench486 -benchscreenturtle -benchexit", bench_runner)
         self.assertNotRegex(assembly, r"(?i)\b(?:cmov\w*|mm\w*|[sv]se\w*|fisttp|fcomi\w*)\b")
         for runner_name in (
-            "build-dos.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
+            "build-dos-experimental.ps1", "bench-dos.ps1", "timedemo-dos.ps1",
             "smoke-dos.ps1", "coverage-dos.ps1",
         ):
-            runner = ((ROOT if runner_name in ("build-dos.ps1", "selectors.ps1") else BENCHMARK_ROOT) / "tools" / runner_name).read_text(encoding="utf-8")
+            runner = read_runner(runner_name)
             self.assertRegex(
                 runner,
                 r"(?s)\[ValidateSet\('c', 'asm'\)\]\s*"

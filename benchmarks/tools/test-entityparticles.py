@@ -81,7 +81,7 @@ class EntityParticlesSourceContractTests(unittest.TestCase):
 
     def test_selector_and_direct_benchmark_keep_c_as_default(self) -> None:
         selectors = read("tools/selectors.ps1")
-        build = read("tools/build-dos.ps1")
+        build = read("tools/build-dos-experimental.ps1")
         runner = read("tools/bench-dos.ps1")
         build_test = read("tools/test-build-dos.py")
         run_tests = read("tools/run-tests.ps1")

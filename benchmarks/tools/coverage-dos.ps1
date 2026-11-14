@@ -111,7 +111,7 @@ $toolManifest = Read-BenchmarkToolchainManifest -ToolsDirectory $PSScriptRoot
 $ToolRoot = Resolve-ToolRoot -ToolRoot $ToolRoot
 $DataRoot = Resolve-DataRoot -DataRoot $DataRoot -RepoRoot $repoRoot
 
-$build = Join-Path $gameToolsDirectory 'build-dos.ps1'
+$build = Join-Path $gameToolsDirectory 'build-dos-experimental.ps1'
 $buildParams = @{ CpuTarget = $CpuTarget }
 if ($NoBootstrap) { $buildParams.NoBootstrap = $true }
 # The builder is the only place that knows the output paths. `executable` is
