@@ -90,7 +90,7 @@ class LavaSplashSourceContractTests(unittest.TestCase):
         self.assertIn("#ifdef BENCH486", branch)
 
         host = read("src/core/host_cmd.c")
-        header = read("src/quakedef.h")
+        header = read("src/tests/bench486/bench486_profile.h")
         for contract in (
             "BENCH486_LAVA_SPLASH_EVENT_MAX 32",
             "bench486_lava_splash_event_count = 0;",
