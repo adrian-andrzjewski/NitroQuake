@@ -72,16 +72,61 @@ The release build already selects the exact-zero-T full and tail paths. The
 same-row population is too small to justify another texture-span specialization
 from this evidence. No new source optimization is promoted from this pass.
 
+## Alias raster work census
+
+To quantify the alias workload, a PROFILE486-only counter in
+`quake/src/renderer/d_polyse.c` mirrors the span drawer's right-edge stepping
+before entering the timed draw scope. It records nonempty rows in
+`work_items` and candidate pixel samples in `work_bytes`; it does not change
+the renderer's span state or the non-instrumented release build. These samples
+are submitted to the Z test, so the count is not the number of visible pixels
+that pass depth testing.
+
+Two 256-frame detailed captures used the committed i486 release selectors,
+the same staged PAK files and DOSBox-X setup described above. The instrumented
+executable SHA-256 was
+`87AEFC279D63064C43227B071EE204E85344C562EC19AC62D3C348713C1DE985`; its
+source fingerprint was
+`FE30EAC15C5F43FB22FE5C83CA61C4243B1FDF50EB45C34720381B7EBF22563C`, and
+source-tree fingerprint was
+`C8638B0E0C06AD0DA267BBEB881BF39E318AF4962EB305803A0B2AF8D2D8D395`. Both
+captures matched their earlier detailed runs exactly:
+
+| Workload | Simulation checksum | Framebuffer checksum |
+| --- | ---: | ---: |
+| e1m1 | 2,568,184,557 | 1,299,435,123 |
+| e1m2 | 1,496,920,581 | 1,246,513,233 |
+
+The result JSONs are retained locally under
+`benchmarks/out/alias-pixel-census-e1m2-20261115-v1/`.
+
+| Population over 256 frames | e1m1 | e1m2 | e1m2 / e1m1 |
+| --- | ---: | ---: | ---: |
+| Alias models | 256 | 490 | 1.91x |
+| Alias vertices | 19,118 | 42,967 | 2.25x |
+| Alias span-drawer calls | 10,748 | 25,486 | 2.37x |
+| Nonempty alias span rows | 124,720 | 187,656 | 1.50x |
+| Candidate alias pixels submitted to Z | 602,150 | 1,046,870 | 1.74x |
+
+The existing alias-occlusion counters reported 20 queries, 20 culls and 11,184
+Z samples for e1m1, and 436 queries, 202 culls and 105,064 Z samples for e1m2.
+They describe the occlusion probe's tests, not triangle-area rejection. The
+captures were diagnostic and instrumented; their elapsed times are not
+candidate timings.
+
 ## Next candidate investigation
 
-The e1m2 `Models / sprites` share is 16.64%, versus 10.05% in e1m1; the
-detailed e1m2 capture counted 490 alias models and 42,967 alias vertices over
-256 frames. This makes alias-model raster work the next renderer investigation:
-measure triangle, rejected-area and covered-pixel populations before proposing
-any code change. The present profile shows cost, but not a safe condition that
-removes work. For local gameplay, the server remains 16.5-17.6% of the measured
-component share; function-level QuakeC/collision attribution is a separate
-follow-up if the workload expands beyond timedemos.
+The e1m2 `Models / sprites` share is 16.64%, versus 10.05% in e1m1. It also
+submits 1.74x as many alias pixels and 2.37x as many spans, but the counters
+show work volume rather than a conservative rejection condition. Earlier
+triangle-prefilter and alias-occlusion attempts in the ledger were rejected
+for slower matched runs or exact color/Z divergence. No new alias optimization
+is selected from this census. A future candidate needs a safe per-triangle or
+per-tile rejection population and exact color/Z parity before timing.
+
+For local gameplay, the server remains 16.5-17.6% of the measured component
+share; function-level QuakeC/collision attribution is a separate follow-up if
+the workload expands beyond timedemos.
 
 This report is emulator evidence only. Physical qualification remains pending;
 follow the [physical 486 acceptance procedure](PHYSICAL-486-ACCEPTANCE.md) when a
