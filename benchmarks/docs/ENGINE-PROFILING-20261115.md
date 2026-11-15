@@ -131,3 +131,58 @@ the workload expands beyond timedemos.
 This report is emulator evidence only. Physical qualification remains pending;
 follow the [physical 486 acceptance procedure](PHYSICAL-486-ACCEPTANCE.md) when a
 real test machine is available.
+
+## Current-source exact-zero-T screen
+
+A fresh uninstrumented `BENCH486` A/B screen used the source at Quake commit
+`b017ffb7f50f69160a58194ade457c322e389586` and the committed
+`i486-asm-selectable-current` renderer profile (SHA-256
+`CCF865D39DB35A93B66571A65E3E1555B2EB5E4350FE35D593BCB8E517FF4759`). The
+control overrode `TextureSpanTZeroPath` and `TextureSpanTailTZeroPath` to
+`control`; the candidate used `zerot` for both. The remaining selectors and
+build inputs were loaded from the same release profile. The source-tree
+fingerprint matched (`C8638B0E0C06AD0DA267BBEB881BF39E318AF4962EB305803A0B2AF8D2D8D395`);
+the configuration-bound build fingerprints were
+`A89579414EC23FC444C511DA1BBB1E96014D69313AE90E4AF992EB107283EE9E` for
+control and `B557210FF7948F26ED950189937DD22966C56B79CDBE270EDC9B37012473AF45`
+for candidate.
+
+Both executables passed the strict linked i486 ISA gate with zero above-i486
+instructions and zero exemptions. Both builds also passed the generated
+renderer stack budget check: normal rendering requires `172864 + 128 *
+world_depth` bytes. The control executable SHA-256 is
+`0117A1F6DE0CE9A1088035F4732B13A33C45BFFC66E0F1E47F0409A901C06296`; the
+candidate executable SHA-256 is
+`619DB6E149A5D7978296E3F38702C8CA0E9D28D200FF400156EA4FF3F3DD3D62`.
+
+Correctness used DOSBox-X 2026.08.31 (executable SHA-256
+`F17F47DFD6DA895747ACFC70A533077D0B4C55B3A8B79551A04750E2A51B8D34`), the
+pinned 486 profile (SHA-256
+`532284EA01C1A93C8B96D70FB538625B694DFAD0172BA13B9BA9C36C8FE845BA`) and
+CWSDPMI (SHA-256
+`FF3501B50BCF320E6615E025BDFF94261A087F83212858D4B12E42C19C7E3883`). One
+fixed-clock `demo1` replay per executable recorded all 970 checksum entries
+(initial frame plus 969 timedemo frames), with zero overflow. Final framebuffer
+checksums were `1047377823`. The complete per-frame color and Z files matched
+byte for byte:
+
+| Stream | Bytes | SHA-256 |
+| --- | ---: | --- |
+| Color | 14,154 | `C1C6DF62FA795D62D958FEC9F1B7F0811CB92B35E0C14D32BA45CEEFD9DF919B` |
+| Z buffer | 14,182 | `4D995848BEF742F2E2B8362A978F21AB3F4A4885ACB95794DAC512964135FD37` |
+
+Three uninstrumented timing runs per build completed 969 frames and returned
+the same final framebuffer checksum in every run:
+
+| Selector values (full / tail) | Seconds (runs 1, 2, 3) | FPS (runs 1, 2, 3) | Median FPS |
+| --- | --- | --- | ---: |
+| `control / control` | 57.240511, 57.240421, 57.240417 | 16.928570, 16.928597, 16.928598 | 16.928597 |
+| `zerot / zerot` | 57.686949, 57.686941, 57.686980 | 16.797560, 16.797563, 16.797551 | 16.797560 |
+
+The candidate was 0.77% slower by median FPS in this DOSBox screen. All control
+runs preceded all candidate runs, so this was not an alternating paired test;
+the small difference is not sufficient to change the release profile. These
+results screen correctness and emulator timing only. Physical 486 qualification
+remains pending, and the hardware acceptance procedure's three-demo,
+five-pair alternating timing gate has not been met. Local JSON results and raw
+checksum streams remain under the ignored `benchmarks/out/` directory.
