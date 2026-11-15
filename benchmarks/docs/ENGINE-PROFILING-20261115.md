@@ -272,3 +272,21 @@ timedemo screen shows a repeatable slowdown on demo1 and demo3 and an unstable
 demo2 result, while the two local maps show repeatable gains. Keep conclusions
 workload-specific and wait for the documented physical 486 gate before making
 a hardware performance claim.
+
+## Current-source candidate decision
+
+The combined full-span and tail `zerot / zerot` candidate passes the strict
+i486 ISA gate. Fixed-clock per-frame color/Z streams match byte-for-byte across
+the three demos; both local maps retain their simulation and final framebuffer
+checksums. Its repeated DOSBox timing benefit is limited to e1m1 (+3.849620%)
+and e1m2 (+2.888740%). Demo1 (-0.773940%) and demo3 (-0.765350%) are repeatably
+slower; demo2 is inconclusive because its control timings vary materially.
+
+This refresh supports a workload-specific local-map gain, not a general
+renderer speedup. With no agreed cross-workload weighting and no physical
+result, leave the selector profile unchanged. For subsequent renderer
+experiments, continue to focus on reducing texture-span work: the same-row
+link population is only 0.41-1.09% of spans, and the prior no-row-cross path
+measured slower. Physical-486 qualification remains open; apply the five-pair
+procedure in `PHYSICAL-486-ACCEPTANCE.md` before making a hardware performance
+claim.
