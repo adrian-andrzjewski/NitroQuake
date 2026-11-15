@@ -186,3 +186,49 @@ results screen correctness and emulator timing only. Physical 486 qualification
 remains pending, and the hardware acceptance procedure's three-demo,
 five-pair alternating timing gate has not been met. Local JSON results and raw
 checksum streams remain under the ignored `benchmarks/out/` directory.
+
+## Order-alternated demo and local-map follow-up
+
+The grouped `demo1` timing screen above was followed by three alternating
+control/candidate pairs using the same already-qualified executables and pinned
+DOSBox-X setup. The sequence was control/candidate, candidate/control, then
+control/candidate. Every run completed 969 frames with final framebuffer
+checksum `1047377823`:
+
+| Pair | Control seconds / FPS | `zerot / zerot` seconds / FPS |
+| --- | ---: | ---: |
+| 1 | 57.240531 / 16.928564 | 57.687005 / 16.797544 |
+| 2 | 57.240522 / 16.928567 | 57.686985 / 16.797550 |
+| 3 | 57.240494 / 16.928575 | 57.686985 / 16.797550 |
+
+Median FPS was 16.928567 for control and 16.797550 for `zerot`, a **0.773940%
+decrease**. The timing difference is stable in DOSBox and is not explained by
+run order.
+
+The previous build runner applied release-profile selectors after explicit
+texture-span overrides, preventing current-profile local-map comparisons. The
+runner now reapplies explicitly supplied full-span and tail selectors after
+loading the profile. Using that path, three alternating uninstrumented
+`Mode=off` pairs per map were run from the current `i486-release` selector set
+with sound off, 64 warm-up frames, 256 measured frames and a fixed 0.0625-second
+simulation step at 320x200. Each `seconds / FPS` pair below is one run; orders
+alternated by map and pair: e1m1 used control/candidate, candidate/control,
+control/candidate; e1m2 used candidate/control, control/candidate,
+candidate/control.
+
+| Workload | Control seconds / FPS (runs 1, 2, 3) | `zerot / zerot` seconds / FPS (runs 1, 2, 3) | Mean FPS change |
+| --- | --- | --- | ---: |
+| e1m1 | 10.807087 / 23.688160, 10.807093 / 23.688147, 10.807094 / 23.688143 | 10.406478 / 24.600063, 10.406481 / 24.600055, 10.406486 / 24.600043 | +3.849620% |
+| e1m2 | 11.608803 / 22.052230, 11.608798 / 22.052240, 11.608806 / 22.052225 | 11.282875 / 22.689253, 11.282865 / 22.689272, 11.282869 / 22.689265 | +2.888740% |
+
+All local-game runs retained identical simulation and framebuffer checksums
+between variants: e1m1 `2568184557` / `1299435123`, e1m2 `1496920581` /
+`1246513233`. The mean FPS over the six local-map samples per variant rose
+from 22.870191 to 23.644659 (**+3.386363%**).
+
+This current-source screen supports the exact-zero-T selectors for these local
+game workloads, while the demo1 timedemo is slower. The release profile remains
+unchanged pending workload weighting and physical 486 results. DOSBox-X
+measurements are useful for repeatable screening; they do not qualify physical
+486 performance. Raw local-map JSON results remain under
+`benchmarks/out/span16-tzero-current-20261115/`.
