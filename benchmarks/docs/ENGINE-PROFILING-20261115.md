@@ -273,6 +273,55 @@ demo2 result, while the two local maps show repeatable gains. Keep conclusions
 workload-specific and wait for the documented physical 486 gate before making
 a hardware performance claim.
 
+## Current-source sound-on local-map timing
+
+A supplementary uninstrumented A/B used `engine-profile-dos.ps1` with
+`Mode=off`, sound enabled, 64 warm-up frames, 256 measured frames,
+`host_framerate 0.0625`, and the current `i486-release` selectors at 320x200.
+Each build changed only `TextureSpanTZeroPath` and
+`TextureSpanTailTZeroPath`: control used `control / control`; the candidate
+used `zerot / zerot`. The source-tree fingerprint was
+`C8638B0E0C06AD0DA267BBEB881BF39E318AF4962EB305803A0B2AF8D2D8D395`; the
+configuration fingerprints were `A89579414EC23FC444C511DA1BBB1E96014D69313AE90E4AF992EB107283EE9E`
+and `B557210FF7948F26ED950189937DD22966C56B79CDBE270EDC9B37012473AF45`.
+The executable hashes were
+`A749A1CC484AA5E45FDCEA2AB6B83ADF599CAFC3ED294D48F05C564A8C2E27BB` for
+control and `619DB6E149A5D7978296E3F38702C8CA0E9D28D200FF400156EA4FF3F3DD3D62`
+for candidate. Both builds passed the strict i486 ISA gate. The pinned DOSBox-X
+profile and CWSDPMI identities are the same as the preceding screen.
+
+The five initial pairs per map alternated order. Because e1m1 had one negative
+pair, three additional alternating pairs were run there:
+
+| Workload / pair | Order | Control seconds / FPS | `zerot / zerot` seconds / FPS |
+| --- | --- | ---: | ---: |
+| e1m1 / 1 | control, candidate | 11.008054 / 23.255700 | 10.602294 / 24.145718 |
+| e1m1 / 2 | candidate, control | 11.008057 / 23.255693 | 11.065495 / 23.134979 |
+| e1m1 / 3 | control, candidate | 11.008046 / 23.255718 | 10.602296 / 24.145713 |
+| e1m1 / 4 | candidate, control | 11.008050 / 23.255709 | 10.602294 / 24.145718 |
+| e1m1 / 5 | control, candidate | 11.008043 / 23.255723 | 10.602296 / 24.145714 |
+| e1m1 / 6 | candidate, control | 11.008050 / 23.255700 | 10.602299 / 24.145707 |
+| e1m1 / 7 | control, candidate | 11.008044 / 23.255712 | 10.602296 / 24.145713 |
+| e1m1 / 8 | candidate, control | 11.008055 / 23.255688 | 10.602292 / 24.145722 |
+| e1m2 / 1 | candidate, control | 11.971064 / 21.384900 | 11.639402 / 21.994258 |
+| e1m2 / 2 | control, candidate | 11.971068 / 21.384893 | 11.639410 / 21.994242 |
+| e1m2 / 3 | candidate, control | 11.971065 / 21.384897 | 11.639389 / 21.994282 |
+| e1m2 / 4 | control, candidate | 11.971060 / 21.384906 | 11.639402 / 21.994256 |
+| e1m2 / 5 | candidate, control | 11.971063 / 21.384902 | 11.639397 / 21.994267 |
+
+The e1m1 mean FPS change was +3.283786%; seven of eight paired changes were
++3.827% and one was -0.519%. That outlier's external process time was within
+the other runs' range, so its cause is unresolved. The e1m2 mean change was
++2.849494%, with all five paired changes between +2.849437% and +2.849605%.
+Both variants retained identical simulation and final framebuffer checksums:
+e1m1 `2568184557` / `1299435123`, e1m2 `1496920581` / `1246513233`. Sound
+initialized in every run, and each run passed the build's i486 ISA gate.
+
+These are emulator measurements, not physical-486 acceptance. The e1m1
+sound-on result retains one unresolved outlier; the e1m2 result is consistent.
+The physical procedure still calls for five alternating pairs per map with
+sound disabled, plus its separate three-demo color/Z parity checks.
+
 ## Current-source candidate decision
 
 The combined full-span and tail `zerot / zerot` candidate passes the strict
@@ -282,9 +331,11 @@ checksums. Its repeated DOSBox timing benefit is limited to e1m1 (+3.849620%)
 and e1m2 (+2.888740%). Demo1 (-0.773940%) and demo3 (-0.765350%) are repeatably
 slower; demo2 is inconclusive because its control timings vary materially.
 
-This refresh supports a workload-specific local-map gain, not a general
-renderer speedup. With no agreed cross-workload weighting and no physical
-result, leave the selector profile unchanged. For subsequent renderer
+This refresh supports workload-specific local-map gains, not a general
+renderer speedup: sound-off and sound-on e1m2 improved consistently, while the
+sound-on e1m1 screen contains a timing outlier and the timedemo results regress
+or remain inconclusive. With no agreed cross-workload weighting and no
+physical result, leave the selector profile unchanged. For subsequent renderer
 experiments, continue to focus on reducing texture-span work: the same-row
 link population is only 0.41-1.09% of spans, and the prior no-row-cross path
 measured slower. Physical-486 qualification remains open; apply the five-pair
