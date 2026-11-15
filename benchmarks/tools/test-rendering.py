@@ -1795,7 +1795,7 @@ class RenderingComparisonTests(unittest.TestCase):
         bench_runner = (BENCHMARK_ROOT / "tools/bench-dos.ps1").read_text(encoding="utf-8")
 
         self.assertIn("C(D_DrawZSpans):", assembly)
-        self.assertIn("#if\t!id386 || defined(BENCH486)", oracle)
+        self.assertIn("#if !defined(__i386__) || defined(BENCH486)", oracle)
         self.assertIn("void D_DrawZSpans_C (espan_t *pspan)", oracle)
         self.assertIn("truncate-boundary", fixture)
         self.assertIn("vertical-gradient", fixture)
