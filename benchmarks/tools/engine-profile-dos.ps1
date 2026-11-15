@@ -65,6 +65,11 @@ if ($RendererProfile -eq 'i486-release') {
     }
     $rendererProfileSha256=(Get-FileHash -LiteralPath $rendererProfilePath -Algorithm SHA256).Hash
 }
+foreach ($selectorName in @('TextureSpanTZeroPath', 'TextureSpanTailTZeroPath')) {
+    if ($PSBoundParameters.ContainsKey($selectorName)) {
+        $params[$selectorName]=[string]$PSBoundParameters[$selectorName]
+    }
+}
 if ($Instrumentation) { $params.Instrumentation=$true }
 $resolved=(& $build @params -DumpFlags | Out-String) | ConvertFrom-Json
 $fingerprint=Get-BuildFingerprint -RepoRoot $repoRoot -Resolved $resolved
