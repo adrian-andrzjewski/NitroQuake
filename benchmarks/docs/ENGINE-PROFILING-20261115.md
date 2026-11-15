@@ -232,3 +232,43 @@ unchanged pending workload weighting and physical 486 results. DOSBox-X
 measurements are useful for repeatable screening; they do not qualify physical
 486 performance. Raw local-map JSON results remain under
 `benchmarks/out/span16-tzero-current-20261115/`.
+
+## Current-source demo2/demo3 parity and timing
+
+The same uninstrumented control and `zerot / zerot` executables were checked
+on the other two built-in demos. Each fixed-clock replay used enforced
+demo-specific frame and final-checksum gates, with no gate override. Control
+and candidate color/Z streams matched byte for byte:
+
+| Demo | Timedemo frames | Recorded color/Z entries | Final framebuffer checksum | Color bytes / SHA-256 | Z bytes / SHA-256 |
+| --- | ---: | ---: | ---: | --- | --- |
+| demo2 | 985 | 986 | 1887495667 | 14,442 / `62684ED9C2981962772A2190C24E73F0A2CB4C85D77585DE7D8C928623B47CBA` | 14,435 / `CD43EA9D321A0761966AA40505134388C5996C1778DE2F13F4681DCA543E30A8` |
+| demo3 | 1090 | 1091 | 2316550348 | 16,053 / `345E9F2F5A21FFA2EA4A771C9A3EA178B7B5685554FE4EC309A4760EDDD9ECCA` | 16,082 / `7D76499B5E42697D3FF172B910795AE5F0AFC7E3EF67321AF5CF2E5626846F4C` |
+
+Each parity capture had zero overflow. Together with the earlier demo1 run,
+current-source color/Z parity has now been checked on demo1, demo2 and demo3.
+These are one fixed-clock replay per variant and demo; the physical procedure
+still requires three correctness replays per build and demo.
+
+Three uninstrumented timedemo pairs per demo completed the expected frame
+counts and matched final framebuffers. Pair orders and raw `seconds / FPS`
+were:
+
+| Demo / pair | Control | `zerot / zerot` |
+| --- | ---: | ---: |
+| demo2 / 1 (control first) | 57.216468 / 17.215323 | 57.215752 / 17.215539 |
+| demo2 / 2 (candidate first) | 56.761700 / 17.353251 | 57.215757 / 17.215538 |
+| demo2 / 3 (control first) | 56.761654 / 17.353265 | 57.220128 / 17.214223 |
+| demo3 / 1 (control first) | 68.540898 / 15.902913 | 69.069559 / 15.781193 |
+| demo3 / 2 (control first) | 68.540893 / 15.902915 | 69.069516 / 15.781202 |
+| demo3 / 3 (candidate first) | 68.540900 / 15.902913 | 69.069499 / 15.781207 |
+
+The mean FPS change was -0.532606% on demo2 and -0.765350% on demo3. Demo2's
+control samples split into two timings about 0.455 seconds faster than its
+first control sample, while all three candidate runs stayed near 57.216
+seconds; treat that DOSBox comparison as inconclusive. Demo3's candidate was
+consistently slower across all three pairs. Combined with demo1, the current
+timedemo screen shows a repeatable slowdown on demo1 and demo3 and an unstable
+demo2 result, while the two local maps show repeatable gains. Keep conclusions
+workload-specific and wait for the documented physical 486 gate before making
+a hardware performance claim.
