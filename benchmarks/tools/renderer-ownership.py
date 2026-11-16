@@ -28,7 +28,7 @@ RENDERER_SOURCES = {
     "screen_consolesetupasm.s", "screen_refdefasm.s",
     "screen_drawramasm.s", "screen_overlaysasm.s", "screen_updateasm.s",
     "screen_netasm.s", "screen_turtleasm.s",
-    "asm486_experiments.s",
+    "asm486_experiments.s", "asm486_sprite_geometry.s",
 }
 DEFAULT_ROOTS = [
     "_R_RenderView", "_V_RenderView", "_V_UpdatePalette", "_SCR_UpdateScreen",

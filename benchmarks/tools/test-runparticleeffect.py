@@ -55,7 +55,7 @@ class RunParticleEffectSourceContractTests(unittest.TestCase):
     def test_c_oracle_and_direct_fixture_pin_both_particle_modes(self) -> None:
         c_source = read("src/renderer/r_part.c")
         fixture = read("src/tests/bench486/bench486_runparticleeffect.h")
-        host = read("src/core/host_cmd.c")
+        host = read("src/tests/bench486/bench486_harness.c")
         for contract in (
             "#define R_RunParticleEffect R_RunParticleEffect_C",
             "#if !defined(ASM486_RUN_PARTICLE_EFFECT) || defined(BENCH486)",

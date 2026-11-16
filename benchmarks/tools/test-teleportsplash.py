@@ -63,7 +63,7 @@ class TeleportSplashSourceContractTests(unittest.TestCase):
     def test_c_oracle_and_guarded_fixture_cover_lattice_and_pool_boundaries(self) -> None:
         c_source = read("src/renderer/r_part.c")
         fixture = read("src/tests/bench486/bench486_teleportsplash.h")
-        host = read("src/core/host_cmd.c")
+        host = read("src/tests/bench486/bench486_harness.c")
         for contract in (
             "#define R_TeleportSplash R_TeleportSplash_C",
             "#if !defined(ASM486_TELEPORT_SPLASH) || defined(BENCH486)",

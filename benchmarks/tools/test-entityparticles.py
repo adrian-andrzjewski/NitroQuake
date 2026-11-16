@@ -54,7 +54,7 @@ class EntityParticlesSourceContractTests(unittest.TestCase):
     def test_c_oracle_layout_and_direct_fixture_cover_state_and_rng(self) -> None:
         c_source = read("src/renderer/r_part.c")
         fixture = read("src/tests/bench486/bench486_entityparticles.h")
-        host = read("src/core/host_cmd.c")
+        host = read("src/tests/bench486/bench486_harness.c")
         for contract in (
             "#define R_EntityParticles R_EntityParticles_C",
             "#if !defined(ASM486_ENTITY_PARTICLES) || defined(BENCH486)",
@@ -107,7 +107,7 @@ class EntityParticlesSourceContractTests(unittest.TestCase):
 
         for target in ("i386", "i486"):
             golden = json.loads(read("tools/golden/build-flags-%s.json" % target))
-            self.assertEqual(golden["allAssemblySourceCount"], 86)
+            self.assertEqual(golden["allAssemblySourceCount"], 87)
             self.assertIn("r_entityparticlesasm.s", golden["assemblySources"])
 
 

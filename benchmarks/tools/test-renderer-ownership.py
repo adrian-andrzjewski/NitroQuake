@@ -183,6 +183,10 @@ class RendererOwnershipTests(unittest.TestCase):
                     self.assertTrue(ownership.renderer_source("model.c", symbol))
         self.assertFalse(ownership.renderer_source("model.c", "_Mod_LoadBrushModel.constprop.0"))
 
+    def test_split_sprite_geometry_assembly_remains_renderer_owned(self):
+        self.assertTrue(ownership.renderer_source("asm486_sprite_geometry.s", "_R_RotateSprite_asm486"))
+        self.assertTrue(ownership.renderer_source("asm486_sprite_geometry.s", "_R_ClipSpriteFace_asm486"))
+
     def test_clone_callee_is_reported_with_its_root_trace(self):
         with tempfile.TemporaryDirectory(prefix="quake-ownership-") as directory:
             root = Path(directory)
