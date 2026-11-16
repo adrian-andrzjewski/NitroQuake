@@ -8,6 +8,29 @@
 
 This report supersedes the November 14 snapshots in [architectural-assessment-2026-11-14.md](architectural-assessment-2026-11-14.md) and [architectural-assessment-2026-11-14-current.md](architectural-assessment-2026-11-14-current.md). Those documents describe an earlier source and worktree state.
 
+## Follow-up after renderer assembly split (2026-11-16)
+
+This assessment records the source state at game commit `38873bce`. The
+subsequent game commit `2a965f3` split `src/renderer/asm486_experiments.s` into
+renderer units for alias, BSP, edges, lighting, memory, particles, raster and
+sky/warp work, sprite rendering, surface cache, surface drawing, and world
+rendering, with collision helpers moved to `src/collision/asm486_collision.s`.
+The pre-existing sprite geometry routines remain in `asm486_sprite.s`. The
+source-layout map records the original monolith as a one-to-many migration.
+
+The split preserves all 88 exported symbols from the former monolith with no
+duplicate exports. Clean i486 release and C-reference builds passed their
+linked ISA gates: 98 and 92 assembly sources, respectively, with zero above-
+i486 instructions and zero exemptions. The renderer stack budget passed in
+both configurations; the benchmark host suite passed 20/20 gates. A focused
+`demo1-drawspans8` DOSBox-X parity run matched exact frame checksums and
+framebuffer/palette output over two repeats per profile. No physical 486 timing
+or qualification was performed.
+
+This follow-up supersedes the assembly-file finding in P2 and item 4 under
+“Substantial engineering opportunities.” Other findings remain tied to the
+reviewed baseline unless covered by a later dated follow-up.
+
 ## Executive assessment
 
 NitroQuake is a mature, DOS-first software renderer and game engine with unusually strong evidence discipline for a legacy 486 target. The repository split is explicit: the nested game checkout owns C, GNU assembly, game assets, the DJGPP build, native correctness fixtures, and ISA verification; the outer checkout owns DOSBox automation, scenario data, output analysis, and reports. A read-only workspace doctor now verifies that the nested checkout matches the committed and staged gitlinks.
