@@ -116,7 +116,7 @@ if ($DataRoot) { $runtimeInputs += @('-DataRoot', $DataRoot) }
 # ---- 1-3: host-only tests.  No compiler, no emulator, seconds each. --------
 # The full game gate below already runs its host checks. HostOnly here verifies
 # suite contracts; native compiler/source checks have their own game entry point.
-foreach ($test in @('test-runner-selectors.ps1', 'test-render-progress.ps1', 'test-timedemo-command-tail.ps1', 'test-bench-event-repeat.ps1', 'test-workspace.ps1')) {
+foreach ($test in @('test-runner-selectors.ps1', 'test-render-progress.ps1', 'test-timedemo-command-tail.ps1', 'test-bench-event-repeat.ps1', 'test-workspace-doctor.ps1', 'test-workspace.ps1')) {
     Invoke-Gate -Name $test -Kind 'host' -Command @($pwshExe.Source, '-NoProfile', '-File', "tools/$test") | Out-Null
 }
 Invoke-Gate -Name 'test-dosbox-profile' -Kind 'host' -Command @('python', 'tools/test-dosbox-profile.py') | Out-Null
