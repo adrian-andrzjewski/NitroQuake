@@ -1040,6 +1040,23 @@ class RenderingComparisonTests(unittest.TestCase):
                 if choices is not None:
                     self.assertIn(value, re.findall(r"'([^']*)'", choices))
 
+    def test_experiment_reports_bind_resolved_profiles_and_parity_evidence(self) -> None:
+        build_common = (ROOT / "tools/common.ps1").read_text(encoding="utf-8")
+        timedemo_source = (BENCHMARK_ROOT / "tools/timedemo-dos.ps1").read_text(encoding="utf-8")
+        render_validation = (BENCHMARK_ROOT / "tools/render-validation-dos.ps1").read_text(encoding="utf-8")
+        render_parity = (BENCHMARK_ROOT / "tools/render-parity-dos.ps1").read_text(encoding="utf-8")
+
+        self.assertIn("$verified[$selector.Param] = $actual.Value", build_common)
+        self.assertIn("selectors = $verified", build_common)
+        self.assertIn("profileSha256 = $profileHash", timedemo_source)
+        self.assertIn("parityGate = [ordered]@{", timedemo_source)
+        self.assertIn("buildSelectorVerification = $selectorVerification", timedemo_source)
+        self.assertIn("rendererSelectors = if ($null -ne $rendererSelectorProfileData)", render_validation)
+        self.assertIn("profileSha256 = if ($null -ne $timedemoJson)", render_validation)
+        self.assertIn("$referenceReport", render_parity)
+        self.assertIn("$candidateReport", render_parity)
+        self.assertIn("Each build manifest was checked by the normal renderer compatibility gate.", render_parity)
+
     def test_render_validation_accepts_timedemo_configuration_selectors(self) -> None:
         validation_source = (BENCHMARK_ROOT / "tools/render-validation-dos.ps1").read_text(encoding="utf-8")
         self.assertNotRegex(validation_source, r"\$selector\.Name\s+-notmatch\s+'Implementation\$'")
@@ -3929,7 +3946,9 @@ class RenderingComparisonTests(unittest.TestCase):
         self.assertIn("void D_DrawSprite_C (void)", c_source)
         self.assertIn("#ifdef ASM486_SPRITE_DRAW", c_source)
         self.assertIn("D_DrawSprite_asm486 (r_spritedesc.nump, r_spritedesc.pverts,", c_source)
-        self.assertIn("sizeof(sspan_t) == 12", c_source)
+        self.assertIn('#include "renderer/asm_draw.h"', c_source)
+        self.assertIn("offsetof(sspan_t, count) == sspan_t_count", c_source)
+        self.assertIn("sizeof(sspan_t) == sspan_t_size", c_source)
         self.assertIn("sizeof(emitpoint_t) == 20", c_source)
 
         benchmark = (ROOT / "src/core/host_cmd.c").read_text(encoding="utf-8")
