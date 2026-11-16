@@ -28,7 +28,10 @@ RENDERER_SOURCES = {
     "screen_consolesetupasm.s", "screen_refdefasm.s",
     "screen_drawramasm.s", "screen_overlaysasm.s", "screen_updateasm.s",
     "screen_netasm.s", "screen_turtleasm.s",
-    "asm486_experiments.s", "asm486_sprite_geometry.s",
+    "asm486_alias.s", "asm486_bsp.s", "asm486_edge.s",
+    "asm486_lighting.s", "asm486_particles.s", "asm486_raster.s",
+    "asm486_sky_warp.s", "asm486_sprite.s", "asm486_surface_cache.s",
+    "asm486_surface_draw.s", "asm486_world.s",
 }
 DEFAULT_ROOTS = [
     "_R_RenderView", "_V_RenderView", "_V_UpdatePalette", "_SCR_UpdateScreen",
@@ -143,7 +146,7 @@ def resolve_d_drawspans_targets(manifest: dict, units: dict[str, dict],
         return []
 
     required_sources = {
-        "asm486_experiments.s", "d_driverasm.s", "d_draw.s", "d_draw16.s",
+        "asm486_world.s", "d_driverasm.s", "d_draw.s", "d_draw16.s",
     }
     selected_assembly = set(manifest.get("assemblySources", []))
     missing_sources = sorted(required_sources - selected_assembly)
@@ -151,7 +154,7 @@ def resolve_d_drawspans_targets(manifest: dict, units: dict[str, dict],
         raise ValueError("combined d_drawspans profile omits assembly sources: " + ", ".join(missing_sources))
 
     consumer_entry, consumer = _renderer_function(
-        "_D_DrawSurfaces", "asm486_experiments.s", entries, units)
+        "_D_DrawSurfaces", "asm486_world.s", entries, units)
     setter_entry, setter = _renderer_function(
         "_D_SetupFrame", "d_driverasm.s", entries, units)
 
@@ -279,7 +282,7 @@ PDRAW_FUNC_TARGETS = {
 }
 PDRAW_FUNC_PRIVATE_ALIASES = {
     "_R_GenerateSpans_asm486": "r_edgea.s",
-    "_R_GenerateSpansBackward_asm486": "asm486_experiments.s",
+    "_R_GenerateSpansBackward_asm486": "asm486_edge.s",
 }
 
 
@@ -299,7 +302,7 @@ def resolve_pdrawfunc_targets(manifest: dict, units: dict[str, dict],
         return []
 
     required_sources = {
-        "r_worldcontrolasm.s", "asm486_experiments.s", "r_edgea.s",
+        "r_worldcontrolasm.s", "asm486_edge.s", "r_edgea.s",
         "r_publicbindingsasm.s",
     }
     selected_assembly = set(manifest.get("assemblySources", []))
@@ -325,7 +328,7 @@ def resolve_pdrawfunc_targets(manifest: dict, units: dict[str, dict],
     setter_entry, setter = _renderer_function(
         "_R_BeginEdgeFrame", "r_worldcontrolasm.s", entries, units, "_pdrawfunc")
     consumer_entry, consumer = _renderer_function(
-        "_R_ScanEdges_asm486", "asm486_experiments.s", entries, units, "_pdrawfunc")
+        "_R_ScanEdges_asm486", "asm486_edge.s", entries, units, "_pdrawfunc")
 
     target_relocations = [relocation for relocation in setter["relocations"]
                           if relocation["symbol"] in PDRAW_FUNC_TARGETS]
@@ -469,7 +472,7 @@ def resolve_pdrawfunc_targets(manifest: dict, units: dict[str, dict],
     backward_public, backward_public_function = _renderer_function(
         "_R_GenerateSpansBackward", "r_publicbindingsasm.s", entries, units, "_pdrawfunc")
     backward_impl, _ = _renderer_function(
-        "_R_GenerateSpansBackward_asm486", "asm486_experiments.s", entries, units, "_pdrawfunc")
+        "_R_GenerateSpansBackward_asm486", "asm486_edge.s", entries, units, "_pdrawfunc")
     forward_entry = entries["_R_GenerateSpans"]
     forward_impl, _ = _renderer_function(
         "_R_GenerateSpans_asm486", "r_edgea.s", entries, units, "_pdrawfunc")

@@ -196,7 +196,7 @@ Every instruction above i486 **in this project's own assembly** is gone:
 | construct | files | i486 build | i386 build |
 |---|---|---:|---:|
 | `SHLD` (`0F A4`) | `d_draw.s` | 18 | **0** |
-| `BT`/`BTR` with a register bit offset (`0F A3`, `0F B3`) | `asm486_experiments.s` | 2 | **0** |
+| `BT`/`BTR` with a register bit offset (`0F A3`, `0F B3`) | `asm486_bsp.s` | 2 | **0** |
 
 The unused `StartMSRInterval`/`EndMSRInterval` routines, which accessed the
 Pentium Pro/Cyrix CESR through `RDMSR`/`WRMSR`, have been removed after a
@@ -206,7 +206,7 @@ substitutions are bit-identical:
 * `d_draw.s` packs a Z-span pixel pair with `shld`/`ror`; the i386 macro computes
   the same value as `(eax & 0xFFFF) | (edx & 0xFFFF0000)` in four instructions,
   using `%esi`, which is dead inside the span loop.
-* `asm486_experiments.s` used a register-offset `BT`/`BTR` over a four-plane loop
+* `asm486_bsp.s` uses a register-offset `BT`/`BTR` over a four-plane loop
   counter; a four-entry mask table expresses both exactly and needs no scratch
   register, which matters because all six are live there.
 
@@ -714,7 +714,7 @@ reference bodies.  Select it at build time:
 
 `asm` is now the 486-oriented default and writes to `out\dos-memasm`; `c`
 remains the callable reference path and writes to `out\dos`. The ASM build
-includes `asm486_experiments.s` and defines `ASM486_RUNTIME_MEMOPS`; all other
+includes `asm486_memory.s` and defines `ASM486_RUNTIME_MEMOPS`; all other
 compiler flags and source inputs remain the same. Three current 486 timedemo
 runs measured 62.556866 / 62.556847 / 62.556874 seconds with ASM versus a C
 reference median near 62.568974 seconds, with checksum `4154140932` every run.

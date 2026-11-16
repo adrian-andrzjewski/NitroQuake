@@ -18,7 +18,7 @@ def combined_asm_fixture(root: Path, extra_setter_listing: str = "") -> tuple[di
     objects = root / "obj"
     (root / "src").mkdir()
     objects.mkdir()
-    object_names = ("r_entry", "asm486_experiments", "d_driverasm", "d_draw", "d_draw16")
+    object_names = ("r_entry", "asm486_world", "d_driverasm", "d_draw", "d_draw16")
     for name in object_names:
         (objects / f"{name}.obj").touch()
 
@@ -37,7 +37,7 @@ def combined_asm_fixture(root: Path, extra_setter_listing: str = "") -> tuple[di
         + "   5: e8 00 00 00 00 call a <_R_RenderView+0xa>\n"
         + "            6: DISP32 _D_SetupFrame\n"
         + "   a: c3 ret\n"
-        + object_header("asm486_experiments")
+        + object_header("asm486_world")
         + symbol(0, "_D_DrawSurfaces")
         + symbol(1, "_d_drawspans")
         + "00000000 <_D_DrawSurfaces>:\n"
@@ -70,7 +70,7 @@ def combined_asm_fixture(root: Path, extra_setter_listing: str = "") -> tuple[di
     manifest = {
         "cSources": [],
         "assemblySources": [name + ".s" for name in (
-            "r_entry", "asm486_experiments", "d_driverasm", "d_draw", "d_draw16")],
+            "r_entry", "asm486_world", "d_driverasm", "d_draw", "d_draw16")],
         "surfaceDrawImplementation": "asm",
         "drawingDriverImplementation": "asm",
     }
@@ -86,7 +86,7 @@ def pdrawfunc_fixture(root: Path, extra_setter_listing: str = "",
     objects = root / "obj"
     (root / "src").mkdir()
     objects.mkdir()
-    object_names = ("r_entry", "r_worldcontrolasm", "asm486_experiments",
+    object_names = ("r_entry", "r_worldcontrolasm", "asm486_edge",
                     "r_edgea", "r_publicbindingsasm")
     for name in object_names:
         (objects / f"{name}.obj").touch()
@@ -129,7 +129,7 @@ def pdrawfunc_fixture(root: Path, extra_setter_listing: str = "",
         + "  16: eb f1 jmp 9 <_R_BeginEdgeFrame+0x9>\n"
         + "  18: c3 ret\n"
         + extra_setter_listing
-        + object_header("asm486_experiments")
+        + object_header("asm486_edge")
         + symbol(0, "_R_ScanEdges_asm486")
         + symbol(1, "_R_GenerateSpansBackward_asm486", 0x1000)
         + "00000000 <_R_ScanEdges_asm486>:\n"
@@ -183,9 +183,34 @@ class RendererOwnershipTests(unittest.TestCase):
                     self.assertTrue(ownership.renderer_source("model.c", symbol))
         self.assertFalse(ownership.renderer_source("model.c", "_Mod_LoadBrushModel.constprop.0"))
 
-    def test_split_sprite_geometry_assembly_remains_renderer_owned(self):
-        self.assertTrue(ownership.renderer_source("asm486_sprite_geometry.s", "_R_RotateSprite_asm486"))
-        self.assertTrue(ownership.renderer_source("asm486_sprite_geometry.s", "_R_ClipSpriteFace_asm486"))
+    def test_split_sprite_assembly_remains_renderer_owned(self):
+        self.assertTrue(ownership.renderer_source("asm486_sprite.s", "_R_RotateSprite_asm486"))
+        self.assertTrue(ownership.renderer_source("asm486_sprite.s", "_R_ClipSpriteFace_asm486"))
+
+    def test_split_alias_assembly_remains_renderer_owned(self):
+        self.assertTrue(ownership.renderer_source("asm486_alias.s", "_R_AliasTransformVector_asm486"))
+        self.assertTrue(ownership.renderer_source("asm486_alias.s", "_R_AliasClip_asm486"))
+
+    def test_split_sky_and_warp_assembly_remains_renderer_owned(self):
+        self.assertTrue(ownership.renderer_source("asm486_sky_warp.s", "_D_DrawSkyScans8"))
+        self.assertTrue(ownership.renderer_source("asm486_sky_warp.s", "_D_WarpPixels_asm486"))
+
+    def test_split_lighting_assembly_remains_renderer_owned(self):
+        self.assertTrue(ownership.renderer_source("asm486_lighting.s", "_R_AddDynamicLightSamples_asm486"))
+        self.assertTrue(ownership.renderer_source("asm486_lighting.s", "_R_BuildLightMap"))
+
+    def test_split_bsp_and_world_assembly_remains_renderer_owned(self):
+        self.assertTrue(ownership.renderer_source("asm486_bsp.s", "_R_RecursiveWorldNodeClip_asm486"))
+        self.assertTrue(ownership.renderer_source("asm486_world.s", "_R_RenderWorld_asm486"))
+
+    def test_split_particle_assembly_remains_renderer_owned(self):
+        self.assertTrue(ownership.renderer_source("asm486_particles.s", "_R_DrawParticles_asm486"))
+
+    def test_split_edge_cache_and_raster_assembly_remains_renderer_owned(self):
+        self.assertTrue(ownership.renderer_source("asm486_edge.s", "_R_ScanEdges_asm486"))
+        self.assertTrue(ownership.renderer_source("asm486_surface_cache.s", "_D_CacheSurface"))
+        self.assertTrue(ownership.renderer_source("asm486_raster.s", "_D_FillRect"))
+        self.assertTrue(ownership.renderer_source("asm486_surface_draw.s", "_R_DrawSurface"))
 
     def test_clone_callee_is_reported_with_its_root_trace(self):
         with tempfile.TemporaryDirectory(prefix="quake-ownership-") as directory:
@@ -301,8 +326,8 @@ class RendererOwnershipTests(unittest.TestCase):
             self.assertEqual(proof["implementations"], [
                 {"symbol": "_R_GenerateSpans_asm486", "source": "r_edgea.s",
                  "object": "r_edgea.obj", "language": "assembly"},
-                {"symbol": "_R_GenerateSpansBackward_asm486", "source": "asm486_experiments.s",
-                 "object": "asm486_experiments.obj", "language": "assembly"},
+                {"symbol": "_R_GenerateSpansBackward_asm486", "source": "asm486_edge.s",
+                 "object": "asm486_edge.obj", "language": "assembly"},
             ])
             entries = {entry["symbol"]: entry for entry in report["rendererEntries"]}
             self.assertEqual(entries["_R_GenerateSpans_asm486"], {

@@ -65,7 +65,7 @@ def verify(args):
         '-CpuTarget', 'i486', '-LocalOutputDirectoryName', 'collision-fixture', '-DumpFlags'],
         check=True, capture_output=True, text=True).stdout)
     cflags = resolved['cFlags'] + resolved.get('cSourceExtraFlags', {}).get('world.c', [])
-    asmflags = resolved['asmFlags'] + resolved.get('asmSourceExtraFlags', {}).get('asm486_experiments.s', [])
+    asmflags = resolved['asmFlags'] + resolved.get('asmSourceExtraFlags', {}).get('asm486_collision.s', [])
     defines = {value.split('=', 1)[0] for value in asmflags}
     for define in ('-DBENCH486', '-DASM486_CLIP_TO_LINKS'):
         if define not in defines:
