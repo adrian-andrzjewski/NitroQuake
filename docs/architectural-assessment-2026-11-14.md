@@ -1,5 +1,7 @@
 # NitroQuake Architectural Assessment
 
+> **Superseded on 2026-11-16.** This snapshot reviews outer `8a64282` and game `db4831f`; its findings and roadmap describe an older source state. Use the [2026-11-16 assessment](architectural-assessment-2026-11-16.md) for current architecture and priorities.
+
 **Assessment date:** 2026-11-14  
 **Reviewed revisions:** outer repository `8a64282`; game repository `db4831f`  
 **Scope:** source, build and benchmark infrastructure review. This is a source-level assessment; no code, build, runtime, or performance tests were run.

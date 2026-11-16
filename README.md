@@ -14,9 +14,23 @@ The game does not import or install benchmark tooling.
 The nested game is an existing Git checkout recorded by a gitlink, not a
 configured Git submodule. Preserve both repositories when copying this workspace.
 Commit game changes first, then record the resulting gitlink in this repository.
-For an independent game checkout, use a full-history clone of `quake/`.
+A shallow game checkout can build from its available `HEAD`; full history is
+needed only for a complete optimization-attempt inventory.
 For an independent benchmark checkout, supply `-GameRoot` or
 `NITROQUAKE_GAME_ROOT`; the sibling directory is only a default.
+
+Check checkout alignment and local prerequisites with the read-only workspace
+doctor:
+
+```powershell
+pwsh -NoProfile -File benchmarks/tools/check-workspace.ps1
+```
+
+It reports outer and game revisions, compares the committed and staged gitlink
+with the nested `HEAD`, lists dirty state and checks pinned tool availability.
+It does not fetch, reset, bootstrap, or replace repositories or tools. The
+[current architectural assessment](docs/architectural-assessment-2026-11-16.md)
+records the reviewed baseline and remaining priorities.
 
 See [repository boundaries](docs/repository-layout.md) and
 [migration provenance](benchmarks/migration.json). Existing `quake/out/` evidence,

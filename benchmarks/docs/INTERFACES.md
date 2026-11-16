@@ -11,10 +11,14 @@ send per-routine comparisons and probes to the internal
 `tools/build-dos-experimental.ps1` backend. The suite imports the game API; the
 game never imports the suite.
 
-Build identity comes from the game's full Git history and optimization ledger.
-Moving tooling does not count as an optimization attempt. Product identity and
-source fingerprints remain distinct from the benchmark tooling revision.
-Do not edit generated headers, inventories, manifests or proof reports.
+Product build identity combines the game's source revision with the fingerprint
+of source inputs and resolved build configuration. The manifest retains the
+optimization-attempt count and inventory digest as provenance when a complete
+inventory is available; full history is not required for the product identity
+or for a shallow checkout to build. Moving tooling does not count as an
+optimization attempt. Product identity and source fingerprints remain distinct
+from the benchmark tooling revision. Do not edit generated headers, inventories,
+manifests or proof reports.
 
 ## Paths and toolchains
 

@@ -1,5 +1,7 @@
 # NitroQuake Architectural Assessment
 
+> **Superseded on 2026-11-16.** This snapshot reviews outer `a4b2928` and game `4117414`, including then-uncommitted renderer edits. Its findings and roadmap are historical. Use the [2026-11-16 assessment](architectural-assessment-2026-11-16.md) for current architecture and priorities.
+
 - **Review date:** 2026-11-14
 - **Scope:** Outer NitroQuake workspace and nested `quake/` game repository
 - **Review basis:** Outer revision `a4b29288fcff87a7a2def32d8c95c590b0650b08`; nested game revision `41174145098667ccb1162dbc2b5e6524400402c5`; the working tree also contained pre-existing, uncommitted renderer edits in `quake/src/renderer/r_main.c`, `r_framecontrol_profile.inc`, and `r_framecontrol_release.inc`.

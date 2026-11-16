@@ -22,13 +22,15 @@ checkout, branch, commit, and archived output location for this consolidation.
 | --- | --- |
 | Native C and assembly, including optional engine instrumentation and native correctness fixtures | Python analysis, image/report comparison, ownership reports, and charts |
 | DJGPP bootstrap, compiler configuration, selector profiles, source-bound ISA verification, and their tests | DOSBox bootstrap, pinned emulator configuration, staging, smoke, coverage, profiling, parity, and timedemo runners |
-| Game assets, licenses, engine documentation, and optimization decision records used by build identity | Scenario definitions, captured-frame oracles, benchmark qualification tests, alternative DPMI comparison inputs, and operating guides |
+| Game assets, licenses, engine documentation, and optimization decisions retained as historical provenance | Scenario definitions, captured-frame oracles, benchmark qualification tests, alternative DPMI comparison inputs, and operating guides |
 
 Python used for compiler/source/binary verification is build infrastructure and
 stays with the game. A language-only move would break the standalone i486 gate.
-The optimization ledger stays with the game as build-identity provenance; its
-historic measurements and source quotations must not be silently rewritten.
-Native BENCH486 fixtures are optional game test code, not Python orchestration.
+The optimization ledger stays with the game as historical decision provenance.
+Its attempt count and inventory digest may appear as manifest metadata, but do
+not determine product build identity; historic measurements and source
+quotations must not be silently rewritten. Native BENCH486 fixtures are optional
+game test code, not Python orchestration.
 
 ## Integration contracts
 
@@ -66,8 +68,12 @@ checkout is removed. Unreferenced experiment output is not assumed disposable.
 
 ## Verification procedure
 
-- Build and run game build checks from an independent full-history checkout
-  without a neighboring benchmark suite or installed emulator requirement.
+- Run `benchmarks/tools/check-workspace.ps1` to compare the nested `HEAD` with the
+  outer committed and staged gitlink and report local tool availability. The
+  check is read-only and does not fetch, reset, bootstrap, or replace anything.
+- Build and run game build checks from an independent shallow or full-history
+  checkout without a neighboring benchmark suite or installed emulator. Full
+  game history is required only for a complete optimization-attempt inventory.
 - Verify compiler flags and selector propagation across i386/i486 and native
   release/BENCH486/profiling configurations.
 - Exercise suite path resolution against explicit and sibling game checkouts,
