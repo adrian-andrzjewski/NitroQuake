@@ -1,12 +1,16 @@
 # NitroQuake Architectural Assessment
 
-- **Assessment date:** 2026-11-16
-- **Outer repository:** HEAD 71f17310c58464ed5910b43db73393b63d18e9e1; implementation/tool baseline 94c492a
-- **Game repository:** HEAD 38873bce04762ced607ac36c5d59891173dbe275
-- **Checkout state at review start:** outer and nested worktrees clean; committed and staged outer gitlinks point to the reviewed game HEAD. The outer HEAD after 94c492a contains documentation updates.
-- **Method:** Read-only inspection of source, build scripts, architecture documentation, test contracts, and recorded profiling/parity evidence. No code was changed. No build, test suite, DOSBox scenario, or hardware run was executed for this review.
+- **Original assessment:** 2026-11-16
+- **Current-state refresh:** 2026-11-17
+- **Original baseline:** outer HEAD `71f17310c58464ed5910b43db73393b63d18e9e1`; game HEAD `38873bce04762ced607ac36c5d59891173dbe275`.
+- **Refresh baseline:** outer HEAD `7ea6d146e1b410487d87c2c9549dbbd58fb5e8a8`; game HEAD `ab81c94b83765e78723c48c62cb335c96fc41d96`. The outer gitlink points to that game HEAD. Both worktrees were clean before this report refresh.
+- **Method:** Read-only inspection of source, build scripts, architecture documentation, test contracts, and recorded profiling/parity evidence. No code was changed. No build, test suite, DOSBox scenario, or hardware run was executed during the refresh.
 
-This report supersedes the November 14 snapshots in [architectural-assessment-2026-11-14.md](architectural-assessment-2026-11-14.md) and [architectural-assessment-2026-11-14-current.md](architectural-assessment-2026-11-14-current.md). Those documents describe an earlier source and worktree state.
+This report supersedes the November 14 snapshots in [architectural-assessment-2026-11-14.md](architectural-assessment-2026-11-14.md) and [architectural-assessment-2026-11-14-current.md](architectural-assessment-2026-11-14-current.md). The November 16 findings below are the original review baseline; the November 17 refresh supersedes findings explicitly marked as completed or revised.
+
+Line-number anchors in the original architecture walkthrough describe the
+November 16 review baseline. The refresh uses stable paths, symbols, and
+subsystem documentation where later commits may have shifted line numbers.
 
 ## Follow-up after renderer assembly split (2026-11-16)
 
@@ -28,22 +32,46 @@ framebuffer/palette output over two repeats per profile. No physical 486 timing
 or qualification was performed.
 
 This follow-up supersedes the assembly-file finding in P2 and item 4 under
-“Substantial engineering opportunities.” Other findings remain tied to the
-reviewed baseline unless covered by a later dated follow-up.
+"Substantial engineering opportunities." The 2026-11-17 refresh below revises
+the assembly, benchmark-harness, memory-accounting, and stack-model findings.
+
+## Current-state refresh (2026-11-17)
+
+Three changes after the original review materially changed its priorities:
+
+| Area | Current evidence | Assessment status |
+| --- | --- | --- |
+| Assembly source ownership | The 11,914-line `asm486_experiments.s` was split into subsystem files plus `collision/asm486_collision.s`; the release inventory has 98 assembly sources and the C-reference inventory has 92. The documented split preserved the former 88 exported symbols without duplicate exports. | The monolithic-file finding is closed. No further broad split is recommended without a specific ownership or review problem. |
+| BENCH486 ownership | The roughly 13.2K-line harness was moved from `core/host_cmd.c` into `src/tests/bench486/bench486_harness.c`; regular host commands remain in `host_cmd.c`. | The production/test ownership finding is closed. The test harness remains a large file and is a lower-priority, demand-driven decomposition candidate. |
+| Memory and stack visibility | `quake/docs/memory-budget.md`, the `meminfo` command, and `quake/tools/test-memory-budget.py` account for engine, video, renderer, warp, and DPMI stack resources. `renderer-stack-budget.py` checks generated frames and cross-checks formulas parsed from preprocessed runtime C. | The missing-budget finding is closed. The unexplained low-memory map boundary and physical-DPMI qualification remain open. |
+| Release artifact guard | Commit `ab81c94` normalizes generated build identity for the release hash guard and adds `tools/test-i486-release-guard.py` to the game host-gate inventory. | The identity-guard correction is present in the current source. This refresh did not rerun its test or rebuild the release artifact. |
+
+The assembly split's documented gates include clean i486 release and C-reference
+linked ISA audits with zero above-i486 instructions and zero exemptions, a
+20/20 benchmark host suite, and focused `demo1-drawspans8` parity with exact
+frame checksums over two repeats per profile. These are recorded results, not
+tests rerun for this refresh. The same handoff reports 29 remaining
+selector/profile expectation mismatches in `tools/test-build-dos.py`, even
+though source counts and release/C-reference source inventories match. That
+specific contract gap should be reconciled before treating the selector matrix
+as fully covered. The focused parity case is not the full six-scene gate, and
+none of these results qualifies physical 486 performance.
 
 ## Executive assessment
 
-NitroQuake is a mature, DOS-first software renderer and game engine with unusually strong evidence discipline for a legacy 486 target. The repository split is explicit: the nested game checkout owns C, GNU assembly, game assets, the DJGPP build, native correctness fixtures, and ISA verification; the outer checkout owns DOSBox automation, scenario data, output analysis, and reports. A read-only workspace doctor now verifies that the nested checkout matches the committed and staged gitlinks.
+NitroQuake is a mature, DOS-first software renderer and game engine with unusually strong evidence discipline for a legacy 486 target. The nested checkout owns C, GNU assembly, game assets, the DJGPP build, native correctness fixtures, and ISA verification; the outer checkout owns DOSBox automation, scenario data, output analysis, and reports. The read-only workspace doctor verifies that the nested checkout matches the committed and staged gitlinks.
 
-The game source is grouped by subsystem, production C files no longer directly include the legacy quakedef.h umbrella, and C-to-assembly layout checks have been expanded. Build identity is based on source/configuration inputs, while historical optimization inventory remains separate provenance. Strict i486 object and linked-image audits, exact C/assembly parity checks, and rendering oracles are meaningful safeguards.
+Subsystem directories and headers now expose the source map without direct production includes of the legacy `quakedef.h` umbrella. The renderer assembly monolith has been split by subsystem, the BENCH486 harness has moved into test-owned sources, and the memory budget is documented and reported at runtime. Build identity is source/configuration based; strict i486 audits, exact C/assembly fixtures, and image oracles protect important contracts.
 
-The remaining risks are concentrated in three areas:
+The remaining risks are more focused:
 
-1. **Hardware qualification is still pending.** DOSBox-X provides repeatable screening, but it cannot establish physical 486 performance, DPMI stack behavior, or device compatibility. Recent candidate measurements are workload-dependent and include regressions.
-2. **Renderer stack use is large and modeled.** A roughly 128 KB edge/surface frame is now protected by generated-frame checks and runtime DJGPP stack preflight. The safety model is a significant improvement, but its call-path formulas and recursion assumptions need continued maintenance and physical-system evidence.
-3. **Subsystem interfaces are clearer than before, but ownership remains global and several files mix unrelated responsibilities.** The largest example is core/host_cmd.c, which combines gameplay commands with a very large BENCH486 profiling and fixture harness. The principal assembly experiment source is also a large selector-conditional translation unit.
+1. **Physical 486 qualification is pending.** DOSBox-X supports repeatable screening, but it cannot establish real CPU timing, DPMI stack behavior, or device compatibility.
+2. **Renderer stack use is large and formula-based.** Generated frame checks and runtime DJGPP stack preflight exist, and the build tool cross-checks runtime formulas. The call-path assumptions still need maintenance and physical-system evidence.
+3. **Low-memory map behavior is not explained.** Current captures bracket one e1m1 load transition and show registered-data minimum runs stopping before `POSTMAP`; logs do not identify the failed allocation or pool.
+4. **Selector/profile validation has a documented residual mismatch.** The assembly split's release/reference inventories agree, while the broader profile check reports 29 selector/profile expectation mismatches.
+5. **Ownership is improved but mutable state remains global.** The benchmark harness and assembly files have clearer owners; renderer, host, client, server, and memory state still crosses subsystem boundaries through globals and broad legacy structures.
 
-The pragmatic direction is to preserve the current DOS memory model, C/assembly calling conventions, narrow shipping build interface, exact output contracts, and evidence gates. Avoid broad modernization that adds indirection to pixel and span loops without measurements.
+Preserve the DOS memory model, C/assembly calling conventions, narrow shipping build interface, exact output contracts, and evidence gates. Avoid broad modernization that adds indirection to pixel and span loops without measurements.
 
 ## Architecture and runtime flow
 
@@ -78,19 +106,19 @@ The DOS system layer obtains a large memory block through dos_getmaxlockedmem, w
 
 The hunk grows from low and high ends of the same block. Low allocations hold persistent startup and level data; high marks support temporary allocations. Cache blocks occupy the space between those ends, carry owner handles and LRU links, and can be moved or evicted when hunk growth needs room. The allocator is DOS-appropriate and avoids general-purpose heap fragmentation, but it is a complex shared mechanism: zone, hunk, cache, surface cache, and selected assembly implementations all interact through global state in memory/zone.c.
 
-At 320x200, the surface cache baseline is 2,457,600 bytes (renderer/d_local.h and renderer/d_surf.c:117–135). It grows with framebuffer area and can be overridden with -surfcachesize. Renderer setup also allocates edge/surface arrays based on capacity; smaller scenes can use automatic arrays, while larger configured capacities use hunk storage. The waterwarp image is a 64,000-byte libc allocation retained for renderer lifetime (renderer/r_main.c:1396–1416). Allocation failure has a fallback path, but the buffer is outside the zone/hunk ownership API, so engine memory summaries do not describe every renderer-owned allocation in one place.
+The current memory budget is documented in `quake/docs/memory-budget.md`, and the `meminfo` command reports engine, video, renderer, warp, and DPMI stack resources. At 320x200, the source-derived surface cache is 2,457,600 bytes, the default zone is 49,152 bytes, video hunk payload is 2,649,936 bytes, frame-local edge/surface arrays total 128,096 bytes, and the waterwarp image is a 64,000-byte renderer-lifetime `malloc`. These values belong to different pools and must not be summed as if they were independent allocations: video and extra edge/surface storage are already inside the engine hunk.
 
-The largest persistent stack demand is the edge renderer. The arrays in renderer/r_main.c:1030–1035 correspond to generated frames near 128 KB. Current release requirements are 172,864 + 128 × world_depth bytes for the normal render and 236,880 + 128 × world_depth for the warp stack fallback. At the documented DOSBox-X world depth of 72, that is 182,080 bytes normal and 246,096 bytes for fallback. The documented DPMI stack had 523,772 bytes available, leaving 277,676 bytes of fallback headroom in that emulator setup.
+The release edge frame is 128,176 generated bytes. Current release stack requirements are `172,868 + 128 * world_depth` bytes for normal rendering and `236,884 + 128 * world_depth` for the stack warp fallback. At depth 72, the requirements are 182,084 and 246,100 bytes. The recorded DOSBox-X/CWSDPMI capture at depth 87 reported 523,940 bytes available, with 184,004 normal and 248,020 fallback requirements; fallback headroom was 275,920 bytes in that emulator setup. These are not physical-machine measurements.
 
-The current code is materially safer than the November 14 snapshot. renderer-stack-budget.py parses generated assembly prologues and validates selected view, edge, world, polygon, recursive clip, dispatch, and fallback frames. R_RenderViewDispatch reads ESP and DJGPP stack bounds before the normal render. It skips the render if normal capacity is insufficient, and disables waterwarp if only the extra fallback capacity is insufficient. The loaded BSP depth is measured with an iterative parent-link walk and cached for the current world.
+`renderer-stack-budget.py` parses generated assembly prologues, validates selected view, edge, world, polygon, recursive clip, dispatch, and fallback frames, and cross-checks the preprocessed runtime formula in `r_main.i`. `R_RenderViewDispatch` reads ESP and DJGPP stack bounds before rendering. It skips rendering if the normal requirement does not fit, and disables waterwarp if only the additional fallback capacity does not fit. The BSP depth is measured with an iterative parent-link walk and cached for the current world.
 
-This guard should be treated as a hard safety boundary, not a reason to increase stack use. Generated frame sizes are checked, while some complete path relationships remain explicit model constants (such as polygon-path and recursive-step costs). Changes in call structure, instrumentation callbacks, compiler output, or selector profile must update and validate that model. Moving the 128 KB arrays into permanent storage could reduce stack pressure but consumes scarce hunk/DPMI memory and may change 486 addressing and cache behavior. The current preflight is a reasonable default; consider scratch migration only if real-hardware evidence shows stack rejection or inadequate headroom.
+Treat this guard as a hard safety boundary, not a reason to increase stack use. Several whole-path relationships remain modeled terms (including polygon-path and recursive-step costs); any call-structure, instrumentation, compiler, or selector-profile change must preserve the generated/runtime cross-check. Moving the 128 KB arrays to permanent storage would trade stack for scarce hunk memory and may affect 486 addressing and cache behavior. Consider that only if physical-system evidence shows stack rejection or inadequate headroom.
 
 ### Renderer costs and optimization evidence
 
 The renderer combines classic BSP visibility and front-to-back world traversal, edge-list scan conversion, surface-cache texture reconstruction, Z spans, and separate alias-model triangle rasterization. These algorithms are suited to software rendering and indexed VGA/VESA output, but their cost varies strongly by scene, view size, model density, sound, and presentation mode. The same 486-oriented profile deliberately mixes C and handwritten assembly based on measured implementations; the current release profile selects C for BSP traversal and exact-zero-T span paths for texture spans while retaining many assembly paths.
 
-The most recent detailed profile report, benchmarks/docs/ENGINE-PROFILING-20261115.md, attributes 50.00% of the corrected parts-mode time on e1m1 and 44.44% on e1m2 to the combined surface, texture, Z, and cache group. Local server work is 17.55% and 16.98%; models and sprites 10.05% and 16.64%; world BSP and faces 9.48% and 9.96%; edges and dispatch 8.05% and 6.81%. Those are DOSBox attribution shares for the measured workloads, not physical 486 cycle shares.
+The latest detailed profile currently documented, `benchmarks/docs/ENGINE-PROFILING-20261115.md`, attributes 50.00% of corrected parts-mode time on e1m1 and 44.44% on e1m2 to the combined surface, texture, Z, and cache group. Local server work is 17.55% and 16.98%; models and sprites 10.05% and 16.64%; world BSP and faces 9.48% and 9.96%; edges and dispatch 8.05% and 6.81%. These are DOSBox attribution shares from the measured builds, not physical 486 cycle shares. No fresh full-workload profile after the November 16 source-ownership changes is documented here.
 
 Instrumentation itself is expensive: detailed mode added roughly 43–50% elapsed overhead on the captured workloads, and parts mode about 12–13%. The report therefore uses profile modes for attribution and separate uninstrumented runs for timing. It also records a useful caution against narrow special cases: same-row texture-span links were only 0.41–1.09% of spans, and prior no-row-cross and alternative span-indexing experiments measured slower. The current zero-T candidate improved the two local maps in the documented emulator runs but regressed demo1 and demo3, with demo2 inconclusive. No general renderer-speedup claim or physical-486 acceptance follows from that evidence.
 
@@ -108,10 +136,11 @@ Physical-hardware acceptance is explicitly pending in benchmarks/docs/PHYSICAL-4
 | --- | --- | --- | --- | --- |
 | P1 | Complete physical 486/DPMI qualification | High confidence for target reliability and performance claims | High effort; hardware access and repeated runs | Low implementation risk |
 | P1 | Keep the generated/runtime renderer stack model synchronized with call paths | High reliability impact; large frames remain in the hot path | Medium effort; ongoing validation | Medium |
-| P2 | Split gameplay command ownership from the BENCH486 harness and reduce cross-subsystem state coupling | High maintainability impact in a central 14K-line translation unit | Medium to high | Medium |
-| P2 | Make engine memory accounting cover all large allocations and practical low-memory modes | Medium reliability and diagnostic impact | Low to medium | Low |
+| P2 | Diagnose the observed low-memory map-load boundary | High reliability and supportability impact for constrained DOS/DPMI hosts | Medium; requires controlled captures and pool-level evidence | Medium |
+| P2 | Reconcile 29 selector/profile expectation mismatches and complete broad parity coverage | High confidence in configuration coverage | Medium; likely test-contract/source-map maintenance | Medium |
 | P2 | Add host structural tests and complete provenance for the custom ISO writer | Medium release confidence impact | Low to medium | Low |
-| P2 | Reduce assembly translation-unit and selector maintenance cost incrementally | Medium maintainability impact across a large set of selectable routines | High | Medium to high |
+| P2 | Continue incremental ownership work around global renderer and engine state | Medium maintainability impact | Medium to high; preserve legacy interfaces | Medium to high |
+| P3 | Decompose the remaining large BENCH486 test harness only where it improves ownership or review | Local maintainability impact; no runtime effect | Low to medium, demand-driven | Low |
 
 ### P1 — Physical 486/DPMI qualification remains open
 
@@ -119,39 +148,49 @@ The repository has a detailed acceptance procedure and extensive DOSBox-X parity
 
 **Action:** When hardware is available, run the existing physical procedure without weakening it: verify normal startup, collect three color/Z parity replays for demo1/2/3, run local-map checks, then gather at least five alternating uninstrumented pairs per workload. Preserve raw logs and hashes, report each workload and spread separately, and qualify the stack guard on the actual machine. Until then, keep claims explicitly scoped to DOSBox-X.
 
-### P1 — Stack safety now has a guard, but the model is part of the architecture
+### P1 — Stack safety has strong checks; physical-system margin remains unknown
 
-The 128 KB edge/surface frame is a significant DOS design constraint, not an unguarded defect in the current code. The build gate checks generated frame prologues, and the dispatcher rejects insufficient capacity before entering the large normal render. The fallback has a separate budget and controlled degradation behavior.
+The 128 KB edge/surface frame is a significant DOS design constraint. The build checks generated frame prologues and cross-checks preprocessed runtime formulas; the dispatcher rejects a render that does not fit and can disable waterwarp when only the fallback budget is short. The formulas and their caller/callee terms are documented in `quake/docs/renderer-assembly/warp-scratch.md`.
 
-The remaining maintenance risk is that the whole-stack requirement combines selected generated frames with a small number of modeled path constants and assumptions about recursion and tail-call behavior. This is understandable for C plus handwritten assembly, but a new call edge or profile callback can invalidate the formula even if individual frames still pass.
+The residual maintenance risk is that complete path requirements include modeled relationships and recursion assumptions. A new call edge, selector, compiler frame, or profiling callback can invalidate the model even if its individual frame remains below the limit. The captured DOSBox-X stack margin does not establish the bounds provided by real DPMI hosts.
 
-**Action:** Keep the frame-budget test adjacent to the release, C-reference, and PROFILE486 build gates. Require source review of every call-path assumption when modifying renderer entry points, BSP traversal, polygon clipping, or profiling callbacks. Add a concise mapping from each budget term to the actual caller/callee path in the report and stack tool. Keep the reduced-stack DOSBox test as a useful regression; do not describe the synthetic forced-short mode as a real reduced stack. Physical validation remains a separate requirement.
+**Action:** Keep the frame-budget check in release, C-reference, and PROFILE486 gates. When changing renderer entry points, BSP traversal, polygon clipping, or callbacks, update the call-path ledger and generated/runtime cross-check together. Retain the reduced-stack DOSBox regression as emulator evidence. Complete the physical acceptance procedure before making hardware safety claims.
 
-### P2 — The command module mixes gameplay, diagnostics, and a large benchmark harness
+### P2 — Low-memory map-load failures need pool-level diagnosis
 
-core/host_cmd.c is 14,165 lines. It begins with broad dependencies across client, server, renderer, video, sound, memory, input, and model APIs. Most of its early body contains BENCH486 profiling, checksum/event reporting, memory and renderer fixtures, and benchmark command handling; ordinary host command implementations such as Host_Quit_f begin around line 13,231, with Host_InitCommands around line 15,078. The BENCH486 code is excluded from ordinary release behavior, but it keeps the benchmark harness embedded in the gameplay command translation unit and gives that unit a very wide include and rebuild surface.
+`quake/docs/memory-budget.md` and `meminfo` now account for the engine arena, video hunk, cache, renderer capacities, warp allocation, and stack as distinct pools. The evidence brackets one e1m1 transition between 7,241,728 bytes (stops before `POSTMAP`) and 7,258,112 bytes (completes) for the recorded DOSBox-X/CWSDPMI setup. Standard `-minmemory` and the captured registered-data minimum runs also stop during map loading. The captured logs contain no `Sys_Error`, `Host_Error`, or hunk-allocation failure, so the evidence does not identify which request failed.
 
-**Action:** Split by ownership in stages. First move self-contained BENCH486 reporting, checksum serialization, timer/profile aggregation, and fixture case groups behind test-owned interfaces. Then split gameplay command groups such as lifecycle/map/save-load, client interaction, and server/player controls where dependencies permit. Keep a small command registration layer and preserve the current command strings, public entry points, and test output formats. Do not expose renderer globals broadly just to make the first extraction easy; create narrow test interfaces for the data a fixture actually observes.
+**Action:** Preserve these runs as an observed boundary for that build and DPMI setup, not a general minimum requirement. Add targeted instrumentation or allocation-failure diagnostics around map loading, then repeat with matched build, map, and DPMI settings to identify the pool/request at the failure point. Do not raise the startup minimum or claim every map loads at that minimum based on the current captures.
 
-### P2 — Memory pressure is intentional but not visible as one budget
+### P2 — Selector/profile expectations still disagree with current build inventories
 
-The hunk/zone/cache design suits the target, and surface-cache sizing is explicit. However, the user-visible minimum memory check is a coarse threshold, the renderer’s surface and edge capacities can allocate additional hunk storage, the warp image uses libc malloc, and stack requirements are a separate DPMI resource. Those allocations are governed by related but distinct allocators and diagnostics. A successful Host_Init memory threshold does not by itself show how much remains for a large BSP, caches, sound, and stack.
+The renderer assembly split's recorded release and C-reference inventories contain 98 and 92 assembly sources, respectively, and its focused parity and linked ISA gates passed. `quake/ASM486-HANDOFF.md` also records that `tools/test-build-dos.py` reports 29 selector/profile expectation mismatches even though the source counts and release/C-reference inventories match. This is a test-contract inconsistency; the report does not establish whether all 29 failures are stale expectations, missing coverage, or a mixture.
 
-**Action:** Add or maintain a memory-budget document for the supported 320x200 release profile: minimum engine block, default zone, surface cache, edge/surface capacity policy, warp allocation/fallback, level hunk growth, and stack requirement by BSP depth. Improve diagnostics to distinguish engine arena remaining, renderer caches, libc/DPMI allocations where observable, and stack headroom. Do not merge the allocators or raise the minimum blindly; first use the current profiling counters and real low-memory runs to identify pressure.
+**Action:** Classify each mismatch against the current selector table, resolved flags, manifest, and actual source inventory. Update expectations only when the implementation contract supports it; do not simply suppress the failures. Then run the complete selector/profile host gates and the documented multi-scene parity suite. This is the highest-value follow-up to the assembly-split work because the split's main risk is build-selection drift, not runtime overhead.
 
-### P2 — The ISO writer is a bespoke format implementation without direct regression coverage
+### P2 — The ISO writer still lacks direct format regression coverage
 
-benchmarks/tools/build-iso9660.py implements directory records, both-endian path tables, extent allocation, volume descriptors, and atomic output replacement. Its input validation is careful about DOS/ISO names, duplicate names, links/reparse points, and volume limits. However, the benchmark test inventory has no dedicated ISO-structure test, and benchmarks/tools/run-tests.ps1 does not invoke an ISO writer test. The launcher sidecar at benchmarks/tools/build-launcher-iso.ps1:229–242 records game revision, executable and ISO hashes, and staged-file hashes, but it omits the benchmark-suite revision and the complete game build-manifest/configuration identity.
+`benchmarks/tools/build-iso9660.py` implements directory records, both-endian path tables, extent allocation, volume descriptors, and atomic output replacement. Its input validation covers DOS/ISO names, duplicates, links/reparse points, and volume limits. However, the benchmark host test inventory has no dedicated ISO-structure test, and `benchmarks/tools/run-tests.ps1` does not invoke one. The launcher sidecar records game revision, executable and ISO hashes, and staged-file hashes, but omits the benchmark-suite revision and complete game build-manifest/configuration identity.
 
-**Action:** Add synthetic-tree host tests that parse the output and verify volume descriptors, path tables, directory records, extents, alignment, payload bytes, empty directories, boundary sizes, invalid names, and duplicate names. Include them in the host runner. Add suite revision and game build-manifest hash/profile identity to the sidecar. Keep DOS boot validation separate from writer-format tests.
+**Action:** Add synthetic-tree host tests that parse the output and verify volume descriptors, path tables, directory records, extents, alignment, payload bytes, empty directories, boundary sizes, invalid names, and duplicate names. Include them in the host runner. Add suite revision and game build-manifest/profile identity to the sidecar. Keep DOS boot validation separate from writer-format tests.
 
-### P2 — The C/assembly implementation matrix is powerful and costly
+### P2 — Assembly-file ownership is improved; selector complexity remains
 
-The current release profile includes many independently selectable C/assembly routines. That is justified by the 486 target and by measurement: the release profile retains the C BSP walk because it measured faster in its qualified DOSBox workload, while many pixel, memory, and setup routines use assembly. The C-reference profile changes selectable paths but deliberately retains legacy assembly and fixed low-level controls; it is a reference configuration, not an all-C executable.
+The original roughly 299 KB, 11,914-line `renderer/asm486_experiments.s` mixed many selector-conditional routines in one translation unit. It has been split into subsystem-owned renderer units and a collision unit. This materially improves source navigation, review ownership, and independent change/merge scope. The split preserved the documented 88 exported symbols without duplicate exports and did not claim an algorithmic or runtime speedup. The documented i486 release inventory now contains 98 assembly sources; the C-reference inventory contains 92 because six selector-independent helpers do not need to be rebuilt there.
 
-The risk is implementation drift and review cost. A large portion of renderer assembly is centralized in renderer/asm486_experiments.s, a roughly 299 KB source file with selector-conditional entry points. The internal build machinery is also large: build-dos-experimental.ps1 is about 1,371 lines and selectors.ps1 about 2,587 lines. The selector table is intentionally the single ordered source for flag mapping, live assembly selection, and inventory checks; that consolidation is valuable. The supported public builder remains small and named-profile based.
+This is the detailed status of priority action #6. The decision to split was sound because the old file crossed stable responsibilities. Source discovery is recursive, retains unique object basenames, and is mapped through `docs/source-layout-map.json`, including one-to-many mappings for moved routines. Keeping one ordered selector source is also sound: `tools/selectors.ps1` centralizes parameter validation, manifest names, profile suffixes, C and assembly flags, assembly inclusion, and expected assembly inventory. Replacing that table with multiple hand-maintained profile lists would recreate the drift it was designed to prevent.
 
-**Action:** Preserve the single selector source and public profiles. Consider splitting the large assembly file by stable subsystem ownership while retaining one selector table and unchanged symbol/ABI contracts. Keep C layout assertions, source-bound ISA proofs, release/profile checks, and exact C/assembly parity tests next to each split. Simplify internal build mechanics only when a measured maintenance problem is solved; do not replace the selector table with repeated hand-maintained profile lists.
+The selector matrix remains the harder part. The handoff describes 115 current i486 assembly selectors. Each choice can affect compiler/assembler defines, active source files, profile identity, build manifests, selector inventory checks, and the C-versus-assembly comparison path. This multiplies configuration and review work, although the C oracle is valuable for exact parity and performance A/B work. The public builder limits shipping configurations to named profiles; the experimental builder carries the finer-grained choices. The remaining documented complexity is the number of selectable alternatives and the size of the experimental build/test machinery, plus the 29 expectation mismatches described above.
+
+**Action:** Treat the translation-unit split as complete. Resolve the profile expectation mismatches, then keep source discovery, symbol/ABI contracts, per-source ISA checks, profile manifests, release hash pins, and C-oracle parity synchronized. Avoid splitting files further solely to reduce line counts; do it when a file crosses ownership boundaries or causes review/merge friction. Consider pruning only selectors that are both unused and unsupported by a current parity, measurement, or historical-reproduction need. Any such pruning must update the selector table, public experimental interface, tests, and provenance together.
+
+The C/assembly matrix remains useful on a 486: it supports matched implementation comparisons and preserves a C oracle for selected routines. Its cost is real, however: every extra selector expands flag, object, identity, test, and review combinations. The practical control is to keep the public shipping builder limited to named profiles, isolate exploratory combinations behind the experimental builder, and require a documented reason for adding or retaining selectors. Do not simplify by removing the C oracle or parity gates without evidence that the alternative preserves correctness and the measurement workflow.
+
+### P3 — BENCH486 harness decomposition is optional and demand-driven
+
+The BENCH486 code has moved out of `core/host_cmd.c` into `src/tests/bench486/bench486_harness.c`, correcting the production/test ownership boundary and narrowing the normal host-command module. The test-owned harness remains a large, broad translation unit. Its size is no longer a production architecture defect, but can still increase test rebuild scope and make fixture ownership harder to review.
+
+**Action:** Split only when a concrete maintenance issue appears, such as unrelated fixtures repeatedly conflicting, test-only dependencies leaking across cases, or reviewers being unable to trace one fixture's data. Extract cohesive groups behind test-owned headers; preserve benchmark command strings, report formats, checksums, and fixture ABI. Avoid turning each small fixture into a new module without a dependency or ownership benefit.
 
 ## Current strengths to preserve
 
@@ -166,21 +205,22 @@ The risk is implementation drift and review cost. A large portion of renderer as
 
 ### Quick wins
 
-1. Add host structural tests for build-iso9660.py and include them in benchmarks/tools/run-tests.ps1.
-2. Extend the portable ISO manifest with benchmark-suite revision and the selected game build manifest/configuration identity.
-3. Document the renderer stack formula terms alongside the corresponding callers and callees; make future call-path edits explicitly update this contract.
-4. Add a concise release memory budget showing the 320x200 surface cache, default zone, hunk growth, warp image, edge/surface storage, and stack as separate resource pools.
+1. Classify and resolve the 29 selector/profile expectation mismatches in `quake/tools/test-build-dos.py`; retain the current selector table as the authoritative mapping.
+2. Add host structural tests for `benchmarks/tools/build-iso9660.py` and include them in `benchmarks/tools/run-tests.ps1`.
+3. Extend the portable ISO sidecar with benchmark-suite revision and the selected game build-manifest/configuration identity.
+4. Diagnose the allocation or pool that causes the captured pre-`POSTMAP` failures, without turning the observed DOSBox boundary into a general memory minimum.
 5. Keep physical qualification status visible in benchmark reports; avoid broad 486 claims based only on DOSBox-X.
 
 ### Substantial engineering opportunities
 
-1. Complete the physical 486/DPMI acceptance matrix, including rendered parity, VGA/VESA startup, low-memory behavior, and alternating uninstrumented timing pairs.
-2. Evaluate moving the edge/surface scratch arrays only if the physical stack measurements justify spending additional engine memory. Preserve exact image/Z output and compare matched timings on the target.
-3. Split core/host_cmd.c into command-owned modules and a test-owned BENCH486 harness. Introduce narrow interfaces around state observed by tests rather than adding new global access.
-4. Divide renderer/asm486_experiments.s into subsystem-owned assembly units where that reduces merge, review, or ISA-audit scope. Retain the current profile-selection contract and C oracle.
-5. Continue incremental renderer state ownership work through existing subsystem headers. Do not convert the complete renderer to context objects until a prototype shows the 486 code generation remains acceptable.
-6. Direct future optimizations at measured work in surface, texture, Z/cache, and model paths. Require exact color/Z parity, a strict i486 ISA pass, and repeated matched uninstrumented timings; treat emulator and physical results as separate evidence.
+1. Complete the physical 486/DPMI acceptance matrix, including rendered parity, VGA/VESA startup, stack behavior, and alternating uninstrumented timing pairs.
+2. Add pool-level evidence for the low-memory map-load boundary across base and registered data; distinguish startup minimums from map-specific capacity.
+3. After selector expectations are reconciled, run complete multi-scene parity and matched release profiling on the current source revision. Keep emulator timing and physical timing separate.
+4. Continue incremental state ownership through existing subsystem headers. Do not convert the complete renderer to context objects until a prototype shows that the 486 code generation remains acceptable.
+5. Consider moving edge/surface scratch arrays only if physical stack measurements justify spending additional engine memory. Preserve exact image/Z output and compare matched timings on target hardware.
+6. Keep the assembly split and single selector table stable. Reduce the selector matrix only where current parity, measurement, and historical-reproduction needs permit; preserve symbol/ABI, source-bound ISA, build identity, release pin, and C-oracle contracts.
+7. Direct optimizations at measured surface, texture, Z/cache, and model work. Require exact color/Z parity, a strict i486 ISA pass, and repeated matched uninstrumented timings; refresh broad profiles after structural changes.
 
 ## Assessment limits
 
-This is a source-level architecture assessment supplemented by existing project reports. The November 15 performance and November 14 stack values are recorded historical runs, not runs performed during this review. No build or test command was executed here. Physical 486 qualification remains pending. Recommendations about restructuring the legacy renderer and command modules are architectural opportunities, not evidence that the current build is incorrect.
+This is a source-level architecture assessment supplemented by existing project reports and a November 17 source/documentation refresh. The November 15 performance profile and DOSBox-X/CWSDPMI memory and stack captures are recorded evidence, not runs performed during this refresh. The November 16 assembly-split gates and focused parity results are reported by the handoff document and were not rerun here. No build or test command was executed for this refresh. Physical 486 qualification remains pending. The assembly split, BENCH486 extraction, and memory-budget instrumentation are completed work; remaining recommendations are not evidence that the current release build is incorrect.
