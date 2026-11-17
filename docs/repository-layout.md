@@ -59,7 +59,11 @@ history records new ownership without rewriting either repository's history.
 Cross-repository transfer cannot be represented by an ordinary single-repository
 rename; the manifest provides explicit source attribution without history rewriting.
 
-Workspace branding now belongs to `quake/assets/branding/`. Local comparison
+Canonical game branding remains in `quake/assets/branding/`. The outer
+repository keeps publication copies of the logo variants and its tracked
+benchmark chart in `docs/assets/` so the GitHub landing page renders without
+reading through the game gitlink. These copies are presentation assets; the
+game checkout remains the canonical owner of engine artwork. Local comparison
 executables moved to ignored `benchmarks/baselines/`, with a hash inventory.
 License files, canonical game PAKs, tool caches, junctions, accepted artifacts,
 and historical reports are preserved. Historical output from a retired

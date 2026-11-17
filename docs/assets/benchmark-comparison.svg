@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="560" viewBox="0 0 1200 560" role="img" aria-labelledby="title desc">
+  <title id="title">Quake, 486quake, and NitroQuake median frame rate</title>
+  <desc id="desc">Horizontal bars show median demo1 performance at 320 by 200 in DOSBox-X: Quake 13.4 FPS, 486quake 14.2 FPS, NitroQuake 16.9 FPS.</desc>
+  <rect width="1200" height="560" rx="18" fill="#111318" />
+  <rect x="1" y="1" width="1198" height="558" rx="17" fill="none" stroke="#3a3f49" stroke-width="2" />
+  <text x="66" y="64" fill="#f4f1e8" font-family="Arial, sans-serif" font-size="28" font-weight="700">MEDIAN FRAME RATE</text>
+  <text x="66" y="100" fill="#abb1bc" font-family="Arial, sans-serif" font-size="17">demo1 · 320 × 200 · 969 frames · DOSBox-X · 3 runs per executable</text>
+  <g stroke="#353a44" stroke-width="1">
+    <path d="M420 140V438 M525 140V438 M630 140V438 M735 140V438 M840 140V438 M945 140V438 M1050 140V438" />
+  </g>
+  <g fill="#9ca3af" font-family="Arial, sans-serif" font-size="15" text-anchor="middle">
+    <text x="420" y="462">0</text><text x="525" y="462">3</text><text x="630" y="462">6</text>
+    <text x="735" y="462">9</text><text x="840" y="462">12</text><text x="945" y="462">15</text><text x="1050" y="462">18 FPS</text>
+  </g>
+  <g fill="#e9e7e0" font-family="Arial, sans-serif" font-size="21">
+    <text x="66" y="195">Original Quake</text>
+    <text x="66" y="295">486quake</text>
+    <text x="66" y="395">NitroQuake v0.999+26</text>
+  </g>
+  <rect x="420" y="163" width="469" height="48" rx="5" fill="#858c98" />
+  <rect x="420" y="263" width="497" height="48" rx="5" fill="#f47a35" />
+  <rect x="420" y="363" width="592" height="48" rx="5" fill="#ffca3a" />
+  <g font-family="Arial, sans-serif" font-size="21" font-weight="700">
+    <text x="902" y="194" fill="#f4f1e8">13.4</text>
+    <text x="930" y="294" fill="#f4f1e8">14.2</text>
+    <text x="1025" y="394" fill="#ffdf75">16.9</text>
+  </g>
+  <path d="M66 496H1134" stroke="#353a44" />
+  <text x="66" y="530" fill="#abb1bc" font-family="Arial, sans-serif" font-size="16">Measured medians for three separate executables; see the README for defaults and attribution limits.</text>
+</svg>
