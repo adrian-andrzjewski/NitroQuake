@@ -118,7 +118,7 @@ deferred. See [`quake/docs/source-layout.md`](../quake/docs/source-layout.md) an
 - [x] Split the monolithic `asm486_experiments.s` into subsystem-owned assembly units and a collision unit. The recorded split preserved 88 exported symbols without duplicate exports.
 - [x] Keep one ordered selector table as the source for flags, profile suffixes, assembly inclusion, manifests, and inventory checks.
 - [x] Review current ownership boundaries; avoid further broad source splitting unless ownership boundaries, review friction, or merge conflicts justify it.
-- [ ] Before adding a selector, document its parity, measurement, or historical-reproduction need and update its tests and build identity contracts.
+- [x] Define and test a selector-addition gate requiring a documented parity, measurement, or historical-reproduction need plus test and build-identity coverage.
 - [ ] Consider removing a selector only after confirming it is unused and no longer required for parity, measurements, or reproducible historical experiments.
 
 **Completion evidence:** Source ownership stays subsystem-based; selector behavior remains represented once; each supported profile retains symbol/ABI, ISA, build identity, release pin, and C-oracle coverage. The recorded split evidence and the former selector-test mismatch set are detailed in the assessment.
@@ -126,6 +126,8 @@ deferred. See [`quake/docs/source-layout.md`](../quake/docs/source-layout.md) an
 **Review update (2026-11-17):** The current work added no assembly source split and no selector. The profile build used the committed i486 release selector schedule; selector growth or removal was not needed to complete the current-source measurement. No further split or selector change is proposed from this review.
 
 **Current layout review (2026-11-17, game revision `644fb3a`):** `test-source-layout.py` passes with 182 production units, 109 BENCH fixtures, and 402 mapped files. `test-header-dependencies.py` passes with 83 production C files and no explicit `quakedef.h` umbrella users. The latest host/video boundary change adds a narrow colormap accessor without moving unrelated sources. These ownership checks and the reviewed recent diff do not show a boundary, repeated conflict, or review-friction case that justifies another broad split.
+
+**Selector-addition gate (2026-11-17, game commit `05641e2`):** [`quake/docs/SELECTOR-CHANGE-CHECKLIST.md`](../quake/docs/SELECTOR-CHANGE-CHECKLIST.md) now requires a recorded parity, measurement, or historical-reproduction need, updates to the ordered selector table, profile, matrix tests and build identity, and the applicable parity/ISA gates. `BUILD-DOS.md` and the selector table point to this review. `test-build-fingerprints.ps1` now explicitly proves that changing the resolved profile suffix changes the artifact identity. The fingerprint, build-number, profile-completeness and document-structure checks passed; `test-build-dos.py` passed all 138 selector cases at game revision `644fb3a` before this documentation/test-only commit, with the selector table unchanged.
 
 ### Keep BENCH486 test ownership focused
 
