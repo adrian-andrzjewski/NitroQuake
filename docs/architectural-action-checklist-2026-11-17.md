@@ -4,7 +4,9 @@
 **Outer repository:** `7ea6d146e1b410487d87c2c9549dbbd58fb5e8a8`  
 **Game repository:** `ab81c94b83765e78723c48c62cb335c96fc41d96` (outer gitlink matches)
 
-This checklist converts the findings in [the architectural assessment](architectural-assessment-2026-11-16.md) into reviewable work items. The snapshot hashes identify the source state used to create the list; dated completion notes below record work performed afterward. Recorded test evidence identifies when and against which source the checks ran.
+This checklist converts the findings in [the historical architectural assessment](architectural-assessment-2026-11-16.md) into reviewable work items. See the [current-tip assessment](architectural-assessment-2026-11-17.md) for the refreshed subsystem map and current evidence boundaries. The snapshot hashes identify the source state used to create the list; dated completion notes below record work performed afterward. Recorded test evidence identifies when and against which source the checks ran.
+
+**Current checklist status (2026-11-17, outer revision `9ae81ef`, game revision `432ae1a`):** All non-hardware action items below are checked and have completion evidence. The five remaining unchecked items are the physical 486/DPMI machine record, target startup/device checks, target parity and local-map runs, repeated physical timings, and stack/fallback tests on the actual DPMI stack. No physical target is currently available; DOSBox-X evidence cannot close those gates. Keep this checklist open until the physical acceptance procedure is completed.
 
 ## P1 — Target reliability and stack safety
 
