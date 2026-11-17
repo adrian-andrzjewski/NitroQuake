@@ -6,8 +6,9 @@
 | --- | --- |
 | Review date | 2026-11-17 |
 | Outer workspace | `fbf14a84a7f496b200c25680480b5e6082c85898` |
-| Game checkout | `432ae1afaf00e3551d6564ad94fcd4263c5708a6` |
+| Game checkout reviewed | `432ae1afaf00e3551d6564ad94fcd4263c5708a6` |
 | Latest source-affecting game commit | `644fb3a48daad2b5b8ff15a1db7887490b2b8e41` (`refactor(video): route colormap access through host interface`) |
+| Follow-up game documentation commit | `dc6a21a` clarifies that optimization history is manifest provenance, not product identity |
 | Checkout consistency at audit start | Both worktrees were clean; the outer `quake` gitlink matched the game checkout |
 | Method | Source-level review of both repositories, source layout, public headers, build contracts, memory/stack model, and recorded validation evidence; this report is the only documentation output |
 | Commands run for this review | Git status/revision and diff checks plus source/document inspection; no builds or tests rerun |
@@ -43,7 +44,7 @@ The outer repository records `quake/` as a gitlink to a standalone game history,
 | Benchmark suite | DOSBox-X setup, staging, scenarios, timedemos, profiling collection, comparisons, charts, and run output | Explicit game root plus build manifests and recorded result schemas |
 | Native fixtures | C/assembly oracle code that must compile against engine internals | Game-owned `src/tests/bench486/` interfaces |
 
-The public game surface is intentionally small: `i486-release` and `c-reference`. Build identity is based on source revision and the resolved source/configuration fingerprint. Optimization-attempt count and inventory digest remain provenance in the manifest, so a shallow clone can build without pretending its history inventory is complete. One documentation inconsistency remains: [quake/README.md](../quake/README.md) still says the ledger determines the reproducible build number, which conflicts with [BUILD-DOS.md](../quake/BUILD-DOS.md) and [benchmarks/docs/INTERFACES.md](../benchmarks/docs/INTERFACES.md). Update that sentence when the README is next touched.
+The public game surface is intentionally small: `i486-release` and `c-reference`. Build identity is based on source revision and the resolved source/configuration fingerprint. Optimization-attempt count and inventory digest remain provenance in the manifest, so a shallow clone can build without pretending its history inventory is complete. The historical build-number sentence in [quake/README.md](../quake/README.md) was corrected in game commit `dc6a21a` to agree with [BUILD-DOS.md](../quake/BUILD-DOS.md) and [benchmarks/docs/INTERFACES.md](../benchmarks/docs/INTERFACES.md).
 
 ## Runtime architecture
 
@@ -145,12 +146,12 @@ This separation is a strength: source/layout checks, ISA compatibility, visual c
 | P1 | Normal renderer stack remains large | A generated/runtime model and preflight exist, but the ordinary edge/surface frame itself is about 128 KB and whole-path assumptions need synchronization with call graph changes. |
 | P2 | Runtime ownership remains broad | Global state and transitive aggregate-header dependencies obscure ownership, especially across renderer, client, server, host and memory. |
 | P2 | Build schedules still have parallel representations | The ordered selector table is a good central contract, but separate release/profile include schedules and C/assembly variants raise review and parity cost. |
-| P2 | User-facing build identity documentation is inconsistent | `quake/README.md` retains a ledger-derived build-number statement that is superseded by the current source/configuration identity contract. |
+| Resolved | User-facing build identity documentation drift | Game commit `dc6a21a` aligns `quake/README.md` with the source/configuration identity contract; build behavior did not change. |
 | P3 | BENCH486 harness is large | It is correctly test-owned and split from normal host commands; decompose further only when the existing fixture grouping causes concrete maintenance friction. |
 
 ## Recommended incremental work
 
-1. Correct the stale build-identity statement in `quake/README.md` so it agrees with `BUILD-DOS.md` and the benchmark interface contract.
+1. **Completed in game commit `dc6a21a`:** Correct the stale build-identity statement in `quake/README.md` so it agrees with `BUILD-DOS.md` and the benchmark interface contract.
 2. Continue narrowing includes at the point of use. First reduce server/client transitive dependencies and split declarations from implementation-owned globals where a bounded change has clear consumers. Keep legacy symbols and calling conventions stable during migration.
 3. Give renderer-owned mutable state smaller interfaces in stages. Preserve the existing assembly ABI and structure-layout assertions; avoid a broad context-object conversion until a measured prototype shows acceptable i486 code generation.
 4. Keep generated-frame, runtime stack-formula, reduced-capacity and warp-fallback checks synchronized with renderer call-path changes. Record the physical target margin when hardware access becomes available.
@@ -159,4 +160,4 @@ This separation is a strength: source/layout checks, ISA compatibility, visual c
 
 ## Review limits
 
-This assessment describes checked-in source and documentation at the revisions in the review table and uses committed/recorded test and emulator results. It did not execute builds, host tests, DOSBox scenarios, or physical hardware runs. At audit start both worktrees were clean and the gitlink matched; the only working-tree changes from this review are the two assessment documents. No engine-source change is proposed; physical qualification and performance claims remain explicitly open.
+This assessment describes checked-in source and documentation at the revisions in the review table and uses committed/recorded test and emulator results. It did not execute builds, host tests, DOSBox scenarios, or physical hardware runs. Both worktrees were clean at audit start and the gitlink matched. The follow-up made a documentation-only game change at `dc6a21a`; this outer update records that revision. No engine-source change is proposed; physical qualification and performance claims remain explicitly open.
