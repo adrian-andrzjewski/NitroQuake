@@ -79,12 +79,24 @@ A fresh C-reference (`i486-c-reference`, source fingerprint `2002B12C0199436302F
 
 ### Reduce global-state coupling incrementally
 
-- [ ] Identify one concrete cross-subsystem state flow that causes maintenance or testing friction; record its producer, consumers, and hot-path impact.
-- [ ] Introduce a narrow subsystem interface for that flow while preserving C/assembly symbol names, calling conventions, and structure layout contracts.
+- [x] Identify one concrete cross-subsystem state flow that causes maintenance or testing friction; record its producer, consumers, and hot-path impact.
+- [x] Introduce a narrow subsystem interface for that flow while preserving C/assembly symbol names, calling conventions, and structure layout contracts.
 - [ ] Compare generated i486 code and matched performance before expanding the pattern to more state.
-- [ ] Defer a full renderer context-object conversion unless a prototype demonstrates acceptable 486 code generation and measurable maintenance value.
+- [x] Defer a full renderer context-object conversion unless a prototype demonstrates acceptable 486 code generation and measurable maintenance value.
 
-**Completion evidence:** The chosen state boundary has a focused interface, documented ownership, unchanged parity, and acceptable release-profile code generation. See [`quake/docs/source-layout.md`](../quake/docs/source-layout.md) and the subsystem headers under `quake/src/`.
+**Progress evidence (2026-11-17):** `Host_Init` owns and loads `host_colormap`; the only production
+consumers outside the host are `VGA_InitMode` and `VID_ExtraInitMode`, both during video-mode
+initialization. The video test fixture also had to define the legacy host global. `host_assets.h`
+now exposes `Host_GetColormap`, both video drivers use it, and the legacy `host_colormap` symbol
+remains available. The accessor is not called in the frame-rendering path. The strict i486 release
+build, renderer stack check, and linked ISA audit pass. In matched uninstrumented i486 BENCH builds
+using the release selector schedule, 11 renderer/drawing object files were byte-identical; only the
+two video-driver objects changed. No matched timing or DOS runtime parity run has been collected
+for this boundary, so this pattern has not been expanded to other state. The game host suite
+completed 15/17 gates; its sysinfo and video C tests could not run because native `gcc` is
+unavailable on this host. The benchmark host suite passed 22/22. A full renderer context-object
+conversion remains deferred. See [`quake/docs/source-layout.md`](../quake/docs/source-layout.md) and
+`quake/src/host_assets.h`.
 
 ## P3 — Demand-driven maintainability and optimization
 
