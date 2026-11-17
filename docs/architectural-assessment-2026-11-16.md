@@ -46,6 +46,14 @@ Three changes after the original review materially changed its priorities:
 | Memory and stack visibility | `quake/docs/memory-budget.md`, the `meminfo` command, and `quake/tools/test-memory-budget.py` account for engine, video, renderer, warp, and DPMI stack resources. `renderer-stack-budget.py` checks generated frames and cross-checks formulas parsed from preprocessed runtime C. | The missing-budget finding is closed. The unexplained low-memory map boundary and physical-DPMI qualification remain open. |
 | Release artifact guard | Commit `ab81c94` normalizes generated build identity for the release hash guard and adds `tools/test-i486-release-guard.py` to the game host-gate inventory. | The identity-guard correction is present in the current source. This refresh did not rerun its test or rebuild the release artifact. |
 
+Subsequent verification on 2026-11-17 built the i486 release, C-reference,
+and PROFILE486 configurations from game revision `ab81c94`. All three generated
+stack-frame/runtime-formula checks and linked i486 ISA gates passed. The
+measured emulator stack headroom remains specific to its DOSBox-X/CWSDPMI
+environment; physical DPMI qualification is still pending. This later build
+verification does not change the read-only method used for the assessment
+refresh above.
+
 The assembly split's documented gates include clean i486 release and C-reference
 linked ISA audits with zero above-i486 instructions and zero exemptions, a
 20/20 benchmark host suite, and focused `demo1-drawspans8` parity with exact

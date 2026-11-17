@@ -21,12 +21,12 @@ This checklist converts the findings in [the architectural assessment](architect
 
 ### Maintain the renderer stack model as a build invariant
 
-- [ ] For changes to renderer entry points, BSP traversal, polygon clipping, or profiling callbacks, update the call-path ledger and generated/runtime formula checks together.
-- [ ] Keep generated-frame and preprocessed-runtime formula checks enabled for release, C-reference, and PROFILE486 configurations.
-- [ ] Preserve the runtime guard that rejects an insufficient normal render stack and disables waterwarp when only fallback capacity is insufficient.
-- [ ] Treat reduced-stack DOSBox runs as emulator regression evidence; qualify DPMI stack margin separately on hardware.
+- [x] For changes to renderer entry points, BSP traversal, polygon clipping, or profiling callbacks, update the call-path ledger and generated/runtime formula checks together.
+- [x] Keep generated-frame and preprocessed-runtime formula checks enabled for release, C-reference, and PROFILE486 configurations.
+- [x] Preserve the runtime guard that rejects an insufficient normal render stack and disables waterwarp when only fallback capacity is insufficient.
+- [x] Treat reduced-stack DOSBox runs as emulator regression evidence; qualify DPMI stack margin separately on hardware.
 
-**Completion evidence:** Relevant profile gates agree on generated frames and runtime formulas; physical stack behavior is recorded under the hardware item above. See [`quake/docs/renderer-assembly/warp-scratch.md`](../quake/docs/renderer-assembly/warp-scratch.md) and [`quake/tools/renderer-stack-budget.py`](../quake/tools/renderer-stack-budget.py).
+**Completion evidence (2026-11-17):** Fresh i486 release, C-reference, and PROFILE486 builds passed generated-frame and runtime-formula checks. Their linked ISA gates passed with 166,300, 176,959, and 326,951 instructions, respectively, and zero above-i486, unknown, or exempt instructions. Existing 192 KiB/160 KiB reduced-stack runs and warp fallback parity are DOSBox-X/CWSDPMI regression evidence only; physical DPMI stack margin remains open under the hardware qualification item. Exact commands and source/build identities are recorded in [`quake/docs/renderer-assembly/warp-scratch.md`](../quake/docs/renderer-assembly/warp-scratch.md).
 
 ## P2 — Configuration, memory, and release confidence
 
