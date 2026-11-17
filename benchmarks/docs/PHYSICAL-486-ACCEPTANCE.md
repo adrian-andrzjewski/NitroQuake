@@ -6,6 +6,54 @@ Physical-hardware qualification is pending access to a real 486 system. DOSBox,
 86Box, PCem and other emulators can screen changes, but do not satisfy this
 acceptance gate or support a physical-486 performance claim.
 
+## Pinned workstation preflight (2026-11-17)
+
+The current i486 release artifact and base-game data are pinned here to reduce
+setup work when a physical target is available. This was a host build only; it
+does not satisfy any target-machine, startup, rendering, device, timing or DPMI
+stack acceptance requirement.
+
+| Item | Recorded value |
+| --- | --- |
+| Game revision | `432ae1afaf00e3551d6564ad94fcd4263c5708a6` |
+| Product build ID | `432ae1afaf00-8153186631e7` |
+| Build command | `quake/tools/build-dos.ps1 -Configuration i486-release -CpuTarget i486 -NoBootstrap -LocalOutputDirectoryName physical-486-preflight-432ae1a` |
+| Executable | `quake/out/local-physical-486-preflight-432ae1a/quake.exe` |
+| Executable SHA-256 | `2165ab8f06a8f387977492ee36a14b31f1e4ee4d846749afd331dcc182eb26a3` |
+| Build manifest SHA-256 | `f06deaf51d678ea3dc2da7d05e1283e90fe43c12a7ae973ba0eee1d3202d9ee9` |
+| Renderer profile | `i486-asm-selectable-current` |
+| Renderer profile SHA-256 | `ccf865d39db35a93b66571a65e3e1555b2eb5e4350fe35d593bcb8e517ff4759` |
+| Workstation CWSDPMI SHA-256 | `ff3501b50bcf320e6615e025bdff94261a087f83212858d4b12e42c19c7e3883` |
+| `id1/pak0.pak` SHA-256 | `35a9c55e5e5a284a159ad2a62e0e8def23d829561fe2f54eb402dbc0a9a946af` |
+| `id1/pak1.pak` SHA-256 | `94e355836ec42bc464e4cbe794cfb7b5163c6efa1bcc575622bb36475bf1cf30` |
+| Generated stack budget | PASS; normal `172868 + 128 * world_depth`; fallback `236884 + 128 * world_depth` |
+| Complete linked i486 ISA gate | PASS; 166,287 relocated instructions, 529 startup rows and 9,207 provider instructions; zero exemptions |
+
+The build output and executable are ignored local files under `quake/out/`.
+Rebuild from the recorded revision if the checkout or configuration changes.
+Record the target's machine, BIOS, FPU, memory, video, audio and DPMI details
+alongside these values during the physical run, including the hash of the DPMI
+provider actually used on the target.
+
+The uninstrumented BENCH486 pair specified below was also built from the same
+revision, using the committed release selectors and changing only the two
+texture-span T-zero selectors. Both manifests record the same source-tree hash,
+`62e839885135c33c074624f6b52901d88ab2d63bec881489ca8c9de116532453`,
+`benchmarkBuild=true`, `profileBuild=false`, `isaAuditStatus=PASS`, and the
+generated stack formulas above:
+
+| Configuration | Product build ID | Executable SHA-256 | Manifest SHA-256 |
+| --- | --- | --- | --- |
+| Control (`control` / `control`) | `432ae1afaf00-a5e78aed24e6` | `b0ca76a5e0e286431c7ac3e624756f1fbe01397d5cb28f3444c2282d039b8a55` | `0c6ed16f4bbdd07f7b7d1d9bdd2454135b32a25fe09d84d354762abb92aa99c6` |
+| Candidate (`zerot` / `zerot`) | `432ae1afaf00-bc3c3cecfb7e` | `58cbe190d2059f945ee96524daa31a7e379bbe452919ddcec5ca96dd8843f905` | `dbc48be9d65eb02a7c2df2374129909022f4a8ac3801404cd17b68ca05e32088` |
+
+Their ignored output directories are
+`quake/out/local-physical-486-control-432ae1a/` and
+`quake/out/local-physical-486-zerot-432ae1a/`. These builds are ready for the
+documented physical correctness and timing procedure, but no timedemo or local
+map results are claimed here. Target startup, output parity, devices, timing
+and runtime stack bounds still require a physical 486/DPMI system.
+
 ## Acceptance target
 
 Use the same physical machine, display mode, DOS setup, DPMI host, game data and
