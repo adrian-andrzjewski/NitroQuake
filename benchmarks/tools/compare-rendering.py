@@ -181,9 +181,12 @@ def compare_images(
     }
 
 
-def read_frame_checksums(path: Path) -> dict[str, Any]:
+def read_frame_checksums(
+    path: Path, *, allow_missing_overflow: bool = False
+) -> dict[str, Any]:
     checksums: list[int] = []
     overflow: int | None = None
+    declared_frames: int | None = None
     for line_number, line in enumerate(path.read_text(encoding="ascii").splitlines(), start=1):
         summary = line.split()
         if len(summary) == 4 and summary[0] == "frames" and summary[2] == "overflow":
@@ -191,6 +194,14 @@ def read_frame_checksums(path: Path) -> dict[str, Any]:
                 declared_frames, overflow = int(summary[1]), int(summary[3])
             except ValueError as exc:
                 raise ValueError(f"{path}:{line_number}: malformed frame summary") from exc
+            continue
+        if len(summary) == 2 and summary[0] == "frames":
+            try:
+                declared_frames = int(summary[1])
+            except ValueError as exc:
+                raise ValueError(f"{path}:{line_number}: malformed frame summary") from exc
+            if not allow_missing_overflow:
+                raise ValueError(f"{path}:{line_number}: missing checksum overflow field in frame summary")
             continue
         if len(summary) != 2:
             raise ValueError(f"{path}:{line_number}: malformed checksum record")
@@ -202,22 +213,28 @@ def read_frame_checksums(path: Path) -> dict[str, Any]:
             raise ValueError(f"{path}:{line_number}: expected frame {len(checksums)}, got {frame_index}")
         checksums.append(checksum)
 
-    if overflow is None:
-        raise ValueError(f"{path}: missing frame count/overflow completion summary")
+    if declared_frames is None:
+        raise ValueError(f"{path}: missing frame completion summary")
+    if overflow is None and not allow_missing_overflow:
+        raise ValueError(f"{path}: missing checksum overflow completion summary")
     if declared_frames != len(checksums):
         raise ValueError(f"{path}: summary says {declared_frames} frames, found {len(checksums)}")
-    if overflow != 0:
+    if overflow is not None and overflow != 0:
         raise ValueError(f"{path}: checksum capture overflowed by {overflow} frames")
     return {"frames": checksums, "count": len(checksums), "overflow": overflow}
 
 
 def compare_frame_checksums(
-    expected_path: Path, actual_path: Path, *, ignore_leading_frames: int = 0
+    expected_path: Path,
+    actual_path: Path,
+    *,
+    ignore_leading_frames: int = 0,
+    allow_missing_overflow: bool = False,
 ) -> dict[str, Any]:
     if ignore_leading_frames < 0:
         raise ValueError("ignore_leading_frames must be nonnegative")
-    expected = read_frame_checksums(expected_path)
-    actual = read_frame_checksums(actual_path)
+    expected = read_frame_checksums(expected_path, allow_missing_overflow=allow_missing_overflow)
+    actual = read_frame_checksums(actual_path, allow_missing_overflow=allow_missing_overflow)
     common_count = min(expected["count"], actual["count"])
     start = min(ignore_leading_frames, common_count)
     mismatch_frames = [
@@ -257,6 +274,11 @@ def main(argv: list[str] | None = None) -> int:
         help="compare per-frame checksum logs instead of PCX images",
     )
     parser.add_argument(
+        "--z-frame-checksums",
+        action="store_true",
+        help="compare per-frame depth-buffer checksum logs (whose summary omits overflow)",
+    )
+    parser.add_argument(
         "--ignore-leading-frames", type=int, default=0,
         help="exclude startup frames from a checksum comparison",
     )
@@ -272,15 +294,20 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.ignore_leading_frames < 0:
         parser.error("--ignore-leading-frames must be nonnegative")
-    if args.require_exact and not args.frame_checksums:
-        parser.error("--require-exact requires --frame-checksums")
+    if args.frame_checksums and args.z_frame_checksums:
+        parser.error("--frame-checksums and --z-frame-checksums are mutually exclusive")
+    checksum_mode = args.frame_checksums or args.z_frame_checksums
+    if args.require_exact and not checksum_mode:
+        parser.error("--require-exact requires a checksum comparison mode")
 
-    if args.frame_checksums:
+    if checksum_mode:
         try:
             report = compare_frame_checksums(
                 args.expected, args.actual,
                 ignore_leading_frames=args.ignore_leading_frames,
+                allow_missing_overflow=args.z_frame_checksums,
             )
+            report["checksumKind"] = "depth-buffer" if args.z_frame_checksums else "framebuffer"
             report["scenario"] = args.scenario
         except (OSError, ValueError) as exc:
             report = {
@@ -318,7 +345,7 @@ def main(argv: list[str] | None = None) -> int:
         args.report_json.parent.mkdir(parents=True, exist_ok=True)
         args.report_json.write_text(serialized + "\n", encoding="utf-8")
     print(serialized)
-    if args.frame_checksums:
+    if checksum_mode:
         if report.get("error"):
             return 1
         exact_match = bool(report.get("exactMatch", False))

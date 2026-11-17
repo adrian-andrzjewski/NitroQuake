@@ -159,6 +159,29 @@ class RenderingComparisonTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "overflowed by 1"):
             rendering.read_frame_checksums(log)
 
+    def test_depth_frame_log_accepts_frame_count_summary_without_overflow(self) -> None:
+        reference = self.root / "reference-zchecksums.txt"
+        candidate = self.root / "candidate-zchecksums.txt"
+        reference.write_text("0 123\n1 456\nframes 2\n", encoding="ascii")
+        candidate.write_text("0 123\n1 456\nframes 2\n", encoding="ascii")
+
+        with self.assertRaisesRegex(ValueError, "missing checksum overflow"):
+            rendering.read_frame_checksums(reference)
+        parsed = rendering.read_frame_checksums(reference, allow_missing_overflow=True)
+        self.assertEqual(parsed, {"frames": [123, 456], "count": 2, "overflow": None})
+
+        report = rendering.compare_frame_checksums(
+            reference, candidate, allow_missing_overflow=True
+        )
+        self.assertTrue(report["exactMatch"])
+        self.assertEqual(report["comparedFrames"], 2)
+
+        with redirect_stdout(io.StringIO()):
+            strict_exit = rendering.main(
+                [str(reference), str(candidate), "--z-frame-checksums", "--require-exact"]
+            )
+        self.assertEqual(strict_exit, 0)
+
     def test_compares_frame_checksum_streams_and_can_ignore_startup(self) -> None:
         reference = self.root / "reference-checksums.txt"
         candidate = self.root / "candidate-checksums.txt"
