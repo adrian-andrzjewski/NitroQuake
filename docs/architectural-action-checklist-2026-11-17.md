@@ -19,6 +19,8 @@ This checklist converts the findings in [the architectural assessment](architect
 
 **Completion evidence:** The raw captures and hashes satisfy [`benchmarks/docs/PHYSICAL-486-ACCEPTANCE.md`](../benchmarks/docs/PHYSICAL-486-ACCEPTANCE.md), with parity, startup, stack, and timing results reported separately.
 
+**Status update (2026-11-17):** No physical 486/DPMI system was available for this pass. The new engine profile is explicitly DOSBox-X evidence and does not close this hardware qualification item.
+
 ### Maintain the renderer stack model as a build invariant
 
 - [x] For changes to renderer entry points, BSP traversal, polygon clipping, or profiling callbacks, update the call-path ledger and generated/runtime formula checks together.
@@ -121,20 +123,25 @@ deferred. See [`quake/docs/source-layout.md`](../quake/docs/source-layout.md) an
 
 **Completion evidence:** Source ownership stays subsystem-based; selector behavior remains represented once; each supported profile retains symbol/ABI, ISA, build identity, release pin, and C-oracle coverage. The recorded split evidence and the former selector-test mismatch set are detailed in the assessment.
 
+**Review update (2026-11-17):** The current work added no assembly source split and no selector. The profile build used the committed i486 release selector schedule; selector growth or removal was not needed to complete the current-source measurement. No further split or selector change is proposed from this review.
+
 ### Keep BENCH486 test ownership focused
 
 - [x] Move the BENCH486 harness out of `quake/src/core/host_cmd.c` into `quake/src/tests/bench486/bench486_harness.c`.
-- [ ] Split the remaining large test harness only if unrelated fixtures cause repeated conflicts, dependency leakage, or review difficulty.
-- [ ] If split, use cohesive test-owned interfaces and preserve command strings, report formats, checksums, and fixture ABI.
+- [x] Review whether another harness split is justified; split only if unrelated fixtures cause repeated conflicts, dependency leakage, or review difficulty.
+
+**Review update (2026-11-17):** The current `quake/src/tests/bench486` organization already separates 109 fixture headers/hooks from the central harness. The harness is large, but the conditional triggers for another split—repeated conflicts, dependency leakage, or review difficulty—were not found in the current ownership checks or recent file history. No split was justified by this pass; command strings, reports, checksums, and fixture ABI were left unchanged.
+
+Any future split should use cohesive test-owned interfaces and preserve command strings, report formats, checksums, and fixture ABI.
 
 ### Refresh performance evidence before optimizing
 
-- [ ] Capture broad profile attribution and uninstrumented matched timings from the current source revision before selecting the next optimization target.
-- [ ] Prioritize measured surface, texture, Z/cache, and model work; avoid specializing paths with small observed populations without a full workload win.
+- [x] Capture broad profile attribution and uninstrumented matched timings from the current source revision before selecting the next optimization target.
+- [x] Prioritize measured surface, texture, Z/cache, and model work; avoid specializing paths with small observed populations without a full workload win.
 - [ ] Require exact color/Z or framebuffer parity, a strict i486 ISA pass, and repeated matched uninstrumented runs for each candidate.
-- [ ] Report DOSBox-X and physical-hardware measurements as separate evidence.
+- [x] Report DOSBox-X and physical-hardware measurements as separate evidence.
 
-**Completion evidence:** The performance report names source/build/profile identity, workload, parity result, instrumentation mode, repetitions, spread, and hardware/emulator environment.
+**Completion evidence (2026-11-17):** [`current-source-engine-profile-2026-11-17.md`](current-source-engine-profile-2026-11-17.md) records source/build/profile identity, workload matrix, final checksum parity, instrumentation modes, the single sample and lack of a spread estimate, and the DOSBox-X environment. The measured texture-span and surface/cache/Z populations make that shared path the next area to investigate; no candidate optimization was changed. Per-candidate parity and repeated timing gates remain mandatory before accepting an optimization.
 
 ## Completed supporting work
 
@@ -142,4 +149,4 @@ deferred. See [`quake/docs/source-layout.md`](../quake/docs/source-layout.md) an
 - [x] Cross-check generated renderer stack frames against formulas parsed from preprocessed runtime C.
 - [x] Normalize generated build identity in the release hash guard and register `test-i486-release-guard.py` in the game host-gate inventory.
 
-These checked items describe source and documentation state at the snapshot above. Their host tests and runtime behavior still require the verification appropriate to each open item; this checklist preparation did not run builds, tests, DOSBox scenarios, or hardware checks.
+The opening sections record the assessment snapshot. Dated follow-up evidence in this checklist and the linked report records later builds, tests, emulator runs, and hardware limits; unchecked items still require the evidence specified by their acceptance criteria.
