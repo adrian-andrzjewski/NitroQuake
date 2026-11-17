@@ -144,10 +144,12 @@ Any future split should use cohesive test-owned interfaces and preserve command 
 
 - [x] Capture broad profile attribution and uninstrumented matched timings from the current source revision before selecting the next optimization target.
 - [x] Prioritize measured surface, texture, Z/cache, and model work; avoid specializing paths with small observed populations without a full workload win.
-- [ ] Require exact color/Z or framebuffer parity, a strict i486 ISA pass, and repeated matched uninstrumented runs for each candidate.
+- [x] Define the per-candidate gate: exact color/Z stream or framebuffer parity, a complete strict i486 ISA pass, and repeated matched uninstrumented runs.
 - [x] Report DOSBox-X and physical-hardware measurements as separate evidence.
 
 **Completion evidence (2026-11-17):** [`current-source-engine-profile-2026-11-17.md`](current-source-engine-profile-2026-11-17.md) records source/build/profile identity, workload matrix, final checksum parity, instrumentation modes, the single sample and lack of a spread estimate, and the DOSBox-X environment. The measured texture-span and surface/cache/Z populations make that shared path the next area to investigate; no candidate optimization was changed. Per-candidate parity and repeated timing gates remain mandatory before accepting an optimization.
+
+**Candidate-acceptance gate (2026-11-17, game commit `5d3a31f`):** [`quake/docs/OPTIMIZATION-PLAN.md`](../quake/docs/OPTIMIZATION-PLAN.md) now defines correctness as byte-exact full per-frame color/Z streams or exact framebuffer captures; a final checksum match alone is insufficient. It retains the complete linked-image strict i486 gate and at least three matched uninstrumented runs with recorded samples and spread. `benchmarks/tools/run-tests.ps1 -HostOnly` passed 22/22 checks, including exact C/ASM report comparisons. No candidate was changed or promoted during this policy update; DOSBox-X timing remains emulator evidence.
 
 ## Completed supporting work
 
