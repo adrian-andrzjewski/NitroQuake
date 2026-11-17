@@ -58,12 +58,12 @@ The assembly split's documented gates include clean i486 release and C-reference
 linked ISA audits with zero above-i486 instructions and zero exemptions, a
 20/20 benchmark host suite, and focused `demo1-drawspans8` parity with exact
 frame checksums over two repeats per profile. These are recorded results, not
-tests rerun for this refresh. The same handoff reports 29 remaining
+tests rerun for this refresh. At that snapshot, the handoff reported 29
 selector/profile expectation mismatches in `tools/test-build-dos.py`, even
-though source counts and release/C-reference source inventories match. That
-specific contract gap should be reconciled before treating the selector matrix
-as fully covered. The focused parity case is not the full six-scene gate, and
-none of these results qualifies physical 486 performance.
+though source counts and release/C-reference source inventories matched. The
+2026-11-17 follow-up below records their classification and the passing matrix
+test. The focused parity case is not the full six-scene gate, and none of these
+results qualifies physical 486 performance.
 
 ## Executive assessment
 
@@ -76,7 +76,7 @@ The remaining risks are more focused:
 1. **Physical 486 qualification is pending.** DOSBox-X supports repeatable screening, but it cannot establish real CPU timing, DPMI stack behavior, or device compatibility.
 2. **Renderer stack use is large and formula-based.** Generated frame checks and runtime DJGPP stack preflight exist, and the build tool cross-checks runtime formulas. The call-path assumptions still need maintenance and physical-system evidence.
 3. **Low-memory map behavior is not explained.** Current captures bracket one e1m1 load transition and show registered-data minimum runs stopping before `POSTMAP`; logs do not identify the failed allocation or pool.
-4. **Selector/profile validation has a documented residual mismatch.** The assembly split's release/reference inventories agree, while the broader profile check reports 29 selector/profile expectation mismatches.
+4. **Selector/profile contracts needed reconciliation.** The release/reference inventories agree. The 29 reported profile-test mismatches have since been addressed in the goldens and selector probes; the six-scene parity gate remains pending.
 5. **Ownership is improved but mutable state remains global.** The benchmark harness and assembly files have clearer owners; renderer, host, client, server, and memory state still crosses subsystem boundaries through globals and broad legacy structures.
 
 Preserve the DOS memory model, C/assembly calling conventions, narrow shipping build interface, exact output contracts, and evidence gates. Avoid broad modernization that adds indirection to pixel and span loops without measurements.
@@ -145,7 +145,7 @@ Physical-hardware acceptance is explicitly pending in benchmarks/docs/PHYSICAL-4
 | P1 | Complete physical 486/DPMI qualification | High confidence for target reliability and performance claims | High effort; hardware access and repeated runs | Low implementation risk |
 | P1 | Keep the generated/runtime renderer stack model synchronized with call paths | High reliability impact; large frames remain in the hot path | Medium effort; ongoing validation | Medium |
 | P2 | Diagnose the observed low-memory map-load boundary | High reliability and supportability impact for constrained DOS/DPMI hosts | Medium; requires controlled captures and pool-level evidence | Medium |
-| P2 | Reconcile 29 selector/profile expectation mismatches and complete broad parity coverage | High confidence in configuration coverage | Medium; likely test-contract/source-map maintenance | Medium |
+| P2 | Complete six-scene parity with reconciled selector profiles | High confidence in configuration coverage | Medium; DOSBox runtime and captured-output review | Medium |
 | P2 | Add host structural tests and complete provenance for the custom ISO writer (completed 2026-11-17) | Medium release confidence impact | Low to medium | Low |
 | P2 | Continue incremental ownership work around global renderer and engine state | Medium maintainability impact | Medium to high; preserve legacy interfaces | Medium to high |
 | P3 | Decompose the remaining large BENCH486 test harness only where it improves ownership or review | Local maintainability impact; no runtime effect | Low to medium, demand-driven | Low |
@@ -170,11 +170,13 @@ The residual maintenance risk is that complete path requirements include modeled
 
 **Action:** Preserve these runs as an observed boundary for that build and DPMI setup, not a general minimum requirement. Add targeted instrumentation or allocation-failure diagnostics around map loading, then repeat with matched build, map, and DPMI settings to identify the pool/request at the failure point. Do not raise the startup minimum or claim every map loads at that minimum based on the current captures.
 
-### P2 — Selector/profile expectations still disagree with current build inventories
+### P2 — Selector flag matrix is reconciled; full parity remains open
 
-The renderer assembly split's recorded release and C-reference inventories contain 98 and 92 assembly sources, respectively, and its focused parity and linked ISA gates passed. `quake/ASM486-HANDOFF.md` also records that `tools/test-build-dos.py` reports 29 selector/profile expectation mismatches even though the source counts and release/C-reference inventories match. This is a test-contract inconsistency; the report does not establish whether all 29 failures are stale expectations, missing coverage, or a mixture.
+The recorded release and C-reference inventories contain 98 and 92 assembly sources, respectively. The 2026-11-17 follow-up classified the 29 `test-build-dos.py` reports against current `DumpFlags` output and the ordered selector table. The i486/i386 goldens were refreshed for the resolved tail-Z and BSP frame-count flags and profile paths. Selector probes now set required dependencies, hold sibling implementations stable where flags are shared, and account for the two independent `skyasm` tokens and C reference tokens. The standalone selector test and its host-suite gate both pass.
 
-**Action:** Classify each mismatch against the current selector table, resolved flags, manifest, and actual source inventory. Update expectations only when the implementation contract supports it; do not simply suppress the failures. Then run the complete selector/profile host gates and the documented multi-scene parity suite. This is the highest-value follow-up to the assembly-split work because the split's main risk is build-selection drift, not runtime overhead.
+The full game host suite passed 15/17 gates. `test-sysinfo-dos.py` failed on a stale substring boundary before compilation, and `test-video-dos.py` could not invoke its required native `gcc`, which is not installed in this environment. The full six-scene framebuffer/palette parity run has not yet been repeated against the updated source identity.
+
+**Action:** Complete the full documented multi-scene parity suite and retain exact frame/checksum, framebuffer, palette, and color/Z evidence. Re-run the game host suite in an environment with native GCC after correcting the stale `VID_Init` test slice. Keep source-bound and linked-image i486 gates tied to the resulting build identity. This remains the highest-value follow-up to the assembly split because build-selection drift is a greater risk than runtime overhead.
 
 ### P2 — ISO writer host coverage and sidecar provenance added (2026-11-17)
 
@@ -188,9 +190,9 @@ The original roughly 299 KB, 11,914-line `renderer/asm486_experiments.s` mixed m
 
 This is the detailed status of priority action #6. The decision to split was sound because the old file crossed stable responsibilities. Source discovery is recursive, retains unique object basenames, and is mapped through `docs/source-layout-map.json`, including one-to-many mappings for moved routines. Keeping one ordered selector source is also sound: `tools/selectors.ps1` centralizes parameter validation, manifest names, profile suffixes, C and assembly flags, assembly inclusion, and expected assembly inventory. Replacing that table with multiple hand-maintained profile lists would recreate the drift it was designed to prevent.
 
-The selector matrix remains the harder part. The handoff describes 115 current i486 assembly selectors. Each choice can affect compiler/assembler defines, active source files, profile identity, build manifests, selector inventory checks, and the C-versus-assembly comparison path. This multiplies configuration and review work, although the C oracle is valuable for exact parity and performance A/B work. The public builder limits shipping configurations to named profiles; the experimental builder carries the finer-grained choices. The remaining documented complexity is the number of selectable alternatives and the size of the experimental build/test machinery, plus the 29 expectation mismatches described above.
+The selector matrix remains the harder part. The handoff describes 115 current i486 assembly selectors. Each choice can affect compiler/assembler defines, active source files, profile identity, build manifests, selector inventory checks, and the C-versus-assembly comparison path. This multiplies configuration and review work, although the C oracle is valuable for exact parity and performance A/B work. The public builder limits shipping configurations to named profiles; the experimental builder carries the finer-grained choices. The documented expectation mismatches have been resolved in the current test contract; full multi-scene parity still needs to be repeated.
 
-**Action:** Treat the translation-unit split as complete. Resolve the profile expectation mismatches, then keep source discovery, symbol/ABI contracts, per-source ISA checks, profile manifests, release hash pins, and C-oracle parity synchronized. Avoid splitting files further solely to reduce line counts; do it when a file crosses ownership boundaries or causes review/merge friction. Consider pruning only selectors that are both unused and unsupported by a current parity, measurement, or historical-reproduction need. Any such pruning must update the selector table, public experimental interface, tests, and provenance together.
+**Action:** Treat the translation-unit split as complete. Keep source discovery, symbol/ABI contracts, per-source ISA checks, profile manifests, release hash pins, and C-oracle parity synchronized with the reconciled selector table. Avoid splitting files further solely to reduce line counts; do it when a file crosses ownership boundaries or causes review/merge friction. Consider pruning only selectors that are both unused and unsupported by a current parity, measurement, or historical-reproduction need. Any such pruning must update the selector table, public experimental interface, tests, and provenance together.
 
 The C/assembly matrix remains useful on a 486: it supports matched implementation comparisons and preserves a C oracle for selected routines. Its cost is real, however: every extra selector expands flag, object, identity, test, and review combinations. The practical control is to keep the public shipping builder limited to named profiles, isolate exploratory combinations behind the experimental builder, and require a documented reason for adding or retaining selectors. Do not simplify by removing the C oracle or parity gates without evidence that the alternative preserves correctness and the measurement workflow.
 
@@ -213,7 +215,7 @@ The BENCH486 code has moved out of `core/host_cmd.c` into `src/tests/bench486/be
 
 ### Quick wins
 
-1. Classify and resolve the 29 selector/profile expectation mismatches in `quake/tools/test-build-dos.py`; retain the current selector table as the authoritative mapping.
+1. Run the documented full six-scene C-reference/i486 comparison against the reconciled selector matrix; retain exact output evidence and current source identities.
 2. Diagnose the allocation or pool that causes the captured pre-`POSTMAP` failures, without turning the observed DOSBox boundary into a general memory minimum.
 3. Keep physical qualification status visible in benchmark reports; avoid broad 486 claims based only on DOSBox-X.
 

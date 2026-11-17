@@ -40,11 +40,13 @@ This checklist converts the findings in [the architectural assessment](architect
 
 ### Reconcile selector/profile expectation mismatches
 
-- [ ] Triage each of the 29 reported `test-build-dos.py` selector/profile mismatches against the selector table, resolved flags, manifests, and actual source inventories.
-- [ ] Correct stale expectations or implementation defects based on evidence. Do not suppress or bulk-update mismatches without classifying them.
+- [x] Triage each of the 29 reported `test-build-dos.py` selector/profile mismatches against the selector table, resolved flags, manifests, and actual source inventories.
+- [x] Correct stale expectations or implementation defects based on evidence. Do not suppress or bulk-update mismatches without classifying them.
 - [ ] Run the game host checks after the corrections; ensure release and C-reference inventories agree with their declared profiles.
 - [ ] Run the full documented multi-scene parity suite after selector expectations are clean; retain exact framebuffer/palette and color/Z evidence.
 - [ ] Reconfirm source-bound and linked-image i486 ISA gates and release artifact identity after any selector or assembly-source change.
+
+**Triage progress (2026-11-17):** `tools/test-build-dos.py` now passes after updating i486/i386 flag goldens from current `DumpFlags` output and correcting selector probes that omitted dependencies, varied sibling selectors, or removed the wrong occurrence of a shared profile token. The full `tools/run-tests.ps1 -HostOnly` run passed 15/17 gates; `test-sysinfo-dos.py` has a stale source-slice assertion and `test-video-dos.py` could not start without a host `gcc`. The multi-scene parity run is still pending, so the selector/profile item remains open.
 
 **Completion evidence:** No unexplained selector/profile mismatches remain, the host gates pass, and the full parity evidence identifies the exact source revision and profile. See [`quake/ASM486-HANDOFF.md`](../quake/ASM486-HANDOFF.md), [`quake/tools/selectors.ps1`](../quake/tools/selectors.ps1), and [`quake/tools/test-build-dos.py`](../quake/tools/test-build-dos.py).
 
@@ -76,7 +78,7 @@ This checklist converts the findings in [the architectural assessment](architect
 - [ ] Before adding a selector, document its parity, measurement, or historical-reproduction need and update its tests and build identity contracts.
 - [ ] Consider removing a selector only after confirming it is unused and no longer required for parity, measurements, or reproducible historical experiments.
 
-**Completion evidence:** Source ownership stays subsystem-based; selector behavior remains represented once; each supported profile retains symbol/ABI, ISA, build identity, release pin, and C-oracle coverage. The recorded split evidence and its 29 open expectation mismatches are detailed in the assessment.
+**Completion evidence:** Source ownership stays subsystem-based; selector behavior remains represented once; each supported profile retains symbol/ABI, ISA, build identity, release pin, and C-oracle coverage. The recorded split evidence and the former selector-test mismatch set are detailed in the assessment.
 
 ### Keep BENCH486 test ownership focused
 
