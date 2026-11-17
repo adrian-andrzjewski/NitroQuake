@@ -53,9 +53,10 @@ profiling, whose instrumentation changes runtime cost.
 
 ## A measured comparison
 
-This is a reference comparison of three delivered executables at **320×200**,
-using the same 969-frame `demo1` workload. Each executable was run three times;
-the table reports each executable's median frame rate and elapsed time.
+This reference comparison was recorded on **2026-11-08** using three delivered
+executables at **320×200** and the same 969-frame `demo1` workload. Each
+executable was run three times; the table reports each executable's median
+frame rate and elapsed time.
 
 | Executable | Resolution | Median FPS | Median time |
 | --- | ---: | ---: | ---: |
