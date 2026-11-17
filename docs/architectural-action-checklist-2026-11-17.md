@@ -19,6 +19,8 @@ This checklist converts the findings in [the architectural assessment](architect
 
 **Completion evidence:** The raw captures and hashes satisfy [`benchmarks/docs/PHYSICAL-486-ACCEPTANCE.md`](../benchmarks/docs/PHYSICAL-486-ACCEPTANCE.md), with parity, startup, stack, and timing results reported separately.
 
+**Emulator preflight update (2026-11-17):** Each pinned uninstrumented BENCH486 build completed one fixed-clock DOSBox-X replay of demo1, demo2 and demo3. Per-frame framebuffer and depth checksum streams matched exactly for all three demos. The counts, final checksums, stream hashes and raw output locations are recorded in the linked acceptance procedure. This preflight does not satisfy the remaining physical-target checkboxes.
+
 **Status update (2026-11-17):** No physical 486/DPMI system was available for this pass. The new engine profile is explicitly DOSBox-X evidence and does not close this hardware qualification item.
 
 **Evidence-separation review (2026-11-17):** [`current-source-engine-profile-2026-11-17.md`](current-source-engine-profile-2026-11-17.md) identifies its DOSBox-X profile and says it is not physical-486 evidence. [`quake/docs/renderer-assembly/warp-scratch.md`](../quake/docs/renderer-assembly/warp-scratch.md) labels its stack and parity results as DOSBox-X/CWSDPMI regression evidence. The physical acceptance procedure explicitly keeps emulator results outside the hardware gate. Physical qualification remains open pending a real target.

@@ -50,9 +50,34 @@ generated stack formulas above:
 Their ignored output directories are
 `quake/out/local-physical-486-control-432ae1a/` and
 `quake/out/local-physical-486-zerot-432ae1a/`. These builds are ready for the
-documented physical correctness and timing procedure, but no timedemo or local
-map results are claimed here. Target startup, output parity, devices, timing
-and runtime stack bounds still require a physical 486/DPMI system.
+documented physical correctness and timing procedure.
+
+One emulator-only correctness preflight was run for each build on demo1, demo2
+and demo3 using DOSBox-X 2026.08.31, `dosbox-x-486-high.conf` (normalized
+profile SHA-256
+`532284ea01c1a93c8b96d70fb538625b694dfad0172ba13b9ba9c36c8fe845ba`), and
+CWSDPMI SHA-256
+`ff3501b50bcf320e6615e025bdff94261a087f83212858d4b12e42c19c7e3883`. Each
+replay used `-framechecksums -zchecksums -parityclock` with sound disabled and
+the renderer settings above. The `compare-rendering.py` framebuffer and depth
+comparisons matched every record, with no mismatches; captured frame counts and
+final framebuffer checksums were:
+
+| Demo | Records per stream | Final framebuffer checksum | Framebuffer stream SHA-256 | Depth stream SHA-256 |
+| --- | ---: | ---: | --- | --- |
+| demo1 | 970 | `1047377823` | `3bc7d80f12b90de7031b4d9cf4ca9349ceec9d10dbde482f8917bbaf46412768` | `4d995848bef742f2e2b8362a978f21ab3f4a4885acb95794dac512964135fd37` |
+| demo2 | 986 | `1887495667` | `7750444bb8f2b05a224a1cccd06d0fa7b8544cb4eff949a96f120e9a6df8d999` | `cd43ea9d321a0761966aa40505134388c5996c1778de2f13f4681dca543e30a8` |
+| demo3 | 1091 | `3722973491` | `6479268b7fa33dafc0d4280d769f3ff57fa77b54addc48e4004081bb52a4b996` | `7d76499b5e42697d3ff172b910795ae5f0afc7e3ef67321af5cf2e5626846f4c` |
+
+The hashes shown are for the control streams; candidate streams have the same
+hashes. All color checksum captures reported zero overflow, and the timedemo
+runner verified that each depth stream had the same number of records. The raw
+control/candidate run directories are `benchmarks/out/dos-timedemo-20261117-182806/`
+and `...183052/` for demo1, `...183638/` and `...183839/` for demo2, and
+`...184040/` and `...184258/` for demo3. These are single fixed-clock
+correctness captures, not timing samples; local-map checks, repeated runs,
+physical startup/devices and runtime stack bounds remain pending on a real
+486/DPMI system.
 
 ## Acceptance target
 
