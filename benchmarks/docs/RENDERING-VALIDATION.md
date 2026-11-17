@@ -35,6 +35,7 @@ The suite currently covers:
 
 | Scenario | Workload and path |
 | --- | --- |
+| `demo1-drawspans8` | Demo 1 through the `D_DrawSpans8` renderer path |
 | `demo1-vesa-full` | Default VESA presentation, full viewport |
 | `demo1-vga-full` | Forced VGA mode 13h presentation, full viewport |
 | `demo1-fullbright` | VESA presentation with Quake's fullbright lighting feature enabled |
