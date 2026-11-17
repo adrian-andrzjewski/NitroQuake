@@ -1,5 +1,7 @@
 # NitroQuake Architectural Assessment
 
+> Current-source review: see [the November 17 assessment](architectural-assessment-2026-11-17.md), based on outer revision `fbf14a8` and game revision `432ae1a`. It supersedes the stale low-memory diagnosis and parity status below; this document remains the historical November 16 assessment and progress record.
+
 - **Original assessment:** 2026-11-16
 - **Current-state refresh:** 2026-11-17
 - **Original baseline:** outer HEAD `71f17310c58464ed5910b43db73393b63d18e9e1`; game HEAD `38873bce04762ced607ac36c5d59891173dbe275`.
