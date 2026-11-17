@@ -105,9 +105,19 @@ The builder makes a fresh i486 game build, verifies the packaged comparison
 executables against `baselines/local-artifacts.json`, and includes legally
 obtained `pak0.pak` and `pak1.pak` from `quake/testdata/id1/`. Override those
 inputs with `-GameRoot`, `-DataRoot`, `-ToolRoot`, or `-NitroExecutable` when
-needed. The default image is `benchmarks/out/NitroQuake-Portable.iso`; use
-`-OutputPath` to choose another destination and `-Force` to replace that
-portable image. The retained `../out/NitroQuake-Benchmark.iso` is protected.
+needed. When `-NitroExecutable` points outside a normal build output, pass its
+matching manifest with `-GameBuildManifest`; otherwise the builder discovers
+the adjacent manifest and verifies its executable hash. The version-2 sidecar
+records the benchmark-suite revision, selected game manifest hash and build
+configuration identity, executable hash, staged-file hashes, and ISO hash. The
+default image is `benchmarks/out/NitroQuake-Portable.iso`; use `-OutputPath` to
+choose another destination and `-Force` to replace that portable image. The
+retained `../out/NitroQuake-Benchmark.iso` is protected.
+
+`tools/run-tests.ps1 -HostOnly` parses synthetic ISO images and checks their
+volume descriptors, both path tables, directory records, extents, sector
+alignment, payloads, boundary sizes, empty directories, and rejected inputs.
+This host test is separate from boot validation.
 
 Boot DOS with a CD-ROM driver and MSCDEX, switch to the assigned CD letter,
 then run `START` from the disc root or `\NQ`. The real-mode startup locates the

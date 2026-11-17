@@ -3,6 +3,7 @@ param(
     [string]$GameRoot,
     [string]$DataRoot,
     [string]$NitroExecutable,
+    [string]$GameBuildManifest,
     [string]$OutputPath,
     [string]$ToolRoot,
     [switch]$Force
@@ -83,12 +84,18 @@ if ([string]::IsNullOrWhiteSpace($NitroExecutable)) {
     Write-Host "Building the i486 NitroQuake executable ($gameBuildName)."
     & $buildScript -Configuration i486-release -CpuTarget i486 -LocalOutputDirectoryName $gameBuildName -ToolRoot $ToolRoot
     $NitroExecutable = Join-Path $gameRoot ("out/local-{0}/quake.exe" -f $gameBuildName)
+    $GameBuildManifest = Join-Path $gameRoot ("out/local-{0}/build-manifest.json" -f $gameBuildName)
 } else {
     $NitroExecutable = [IO.Path]::GetFullPath($NitroExecutable)
 }
 if (-not (Test-Path -LiteralPath $NitroExecutable -PathType Leaf)) {
     throw "NitroQuake executable was not produced or does not exist: $NitroExecutable"
 }
+. (Join-Path $PSScriptRoot 'launcher-provenance.ps1')
+$GameBuildManifest = Resolve-LauncherBuildManifestPath -ManifestPath $GameBuildManifest `
+    -ExecutablePath $NitroExecutable
+$gameBuildIdentity = New-LauncherGameBuildIdentity -ManifestPath $GameBuildManifest `
+    -ExecutablePath $NitroExecutable -GameRoot $gameRoot
 
 $djgppRoot = Join-Path $ToolRoot $toolManifest.djgpp.installDirectory
 $compiler = Join-Path $djgppRoot ($toolManifest.djgpp.compiler -replace '/', [IO.Path]::DirectorySeparatorChar)
@@ -225,11 +232,22 @@ try {
     } | Sort-Object path)
     $isoInfo = Get-Item -LiteralPath $OutputPath
     $sidecar = [IO.Path]::ChangeExtension($OutputPath, '.manifest.json')
+    $gameRepositoryRevision = (& git -C $gameRoot rev-parse HEAD).Trim()
+    if ($LASTEXITCODE -ne 0 -or $gameRepositoryRevision -notmatch '^[0-9a-f]{40}$') {
+        throw 'Could not resolve the game repository revision for the portable ISO sidecar.'
+    }
+    $benchmarkSuiteRevision = (& git -C $suiteRoot rev-parse HEAD).Trim()
+    if ($LASTEXITCODE -ne 0 -or $benchmarkSuiteRevision -notmatch '^[0-9a-f]{40}$') {
+        throw 'Could not resolve the benchmark-suite Git revision for the portable ISO sidecar.'
+    }
     $manifest = [ordered]@{
-        format = 'nitroquake-portable-iso-v1'
+        format = 'nitroquake-portable-iso-v2'
         createdUtc = [DateTime]::UtcNow.ToString('o')
         volumeId = 'NQBENCH'
-        gameRevision = (& git -C $gameRoot rev-parse HEAD).Trim()
+        gameRevision = $gameBuildIdentity.sourceCommit
+        gameRepositoryRevision = $gameRepositoryRevision
+        benchmarkSuiteRevision = $benchmarkSuiteRevision
+        gameBuild = $gameBuildIdentity
         gameExecutable = [ordered]@{
             bytes = (Get-Item -LiteralPath $NitroExecutable).Length
             sha256 = (Get-FileHash -LiteralPath $NitroExecutable -Algorithm SHA256).Hash.ToLowerInvariant()

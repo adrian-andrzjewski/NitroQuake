@@ -4,7 +4,7 @@
 **Outer repository:** `7ea6d146e1b410487d87c2c9549dbbd58fb5e8a8`  
 **Game repository:** `ab81c94b83765e78723c48c62cb335c96fc41d96` (outer gitlink matches)
 
-This checklist converts the findings in [the architectural assessment](architectural-assessment-2026-11-16.md) into reviewable work items. Checked boxes denote work already present in the snapshot; unchecked boxes are open. Recorded test evidence is not a claim that tests were rerun while preparing this checklist.
+This checklist converts the findings in [the architectural assessment](architectural-assessment-2026-11-16.md) into reviewable work items. The snapshot hashes identify the source state used to create the list; dated completion notes below record work performed afterward. Recorded test evidence identifies when and against which source the checks ran.
 
 ## P1 — Target reliability and stack safety
 
@@ -50,12 +50,12 @@ This checklist converts the findings in [the architectural assessment](architect
 
 ### Add direct host coverage and provenance for the ISO writer
 
-- [ ] Add synthetic-tree tests that parse generated ISO structures: volume descriptors, path tables in both byte orders, directory records, extent allocation, alignment, payload bytes, and empty directories.
-- [ ] Cover boundary-sized inputs, invalid names, duplicate names, and rejected links/reparse points.
-- [ ] Register the tests in `benchmarks/tools/run-tests.ps1` and retain boot validation as a separate integration check.
-- [ ] Extend the launcher sidecar with the benchmark-suite revision and selected game build-manifest/configuration identity.
+- [x] Add synthetic-tree tests that parse generated ISO structures: volume descriptors, path tables in both byte orders, directory records, extent allocation, alignment, payload bytes, and empty directories.
+- [x] Cover boundary-sized inputs, invalid names, duplicate names, and rejected links/reparse points.
+- [x] Register the tests in `benchmarks/tools/run-tests.ps1` and retain boot validation as a separate integration check.
+- [x] Extend the launcher sidecar with the benchmark-suite revision and selected game build-manifest/configuration identity.
 
-**Completion evidence:** The host suite validates the ISO structure and sidecar provenance without requiring DOSBox; boot/runtime checks remain separately recorded. See [`benchmarks/tools/build-iso9660.py`](../benchmarks/tools/build-iso9660.py) and [`benchmarks/tools/build-launcher-iso.ps1`](../benchmarks/tools/build-launcher-iso.ps1).
+**Completion evidence (2026-11-17):** `benchmarks/tools/run-tests.ps1 -HostOnly` passed 22/22 gates, including the three ISO structure tests and sidecar identity tests. The launcher built a 26,939-sector image from the current i486 release executable and local base-game PAKs; its version-2 sidecar matched the executable and build-manifest hashes and recorded the game and benchmark-suite revisions. The generated ISO is local output. DOS boot validation remains separate and was not part of this host-format change. See [`benchmarks/tools/build-iso9660.py`](../benchmarks/tools/build-iso9660.py), [`benchmarks/tools/build-launcher-iso.ps1`](../benchmarks/tools/build-launcher-iso.ps1), and [`benchmarks/README.md`](../benchmarks/README.md).
 
 ### Reduce global-state coupling incrementally
 

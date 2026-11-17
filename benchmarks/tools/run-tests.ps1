@@ -120,6 +120,10 @@ foreach ($test in @('test-runner-selectors.ps1', 'test-render-progress.ps1', 'te
     Invoke-Gate -Name $test -Kind 'host' -Command @($pwshExe.Source, '-NoProfile', '-File', "tools/$test") | Out-Null
 }
 Invoke-Gate -Name 'test-dosbox-profile' -Kind 'host' -Command @('python', 'tools/test-dosbox-profile.py') | Out-Null
+Invoke-Gate -Name 'test-build-iso9660 (ISO structure, extents and input validation)' -Kind 'host' `
+    -Command @('python', 'tools/test-build-iso9660.py') | Out-Null
+Invoke-Gate -Name 'test-launcher-provenance (manifest/configuration identity)' -Kind 'host' `
+    -Command @($pwshExe.Source, '-NoProfile', '-File', 'tools/test-launcher-provenance.ps1') | Out-Null
 Invoke-Gate -Name 'test-particle-scenario' -Kind 'host' -Command @('python', 'tools/test-particle-scenario.py') | Out-Null
 Invoke-Gate -Name 'test-executable-comparison' -Kind 'host' -Command @('python', 'tools/test-executable-comparison.py') | Out-Null
 Invoke-Gate -Name 'test-frame-times' -Kind 'host' -Command @('python', 'tools/test-frame-times.py') | Out-Null

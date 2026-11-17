@@ -138,7 +138,7 @@ Physical-hardware acceptance is explicitly pending in benchmarks/docs/PHYSICAL-4
 | P1 | Keep the generated/runtime renderer stack model synchronized with call paths | High reliability impact; large frames remain in the hot path | Medium effort; ongoing validation | Medium |
 | P2 | Diagnose the observed low-memory map-load boundary | High reliability and supportability impact for constrained DOS/DPMI hosts | Medium; requires controlled captures and pool-level evidence | Medium |
 | P2 | Reconcile 29 selector/profile expectation mismatches and complete broad parity coverage | High confidence in configuration coverage | Medium; likely test-contract/source-map maintenance | Medium |
-| P2 | Add host structural tests and complete provenance for the custom ISO writer | Medium release confidence impact | Low to medium | Low |
+| P2 | Add host structural tests and complete provenance for the custom ISO writer (completed 2026-11-17) | Medium release confidence impact | Low to medium | Low |
 | P2 | Continue incremental ownership work around global renderer and engine state | Medium maintainability impact | Medium to high; preserve legacy interfaces | Medium to high |
 | P3 | Decompose the remaining large BENCH486 test harness only where it improves ownership or review | Local maintainability impact; no runtime effect | Low to medium, demand-driven | Low |
 
@@ -168,11 +168,11 @@ The renderer assembly split's recorded release and C-reference inventories conta
 
 **Action:** Classify each mismatch against the current selector table, resolved flags, manifest, and actual source inventory. Update expectations only when the implementation contract supports it; do not simply suppress the failures. Then run the complete selector/profile host gates and the documented multi-scene parity suite. This is the highest-value follow-up to the assembly-split work because the split's main risk is build-selection drift, not runtime overhead.
 
-### P2 — The ISO writer still lacks direct format regression coverage
+### P2 — ISO writer host coverage and sidecar provenance added (2026-11-17)
 
-`benchmarks/tools/build-iso9660.py` implements directory records, both-endian path tables, extent allocation, volume descriptors, and atomic output replacement. Its input validation covers DOS/ISO names, duplicates, links/reparse points, and volume limits. However, the benchmark host test inventory has no dedicated ISO-structure test, and `benchmarks/tools/run-tests.ps1` does not invoke one. The launcher sidecar records game revision, executable and ISO hashes, and staged-file hashes, but omits the benchmark-suite revision and complete game build-manifest/configuration identity.
+`benchmarks/tools/test-build-iso9660.py` builds and parses synthetic images, checking volume descriptors, both-endian path tables, directory records, extent ordering, sector alignment, payload bytes, empty directories, boundary-sized payloads, invalid and duplicate names, and rejected links/reparse points. The benchmark host runner invokes it, and `test-launcher-provenance.ps1` validates manifest discovery, executable matching, and the selected build identity. The version-2 portable-ISO sidecar records the benchmark-suite revision, selected game build-manifest hash and configuration identity, executable hash, staged-file hashes, and ISO hash.
 
-**Action:** Add synthetic-tree host tests that parse the output and verify volume descriptors, path tables, directory records, extents, alignment, payload bytes, empty directories, boundary sizes, invalid names, and duplicate names. Include them in the host runner. Add suite revision and game build-manifest/profile identity to the sidecar. Keep DOS boot validation separate from writer-format tests.
+The 2026-11-17 benchmark host run passed 22/22 gates. A complete local ISO build produced 26,939 sectors from the current i486 release executable and local base-game PAKs; the generated sidecar's executable and manifest hashes matched. The ISO and PAKs remain local generated/licensed inputs. DOS boot validation remains a separate integration gate and was not run for this format/provenance change.
 
 ### P2 — Assembly-file ownership is improved; selector complexity remains
 
@@ -206,10 +206,8 @@ The BENCH486 code has moved out of `core/host_cmd.c` into `src/tests/bench486/be
 ### Quick wins
 
 1. Classify and resolve the 29 selector/profile expectation mismatches in `quake/tools/test-build-dos.py`; retain the current selector table as the authoritative mapping.
-2. Add host structural tests for `benchmarks/tools/build-iso9660.py` and include them in `benchmarks/tools/run-tests.ps1`.
-3. Extend the portable ISO sidecar with benchmark-suite revision and the selected game build-manifest/configuration identity.
-4. Diagnose the allocation or pool that causes the captured pre-`POSTMAP` failures, without turning the observed DOSBox boundary into a general memory minimum.
-5. Keep physical qualification status visible in benchmark reports; avoid broad 486 claims based only on DOSBox-X.
+2. Diagnose the allocation or pool that causes the captured pre-`POSTMAP` failures, without turning the observed DOSBox boundary into a general memory minimum.
+3. Keep physical qualification status visible in benchmark reports; avoid broad 486 claims based only on DOSBox-X.
 
 ### Substantial engineering opportunities
 
