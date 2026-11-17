@@ -15,11 +15,13 @@ This checklist converts the findings in [the architectural assessment](architect
 - [ ] Run the prescribed demo1/demo2/demo3 parity replays and local-map checks. Preserve raw logs and output hashes.
 - [ ] Collect at least five alternating uninstrumented timing pairs per workload. Report each workload and its spread separately.
 - [ ] Exercise normal rendering, waterwarp fallback behavior, and stack rejection on the actual DPMI stack. Preserve the generated stack-budget report.
-- [ ] Keep DOSBox-X measurements labeled as emulator evidence; do not use them to claim physical 486 performance or compatibility.
+- [x] Keep DOSBox-X measurements labeled as emulator evidence; do not use them to claim physical 486 performance or compatibility.
 
 **Completion evidence:** The raw captures and hashes satisfy [`benchmarks/docs/PHYSICAL-486-ACCEPTANCE.md`](../benchmarks/docs/PHYSICAL-486-ACCEPTANCE.md), with parity, startup, stack, and timing results reported separately.
 
 **Status update (2026-11-17):** No physical 486/DPMI system was available for this pass. The new engine profile is explicitly DOSBox-X evidence and does not close this hardware qualification item.
+
+**Evidence-separation review (2026-11-17):** [`current-source-engine-profile-2026-11-17.md`](current-source-engine-profile-2026-11-17.md) identifies its DOSBox-X profile and says it is not physical-486 evidence. [`quake/docs/renderer-assembly/warp-scratch.md`](../quake/docs/renderer-assembly/warp-scratch.md) labels its stack and parity results as DOSBox-X/CWSDPMI regression evidence. The physical acceptance procedure explicitly keeps emulator results outside the hardware gate. Physical qualification remains open pending a real target.
 
 ### Maintain the renderer stack model as a build invariant
 
