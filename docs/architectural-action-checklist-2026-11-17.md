@@ -32,11 +32,25 @@ This checklist converts the findings in [the architectural assessment](architect
 
 ### Explain the low-memory map-load boundary
 
-- [ ] Instrument map loading to identify the exact allocation request or resource pool that prevents `POSTMAP` completion.
-- [ ] Repeat controlled base-game and registered-data runs with the same build, map, and DPMI setup; preserve console/error logs and `meminfo` output.
-- [ ] Record startup minimum separately from map-specific capacity. Do not generalize the observed e1m1 transition (7,241,728 bytes fails before `POSTMAP`; 7,258,112 bytes completes) to other hosts or maps.
+- [x] Instrument map loading to identify the exact allocation request or resource pool that prevents `POSTMAP` completion.
+- [x] Repeat controlled base-game and registered-data runs with the same build, map, and DPMI setup; preserve console/error logs and `meminfo` output.
+- [x] Record startup minimum separately from map-specific capacity. Do not generalize the observed e1m1 transition (7,241,728 bytes fails before `POSTMAP`; 7,258,112 bytes completes) to other hosts or maps.
 
-**Completion evidence:** Failure and success runs identify the limiting allocation/pool and state their build, map, and DPMI conditions. See [`quake/docs/memory-budget.md`](../quake/docs/memory-budget.md).
+**Verification evidence (2026-11-17):** The isolated `i486-c-reference`
+memory-trace build (`762d22afa0db-e53a4a60da19`, source
+`762d22afa0db7e093363d8c4c7d3522dbbfd40f0`) ran under DOSBox-X
+2026.08.31/CWSDPMI (80486, DOS 5.00, DPMI 0.90, 31,280 KiB reported RAM). The
+5,570,560-byte standard startup minimum first failed a 107,984-byte low-hunk
+request with 47,760 bytes available; at 7,241,728 bytes `e1m1` first failed a
+22,000-byte request with 15,056 available; at 7,258,112 bytes `e1m1` completed.
+Hipnotic `hip1m1` and Rogue `r1m1` startup-minimum runs first failed low-hunk
+requests of 129,772 and 141,172 bytes, with 47,168 and 63,328 bytes available.
+These results identify this build's first failing pool and allocation; they do
+not establish minima for other maps, DPMI hosts, or physical 486 systems. Raw
+ignored run outputs are under
+`benchmarks/out/memory-maptrace-20261117-125228/`. See
+[`quake/docs/memory-budget.md`](../quake/docs/memory-budget.md) for build hashes,
+PAK hashes, and detailed conditions.
 
 ### Reconcile selector/profile expectation mismatches
 
