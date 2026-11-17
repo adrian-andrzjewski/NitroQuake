@@ -117,13 +117,15 @@ deferred. See [`quake/docs/source-layout.md`](../quake/docs/source-layout.md) an
 
 - [x] Split the monolithic `asm486_experiments.s` into subsystem-owned assembly units and a collision unit. The recorded split preserved 88 exported symbols without duplicate exports.
 - [x] Keep one ordered selector table as the source for flags, profile suffixes, assembly inclusion, manifests, and inventory checks.
-- [ ] Avoid further broad source splitting unless ownership boundaries, review friction, or merge conflicts justify it.
+- [x] Review current ownership boundaries; avoid further broad source splitting unless ownership boundaries, review friction, or merge conflicts justify it.
 - [ ] Before adding a selector, document its parity, measurement, or historical-reproduction need and update its tests and build identity contracts.
 - [ ] Consider removing a selector only after confirming it is unused and no longer required for parity, measurements, or reproducible historical experiments.
 
 **Completion evidence:** Source ownership stays subsystem-based; selector behavior remains represented once; each supported profile retains symbol/ABI, ISA, build identity, release pin, and C-oracle coverage. The recorded split evidence and the former selector-test mismatch set are detailed in the assessment.
 
 **Review update (2026-11-17):** The current work added no assembly source split and no selector. The profile build used the committed i486 release selector schedule; selector growth or removal was not needed to complete the current-source measurement. No further split or selector change is proposed from this review.
+
+**Current layout review (2026-11-17, game revision `644fb3a`):** `test-source-layout.py` passes with 182 production units, 109 BENCH fixtures, and 402 mapped files. `test-header-dependencies.py` passes with 83 production C files and no explicit `quakedef.h` umbrella users. The latest host/video boundary change adds a narrow colormap accessor without moving unrelated sources. These ownership checks and the reviewed recent diff do not show a boundary, repeated conflict, or review-friction case that justifies another broad split.
 
 ### Keep BENCH486 test ownership focused
 
