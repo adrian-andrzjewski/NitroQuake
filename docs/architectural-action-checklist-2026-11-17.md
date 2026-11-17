@@ -81,21 +81,32 @@ A fresh C-reference (`i486-c-reference`, source fingerprint `2002B12C0199436302F
 
 - [x] Identify one concrete cross-subsystem state flow that causes maintenance or testing friction; record its producer, consumers, and hot-path impact.
 - [x] Introduce a narrow subsystem interface for that flow while preserving C/assembly symbol names, calling conventions, and structure layout contracts.
-- [ ] Compare generated i486 code and matched performance before expanding the pattern to more state.
+- [x] Compare generated i486 code and matched performance before expanding the pattern to more state.
 - [x] Defer a full renderer context-object conversion unless a prototype demonstrates acceptable 486 code generation and measurable maintenance value.
 
-**Progress evidence (2026-11-17):** `Host_Init` owns and loads `host_colormap`; the only production
-consumers outside the host are `VGA_InitMode` and `VID_ExtraInitMode`, both during video-mode
-initialization. The video test fixture also had to define the legacy host global. `host_assets.h`
-now exposes `Host_GetColormap`, both video drivers use it, and the legacy `host_colormap` symbol
-remains available. The accessor is not called in the frame-rendering path. The strict i486 release
-build, renderer stack check, and linked ISA audit pass. In matched uninstrumented i486 BENCH builds
-using the release selector schedule, 11 renderer/drawing object files were byte-identical; only the
-two video-driver objects changed. No matched timing or DOS runtime parity run has been collected
-for this boundary, so this pattern has not been expanded to other state. The game host suite
-completed 15/17 gates; its sysinfo and video C tests could not run because native `gcc` is
-unavailable on this host. The benchmark host suite passed 22/22. A full renderer context-object
-conversion remains deferred. See [`quake/docs/source-layout.md`](../quake/docs/source-layout.md) and
+**Completion evidence (2026-11-17):** `Host_Init` owns and loads `host_colormap`; the only
+production consumers outside the host are `VGA_InitMode` and `VID_ExtraInitMode`, both during
+video-mode initialization. The video test fixture also had to define the legacy host global.
+`host_assets.h` now exposes `Host_GetColormap`, both video drivers use it, and the legacy
+`host_colormap` symbol remains available. The accessor is not called in the frame-rendering path.
+
+The strict i486 release build, renderer stack check, and linked ISA audit pass. Matched strict
+i486 BENCH builds using the release selector schedule passed their ISA gates (319,474 baseline
+instructions; 319,461 candidate instructions, with no above-i486 or unclassified instructions).
+Eleven renderer/drawing object files were byte-identical; only the two video-driver objects
+changed. A `+parityclock` demo1 replay produced identical 970-row frame-checksum streams, final
+checksum `1047377823`, and event reports. Five uninstrumented DOSBox-X demo1 runs per build had
+median times of 57.688425 s (baseline) and 57.688428 s (candidate), a 0.0000052% difference at the
+reported precision. These are emulator-only results, not physical 486 measurements. Raw local
+captures are under `benchmarks/out/dos-timedemo-20261117-133222/`,
+`benchmarks/out/dos-timedemo-20261117-133355/`,
+`benchmarks/out/dos-timedemo-20261117-133557/`, and
+`benchmarks/out/dos-timedemo-20261117-134155/`.
+
+The game host suite completed 15/17 gates; its sysinfo and video C tests could not run because
+native `gcc` is unavailable on this host. The benchmark host suite passed 22/22. This interface
+has not been expanded to other state, and a full renderer context-object conversion remains
+deferred. See [`quake/docs/source-layout.md`](../quake/docs/source-layout.md) and
 `quake/src/host_assets.h`.
 
 ## P3 — Demand-driven maintainability and optimization
