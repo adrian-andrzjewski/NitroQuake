@@ -19,7 +19,7 @@ The completed session contains 20 captures across five workload/device groups: d
 
 Final framebuffer checksums matched across the four modes in every group. Local-map simulation checksums also matched across modes and sound configurations. This verifies final-state consistency for these runs; it is not a per-frame color/Z comparison between C-reference and assembly candidates. There was one uninstrumented timing sample per group, so the session has no timing spread and does not establish repeatability.
 
-The raw session, logs, build manifests, and per-run JSON are retained locally in the ignored directory `benchmarks/out/engine-profile-current-release-20261117/`. The analyzer generated `analysis.json`, `ranked-scopes.csv`, and whole-engine/component plots there. Collection and analysis used [`ENGINE-PROFILING.md`](../benchmarks/docs/ENGINE-PROFILING.md).
+The raw session, logs, build manifests, and per-run JSON are retained locally in the ignored directory `benchmarks/out/engine-profile-current-release-20261117/`. The analyzer generated `analysis.json`, `ranked-scopes.csv`, and whole-engine/component plots there. Collection and analysis used [`ENGINE-PROFILING.md`](../ENGINE-PROFILING.md).
 
 ## Uninstrumented controls and final checksums
 

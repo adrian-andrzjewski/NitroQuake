@@ -62,7 +62,7 @@ frame rate and elapsed time.
 | --- | ---: | ---: | ---: |
 | Original `Quake.exe` | 320×200 | 13.4 | 72.4 s |
 | `486quake.exe` | 320×200 | 14.2 | 68.2 s |
-| NitroQuake `v0.999+26` | 320×200 | 16.9 | 57.4 s |
+| NitroQuake 2026-11-08 artifact (`v0.999+26`) | 320×200 | 16.9 | 57.4 s |
 
 <p align="center">
   <img src="docs/assets/benchmark-comparison.svg" alt="Median demo1 frame rate at 320 by 200: Quake 13.4 FPS, 486quake 14.2 FPS, and NitroQuake 16.9 FPS" width="100%">
@@ -83,6 +83,10 @@ runs, and correctness evidence. A separate local-server leaf-cache experiment
 reported a 0.387% pooled gain on its own workloads; client `demo1` does not run
 that server path, so that result is not included here. See the
 [benchmark record and historical context](benchmarks/docs/BENCHMARK-COMPARISON.md).
+The comparison executable predates the current generated console identity;
+supported builds now print `NitroQuake v0.999` and the automatically derived
+`Build <number>` on separate lines. See the game's
+[optimization policy](quake/docs/optimization/policy.md) for the count rules.
 
 ## How the work is qualified
 
@@ -123,6 +127,8 @@ verification workflows. For benchmark setup and commands, start with the
 
 ## Project references
 
+- [Documentation index](docs/INDEX.md)
+- [Current architecture and evidence limits](docs/architecture/current-state.md)
 - [Repository boundaries and ownership](docs/repository-layout.md)
 - [Benchmark setup and operations](benchmarks/README.md)
 - [Repository contribution guidelines](docs/repository-guidelines.md)

@@ -552,7 +552,8 @@ if ($null -ne $profile) {
         if ($null -ne $calls) { $zSpanCalls = [int64]$calls }
     }
     # The z-spans node carries no work_items, so the span count comes from the
-    # run metrics. surface_span_count is the figure ASM486-HANDOFF.md cites as
+    # run metrics. surface_span_count is the figure in the archived game
+    # docs/history/ASM486-HANDOFF.md cited as
     # 1,494,650 spans / 45,953,856 pixels.
     $metrics = $profile.metrics
     if ($null -ne $metrics) {

@@ -10,6 +10,11 @@ The game exposes two supported DOS configurations, `i486-release` and
 dead-scratch probes belong to this benchmark suite and are forwarded to the
 game's internal selector-driven build backend.
 
+Use the [benchmark documentation index](docs/INDEX.md) to find current
+workflows, acceptance procedures, and dated reports. Game-side build identity
+and optimization attempt counting are documented in the game's
+[optimization policy](../quake/docs/optimization/policy.md).
+
 For per-frame FPS/time graphs across demo1, demo2 and demo3, see the
 [frame timeline workflow](docs/FRAME-TIMING.md):
 
@@ -72,7 +77,7 @@ runner; run that from the game checkout separately. `-SkipRendering` and
 Historical test debt is documented in the game's
 `docs/ledger/2026-11-08-commit-validation-and-test-debt.md`.
 
-See [interfaces](docs/INTERFACES.md), [operations and historical results](docs/OPERATIONS.md),
+See [interfaces](docs/INTERFACES.md), [operations](docs/OPERATIONS.md),
 [render validation](docs/RENDERING-VALIDATION.md), and
 [comparison methodology](docs/BENCHMARK-COMPARISON.md).
 The [reorganization validation record](docs/REORGANIZATION-VALIDATION.md) lists

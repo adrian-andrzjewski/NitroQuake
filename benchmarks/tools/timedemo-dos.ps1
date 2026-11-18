@@ -811,7 +811,7 @@ $staleBuild = $freshness.Stale
 if ((-not $executableExists) -or $staleBuild) {
     if ($SkipBuild) {
         if ($staleBuild) {
-            throw "Benchmark executable '$benchmarkExe' is stale with respect to the current sources (fingerprint $sourceFingerprint). Rerun without -SkipBuild to rebuild; see ASM486-HANDOFF.md 'the timedemo runner will not rebuild after a source edit'."
+            throw "Benchmark executable '$benchmarkExe' is stale with respect to the current sources (fingerprint $sourceFingerprint). Rerun without -SkipBuild to rebuild; see the game's docs/history/ASM486-HANDOFF.md for the historical runner contract."
         }
         throw "Benchmark executable not found at '$benchmarkExe'. Run this benchmark runner or build-dos-experimental.ps1 first, or omit -SkipBuild."
     }

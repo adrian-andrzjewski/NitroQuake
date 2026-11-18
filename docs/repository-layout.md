@@ -13,7 +13,7 @@ worktrees belong under `workspace-worktrees\outer\<topic>` or
 `workspace-worktrees\quake\<topic>`; do not create NitroQuake or
 NQ worktree directories directly under `D:\`. Retired experiment output is
 kept under `benchmarks/out/worktree-archives/<date>/<former-worktree>/out`.
-The dated mapping in `docs/worktree-archive-map-2026-11-13.csv` records the
+The dated mapping in `docs/history/repository/worktree-archive-map-2026-11-13.csv` records the
 checkout, branch, commit, and archived output location for this consolidation.
 
 ## Ownership
@@ -27,10 +27,12 @@ checkout, branch, commit, and archived output location for this consolidation.
 Python used for compiler/source/binary verification is build infrastructure and
 stays with the game. A language-only move would break the standalone i486 gate.
 The optimization ledger stays with the game as historical decision provenance.
-Its attempt count and inventory digest may appear as manifest metadata, but do
-not determine product build identity; historic measurements and source
-quotations must not be silently rewritten. Native BENCH486 fixtures are optional
-game test code, not Python orchestration.
+Its accepted/rejected attempts determine the console build number, and its
+inventory digest participates in build freshness and the source/configuration
+fingerprint. The numeric build number remains distinct from the product build
+ID. Historical measurements and source quotations must not be silently
+rewritten. Native BENCH486 fixtures are optional game test code, not Python
+orchestration.
 
 ## Integration contracts
 
@@ -75,9 +77,10 @@ checkout is removed. Unreferenced experiment output is not assumed disposable.
 - Run `benchmarks/tools/check-workspace.ps1` to compare the nested `HEAD` with the
   outer committed and staged gitlink and report local tool availability. The
   check is read-only and does not fetch, reset, bootstrap, or replace anything.
-- Build and run game build checks from an independent shallow or full-history
-  checkout without a neighboring benchmark suite or installed emulator. Full
-  game history is required only for a complete optimization-attempt inventory.
+- Build and run game build checks from an independent full-history checkout
+  without a neighboring benchmark suite or installed emulator. The supported
+  numbered builder requires complete Git history to derive the full
+  optimization-attempt inventory; shallow clones fail explicitly.
 - Verify compiler flags and selector propagation across i386/i486 and native
   release/BENCH486/profiling configurations.
 - Exercise suite path resolution against explicit and sibling game checkouts,

@@ -11,14 +11,16 @@ send per-routine comparisons and probes to the internal
 `tools/build-dos-experimental.ps1` backend. The suite imports the game API; the
 game never imports the suite.
 
-Product build identity combines the game's source revision with the fingerprint
-of source inputs and resolved build configuration. The manifest retains the
-optimization-attempt count and inventory digest as provenance when a complete
-inventory is available; full history is not required for the product identity
-or for a shallow checkout to build. Moving tooling does not count as an
-optimization attempt. Product identity and source fingerprints remain distinct
-from the benchmark tooling revision. Do not edit generated headers, inventories,
-manifests or proof reports.
+The manifest records a product build ID from the game source revision and the
+fingerprint of source inputs, resolved build configuration, and optimization
+inventory. The console's numeric build number is a separate value: it counts the
+distinct accepted and rejected optimization attempts. The supported numbered
+builder requires complete Git history and fails on shallow clones rather than
+reporting a partial count. Moving benchmark tooling does not count as an
+optimization attempt. Product build identity is also distinct from the
+benchmark tooling revision. Do not edit generated headers, inventories,
+manifests, or proof reports. See the game's
+[optimization policy](../../quake/docs/optimization/policy.md).
 
 ## Paths and toolchains
 

@@ -220,7 +220,7 @@ require a positive pooled mean FPS from at least three matched uninstrumented
 runs per variant with matching output and strict ISA gates; the physical screen
 uses five alternating pairs for stronger coverage. There is no minimum
 percentage threshold. See the
-[current renderer acceptance rule](../../quake/docs/OPTIMIZATION-PLAN.md#current-performance-acceptance-2026-10-21).
+[current renderer acceptance rule](../../quake/docs/optimization/policy.md).
 Report each workload separately and call out regressions; a positive pooled
 result does not support a claim of improvement on every map. If pair results
 are inconsistent or timer resolution obscures the sign, add alternating pairs
