@@ -1,16 +1,13 @@
-HDPMI32 (Japheth / HX DOS Extender runtime)
+Optional HX/HDPMI runtime files are not distributed with NitroQuake.
 
-Source package:
+The original package identified for the optional benchmark path is:
+
   https://ibiblio.org/pub/micro/pc-stuff/freedos/files/util/system/hx-dos-extender/2.20/HXRT220.zip
-  Package: HXRT220.zip (HX DOS Extender runtime v2.20)
+  BIN/HDPMI32.EXE
+  BIN/DPMI.EXE
 
-Extracted for this experiment:
-  BIN/HDPMI32.EXE  -> HDPMI32.EXE
-  BIN/DPMI.EXE     -> DPMI.EXE (host identity probe)
-  DOC/HDPMI.TXT    -> HDPMI.TXT
-
-SHA-256 (HDPMI32.EXE):
-  F9C1A21A0673B9E771AC0BFE09AE11E90E264882AC067E27E94DEA2AACA66415
-
-License: HX runtime freeware (see HDPMI.TXT section 10).
-Not linked into Quake; used only as an external DPMI server beside qbench.exe.
+The included HX documentation describes the runtime as freeware, but does not
+provide sufficiently clear permission for this repository to redistribute the
+executables or vendor documentation. Obtain the package independently, review
+its terms, and pass its extracted directory with `-HdpmiRoot` when you choose
+to run the optional HDPMI experiment.

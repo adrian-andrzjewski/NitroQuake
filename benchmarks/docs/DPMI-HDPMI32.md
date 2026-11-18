@@ -3,6 +3,11 @@
 Experiment date (UTC): 2026-09-15. Engine binary unchanged; only the external
 DPMI server and staging/launch path differed.
 
+This is a historical record of a local run. The HX/HDPMI runtime and its vendor
+documentation are not distributed. Reproduction requires a user-supplied HX
+runtime whose terms permit local use; pass its extracted directory with
+`-HdpmiRoot` or `NITROQUAKE_HDPMI_ROOT`.
+
 ## Goal
 
 Determine whether Japheth's **HDPMI32** provides a measurable performance
@@ -29,7 +34,7 @@ benefit over the project's vendored **CWSDPMI** on the pinned DOSBox-X
 
 ### HDPMI32 (treatment)
 
-- Vendored from HX runtime 2.20 (`tools\thirdparty\hdpmi\`; see `SOURCE.txt`).
+- User-supplied from HX runtime 2.20 (see `tools\thirdparty\hdpmi\SOURCE.txt`).
 - Stage `HDPMI32.EXE` and **omit** `cwsdpmi.exe` so the stub cannot auto-load CWSDPMI.
 - Launch: `HDPMI32 -r`, then `DPMI.EXE` identity probe, then `qbench.exe`.
 - Probe confirmed `vendor: 'HDPMI', version: 3.20`.
@@ -40,7 +45,7 @@ benefit over the project's vendored **CWSDPMI** on the pinned DOSBox-X
 
 ```powershell
 .\tools\timedemo-dos.ps1 -SkipBuild -DpmiHost cwsdpmi -Runs 5
-.\tools\timedemo-dos.ps1 -SkipBuild -DpmiHost hdpmi32 -Runs 5
+.\tools\timedemo-dos.ps1 -SkipBuild -DpmiHost hdpmi32 -HdpmiRoot C:\HX\BIN -Runs 5
 # Or both, with a merged report:
 .\tools\compare-dpmi-dos.ps1 -SkipBuild -Runs 5
 ```

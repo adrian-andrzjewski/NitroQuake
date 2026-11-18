@@ -575,6 +575,11 @@ class RenderingComparisonTests(unittest.TestCase):
             "pair-only scenarios must enforce R_RunParticleEffect telemetry before deferring golden-image comparison",
         )
 
+    def test_dpmi_comparison_passes_user_owned_hdpmi_root(self) -> None:
+        source = (BENCHMARK_ROOT / "tools/compare-dpmi-dos.ps1").read_text(encoding="utf-8")
+        self.assertIn("$HdpmiRoot = $env:NITROQUAKE_HDPMI_ROOT", source)
+        self.assertIn("$args.HdpmiRoot = $HdpmiRoot", source)
+
     def test_repeat_event_parity_helper_is_wired_and_covers_frames_and_overflow(self) -> None:
         source = (BENCHMARK_ROOT / "tools/bench-event-repeat.ps1").read_text(encoding="utf-8")
         runner = (BENCHMARK_ROOT / "tools/render-validation-dos.ps1").read_text(encoding="utf-8")
@@ -620,8 +625,10 @@ class RenderingComparisonTests(unittest.TestCase):
                 self.assertGreater(scene["expectedChecksum"], 0)
                 self.assertGreaterEqual(scene["repeatRuns"], 2)
                 reference = BENCHMARK_ROOT / scene["reference"]
-                image = rendering.load_pcx(reference)
-                self.assertEqual((image.width, image.height), (320, 200))
+                self.assertTrue(scene["reference"].lower().endswith(".pcx"))
+                if reference.is_file():
+                    image = rendering.load_pcx(reference)
+                    self.assertEqual((image.width, image.height), (320, 200))
 
     def test_blob_explosion_scenario_manifest_is_pinned_and_requires_event(self) -> None:
         base_manifest = load_json((BENCHMARK_ROOT / "tools/render-scenarios.json").read_text(encoding="utf-8"))
@@ -717,7 +724,9 @@ class RenderingComparisonTests(unittest.TestCase):
                 self.assertIn(selector, timedemo_source)
         validation_source = (BENCHMARK_ROOT / "tools/render-validation-dos.ps1").read_text(encoding="utf-8")
         parity_source = (BENCHMARK_ROOT / "tools/render-parity-dos.ps1").read_text(encoding="utf-8")
-        self.assertIn("must define a reference image unless golden comparison is deferred", validation_source)
+        self.assertIn("ReferenceRenderRoot", validation_source)
+        self.assertIn("has no reference image", validation_source)
+        self.assertIn("reference image is missing", validation_source)
         self.assertIn(
             '"reference": null',
             (BENCHMARK_ROOT / "tools/render-scenarios-lavasplash.json").read_text(encoding="utf-8"),
@@ -767,7 +776,9 @@ class RenderingComparisonTests(unittest.TestCase):
         validation_source = (BENCHMARK_ROOT / "tools/render-validation-dos.ps1").read_text(encoding="utf-8")
         self.assertIn("$referencePath = $null", validation_source)
         parity_source = (BENCHMARK_ROOT / "tools/render-parity-dos.ps1").read_text(encoding="utf-8")
-        self.assertIn("must define a reference image unless golden comparison is deferred", validation_source)
+        self.assertIn("ReferenceRenderRoot", validation_source)
+        self.assertIn("has no reference image", validation_source)
+        self.assertIn("reference image is missing", validation_source)
         self.assertIn('"reference": null', manifest_text)
         self.assertIn("$validationArgs += '-SkipGoldenImageComparison'", parity_source)
 

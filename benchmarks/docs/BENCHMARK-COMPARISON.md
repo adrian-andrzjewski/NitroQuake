@@ -35,7 +35,7 @@ server workloads. The client `demo1` comparison does not execute that server
 path, so the result is not included above. Individual optimization claims need
 matched controls, repeated uninstrumented timing, and correctness evidence.
 
-The detailed source record remains in the game repository at
+The detailed source record remains in the engine repository at
 `quake/docs/ledger/2026-11-08-engine-wide-profile-and-ai-cache.md`. Older
 measurements and their original context are retained in the
 [comparison history](BENCHMARK-COMPARISON-HISTORY.md).

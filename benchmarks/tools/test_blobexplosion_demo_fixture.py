@@ -339,7 +339,8 @@ class BlobExplosionWorkflowWiringTests(unittest.TestCase):
         self.assertIn("$eventFrames -contains $capturedFrameIndex", runner)
         self.assertIn("test = 'capture-bench-event'", runner)
         self.assertIn("captureBenchEvents = $captureBenchEvents", runner)
-        self.assertIn("reference image unless golden comparison is deferred", runner)
+        self.assertIn("ReferenceRenderRoot", runner)
+        self.assertIn("has no reference image", runner)
 
     def test_timedemo_validates_fixture_ranges_paths_and_records_artifact_hashes(self) -> None:
         runner = (TOOLS / "timedemo-dos.ps1").read_text(encoding="utf-8")

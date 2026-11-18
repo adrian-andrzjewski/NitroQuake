@@ -8,6 +8,8 @@ param(
     [switch]$NoBootstrap,
     [string]$ToolRoot,
     [string]$DataRoot,
+    # Optional directory with a user-supplied HX/HDPMI32 runtime package.
+    [string]$HdpmiRoot = $env:NITROQUAKE_HDPMI_ROOT,
     # Optional diagnostic profile template. Supplying this requires an explicit
     # ExpectedProfileSha256 so the altered emulator environment remains pinned.
     [string]$DosboxProfilePath,
@@ -1002,9 +1004,9 @@ if ($AutoexecCommands.Count -gt 0) {
 }
 
 $cwsdpmiSource = Join-Path $repoRoot 'src\cwsdpmi.exe'
-$hdpmiDir = Join-Path $PSScriptRoot 'thirdparty\hdpmi'
-$hdpmiSource = Join-Path $hdpmiDir 'HDPMI32.EXE'
-$dpmiProbeSource = Join-Path $hdpmiDir 'DPMI.EXE'
+$hdpmiDir = $null
+$hdpmiSource = $null
+$dpmiProbeSource = $null
 $dpmiHostPath = $null
 $dpmiHostSha256 = $null
 $hdpmiLoadLine = ''
@@ -1018,8 +1020,14 @@ if ($DpmiHost -eq 'cwsdpmi') {
     $dpmiHostPath = $cwsdpmiSource
 }
 else {
+    if ([string]::IsNullOrWhiteSpace($HdpmiRoot)) {
+        throw 'HDPMI32 is not bundled. Pass -HdpmiRoot or set NITROQUAKE_HDPMI_ROOT to a user-supplied HX runtime directory. See tools\thirdparty\hdpmi\SOURCE.txt.'
+    }
+    $hdpmiDir = [IO.Path]::GetFullPath($HdpmiRoot)
+    $hdpmiSource = Join-Path $hdpmiDir 'HDPMI32.EXE'
+    $dpmiProbeSource = Join-Path $hdpmiDir 'DPMI.EXE'
     if (-not (Test-Path -LiteralPath $hdpmiSource -PathType Leaf)) {
-        throw "HDPMI32 binary missing: '$hdpmiSource'. See tools\thirdparty\hdpmi\SOURCE.txt."
+        throw "HDPMI32 binary missing: '$hdpmiSource'. This repository does not distribute the HX runtime."
     }
     if (-not (Test-Path -LiteralPath $dpmiProbeSource -PathType Leaf)) {
         throw "DPMI host probe missing: '$dpmiProbeSource'."

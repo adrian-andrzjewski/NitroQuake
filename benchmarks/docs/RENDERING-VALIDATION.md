@@ -146,11 +146,11 @@ post-warmup checksums, indexed pixels and all palette bytes. Demo 2 requires a
 only with an explicit SHA-256 pin; the accepted profile is the pinned
 `tools/dosbox-x-486-high.conf` with only `memsize` changed to 32.
 
-Keep emulator, build and temporary files under D: and recreate the pinned
-profile as follows:
+From the workspace root, keep emulator, build, and temporary files under the
+engine checkout's ignored `out/` directory and recreate the pinned profile:
 
 ```powershell
-$repo = 'workspace\quake'
+$repo = (Resolve-Path '.\quake').Path
 Set-Location $repo
 $env:TEMP = Join-Path $repo 'out\tmp-screen-update-repro'
 $env:TMP = $env:TEMP
@@ -184,7 +184,7 @@ parameters:
 
 ```powershell
 $current = Get-Content tools/renderer-profiles/i486-asm-selectable-current.json -Raw | ConvertFrom-Json
-$repo = 'workspace\quake'
+$repo = (Resolve-Path '.\quake').Path
 Set-Location $repo
 $env:TEMP = Join-Path $repo 'out\tmp-screen-update-smoke'
 $env:TMP = $env:TEMP

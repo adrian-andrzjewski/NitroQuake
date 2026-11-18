@@ -5,6 +5,7 @@ param(
     [int]$Runs = 5,
     [string]$DataRoot,
     [string]$ToolRoot,
+    [string]$HdpmiRoot = $env:NITROQUAKE_HDPMI_ROOT,
     [switch]$SkipBuild,
     [switch]$NoBootstrap,
     [int]$TimeoutSeconds = 180,
@@ -47,6 +48,9 @@ function Invoke-DpmiTimedemo {
     if ($NoBootstrap) { $args.NoBootstrap = $true }
     if (-not [string]::IsNullOrWhiteSpace($DataRoot)) { $args.DataRoot = $DataRoot }
     if (-not [string]::IsNullOrWhiteSpace($ToolRoot)) { $args.ToolRoot = $ToolRoot }
+    if ($DpmiHost -eq 'hdpmi32' -and -not [string]::IsNullOrWhiteSpace($HdpmiRoot)) {
+        $args.HdpmiRoot = $HdpmiRoot
+    }
     if (-not [string]::IsNullOrWhiteSpace($QuakeExtraArgs)) { $args.QuakeExtraArgs = $QuakeExtraArgs }
     if ($DpmiHost -eq 'hdpmi32' -and -not [string]::IsNullOrWhiteSpace($HdpmiExtraArgs)) {
         $args.HdpmiExtraArgs = $HdpmiExtraArgs

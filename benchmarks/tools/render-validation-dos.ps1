@@ -6,11 +6,12 @@
     Runs the scenarios in render-scenarios.json through the normal benchmark
     executable. Each scene records its final framebuffer checksum, a checksum
     stream for every rendered frame, a selected PCX frame, and timedemo metrics.
-    Captured images are compared against committed references with configurable
-    per-scenario tolerances. Repeated runs are compared frame by frame after the
-    configured startup frames to expose nondeterministic output and temporal
-    instability. A pair-only scenario may omit its reference image when the
-    caller defers golden comparison to render-parity-dos.ps1.
+    Captured images are compared against user-supplied references with
+    configurable per-scenario tolerances. Repeated runs are compared frame by
+    frame after the configured startup frames to expose nondeterministic output
+    and temporal instability. Reference captures are not distributed; provide
+    them with -ReferenceRenderRoot or explicitly defer image comparison to the
+    paired-profile check.
 #>
 [CmdletBinding()]
 param(
@@ -21,6 +22,8 @@ param(
     [string]$LocalOutputDirectoryPrefix,
     [string]$ToolRoot,
     [string]$DataRoot,
+    # Directory containing user-supplied reference PCX images by filename.
+    [string]$ReferenceRenderRoot = $env:NITROQUAKE_REFERENCE_RENDER_ROOT,
     # Optional diagnostic DOSBox-X template; requires an explicit content pin.
     [string]$DosboxProfilePath,
     [string]$ExpectedProfileSha256,
@@ -466,16 +469,18 @@ $previousRunParticleEffectEventState = $null
         $timedemoJson = Get-Content -LiteralPath $timedemoResultPath -Raw | ConvertFrom-Json
 
         $referencePath = $null
-        $referenceRelativePath = [string]$scene.reference
-        if ([string]::IsNullOrWhiteSpace($referenceRelativePath)) {
-            if (-not $SkipGoldenImageComparison) {
-                throw "Scenario '$($scene.id)' must define a reference image unless golden comparison is deferred to the exact paired-profile check."
+        if (-not $SkipGoldenImageComparison) {
+            $referenceRelativePath = [string]$scene.reference
+            if ([string]::IsNullOrWhiteSpace($referenceRelativePath)) {
+                throw "Scenario '$($scene.id)' has no reference image. Use -SkipGoldenImageComparison or supply a user-owned reference capture."
             }
-        }
-        else {
-            $referencePath = [IO.Path]::GetFullPath((Join-Path $benchmarkRoot $referenceRelativePath))
+            if ([string]::IsNullOrWhiteSpace($ReferenceRenderRoot)) {
+                $ReferenceRenderRoot = Join-Path $benchmarkRoot 'tools\golden\render'
+            }
+            $referenceName = [IO.Path]::GetFileName($referenceRelativePath)
+            $referencePath = [IO.Path]::GetFullPath((Join-Path $ReferenceRenderRoot $referenceName))
             if (-not (Test-Path -LiteralPath $referencePath -PathType Leaf)) {
-                throw "Scenario reference image is missing: '$referencePath'."
+                throw "Scenario reference image is missing: '$referencePath'. Supply a user-owned PCX through -ReferenceRenderRoot, or use -SkipGoldenImageComparison."
             }
         }
 
