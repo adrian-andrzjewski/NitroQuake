@@ -1,6 +1,6 @@
 # NitroQuake CI and release architecture
 
-**Status:** implemented in this change; hosted verification and the first release are pending.
+**Status:** automated build and release pipeline; public releases require a verified version tag.
 
 **Reviewed:** 2026-11-18
 
@@ -89,8 +89,9 @@ manifest, requires the tag commit to be reachable from `main`, downloads the
 artifact produced by that run, and checks its contents and executable hash
 again. Only this job receives `contents: write`; it creates the GitHub Release
 and attaches the executable, exact source archive, build evidence, and notices.
-The expected initial tag is `v0.999-build-888`, subject to the green main build
-confirming the generated manifest.
+For the current inventory, the matching release tag is
+`v0.999-build-888`. The workflow checks that every release tag suffix matches
+the build number in the generated manifest.
 
 The release contains no PAK, map, model, sound, demo, or captured game imagery.
 Users must supply legally obtained Quake data in `id1/` and run from the game
@@ -124,10 +125,11 @@ locally supplied game data; they are not reported as CI passes.
 
 The ledger document-structure gate passes in the supported sibling layout
 (workspace root with engine under `quake/`). The workspace host suite passes
-locally with 23 gates and no failures. The workflow YAML parses and all nine
-PowerShell steps pass the PowerShell parser. Hosted compiler-backed results,
-the downloadable Actions artifact, and the first public Release are still
-pending; local syntax and host-suite results are not treated as a hosted build.
+locally with 23 gates and no failures. The workflow YAML parses and all ten
+PowerShell steps pass the PowerShell parser. Successful pull-request and main
+builds upload a 14-day Actions artifact; tagged releases publish the verified
+package permanently. Local syntax and host-suite results are not treated as a
+hosted compiler build, and no game-data-backed runtime result is claimed.
 
 ## References
 
