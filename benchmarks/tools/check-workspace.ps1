@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Check the NitroQuake outer checkout, game gitlink and local tool availability.
+    Check the NitroQuake workspace, pinned engine revision and local tool availability.
 .DESCRIPTION
     This is a read-only check. It does not fetch, reset, update, bootstrap or
     replace either repository or any tool installation.
@@ -39,7 +39,7 @@ if (-not [string]::IsNullOrWhiteSpace($ToolRoot)) {
 
 $gitCommand = Get-Command git.exe -ErrorAction SilentlyContinue
 if ($null -eq $gitCommand) { $gitCommand = Get-Command git -ErrorAction SilentlyContinue }
-if ($null -eq $gitCommand) { throw 'Git is required to inspect repository revisions and the gitlink.' }
+if ($null -eq $gitCommand) { throw 'Git is required to inspect repository revisions and engine.lock.' }
 
 function Invoke-WorkspaceGit {
     param(
@@ -141,19 +141,28 @@ function Get-CommandVersion {
 
 $outer = Get-RepositoryRecord -RepositoryPath $OuterRoot
 $game = Get-RepositoryRecord -RepositoryPath $GameRoot
-$gitlinkOutput = Invoke-WorkspaceGit -RepositoryPath $OuterRoot -Arguments @('ls-tree', 'HEAD', '--', 'quake')
-$indexOutput = Invoke-WorkspaceGit -RepositoryPath $OuterRoot -Arguments @('ls-files', '--stage', '--', 'quake')
-$gitlinkMatch = [regex]::Match($gitlinkOutput, '^160000 commit ([0-9a-fA-F]{40,64})\tquake$')
-$indexMatch = [regex]::Match($indexOutput, '^160000 ([0-9a-fA-F]{40,64}) 0\tquake$')
-$recordedGitlink = if ($gitlinkMatch.Success) { $gitlinkMatch.Groups[1].Value.ToLowerInvariant() } else { $null }
-$indexedGitlink = if ($indexMatch.Success) { $indexMatch.Groups[1].Value.ToLowerInvariant() } else { $null }
-$gitlinkMatchesHead = ($null -ne $recordedGitlink -and $recordedGitlink -eq $game.revision)
-$gitlinkMatchesIndex = ($null -ne $indexedGitlink -and $indexedGitlink -eq $game.revision)
+$engineLockPath = Join-Path $OuterRoot 'engine.lock'
+if (-not (Test-Path -LiteralPath $engineLockPath -PathType Leaf)) {
+    throw "Engine lock file is missing: '$engineLockPath'."
+}
+$committedEngineLock = Invoke-WorkspaceGit -RepositoryPath $OuterRoot -Arguments @('show', 'HEAD:engine.lock') | ConvertFrom-Json
+$workingEngineLock = Get-Content -LiteralPath $engineLockPath -Raw | ConvertFrom-Json
+$lockedEngineRevision = ([string]$committedEngineLock.commit).ToLowerInvariant()
+$workingEngineRevision = ([string]$workingEngineLock.commit).ToLowerInvariant()
+$lockedEngineRepository = [string]$committedEngineLock.repository
+$engineLockValid = ([int]$committedEngineLock.schemaVersion -eq 1 -and
+    $lockedEngineRevision -match '^(?:[0-9a-f]{40}|[0-9a-f]{64})$' -and
+    -not [string]::IsNullOrWhiteSpace($lockedEngineRepository))
+$engineLockMatchesHead = ($engineLockValid -and $lockedEngineRevision -eq $game.revision)
+$engineLockMatchesWorktree = ($engineLockValid -and
+    [int]$workingEngineLock.schemaVersion -eq 1 -and
+    [string]$workingEngineLock.repository -eq $lockedEngineRepository -and
+    $workingEngineRevision -eq $lockedEngineRevision)
 
 $tools = @()
 $gitVersion = Get-CommandVersion -Command $gitCommand -Arguments @('--version')
 $tools += [pscustomobject]@{
-    name = 'Git'; purpose = 'workspace revision and gitlink checks'; requiredForBuild = $true
+    name = 'Git'; purpose = 'workspace revision and engine pin checks'; requiredForBuild = $true
     status = 'available'; version = $gitVersion; path = $gitCommand.Source
 }
 
@@ -251,7 +260,7 @@ foreach ($tool in @($tools | Where-Object { $_.requiredForBuild })) {
     if ($tool.status -ne 'available') { $buildToolsReady = $false }
 }
 $runtimeToolsAvailable = ($buildToolsReady -and $dosboxAvailable)
-$workspaceConsistent = ($gitlinkMatchesHead -and $gitlinkMatchesIndex)
+$workspaceConsistent = ($engineLockMatchesHead -and $engineLockMatchesWorktree)
 $report = [pscustomobject]@{
     schemaVersion = 1
     readOnly = $true
@@ -259,12 +268,13 @@ $report = [pscustomobject]@{
     workspaceConsistent = $workspaceConsistent
     outer = $outer
     game = $game
-    gitlink = [pscustomobject]@{
-        path = 'quake'
-        committedRevision = $recordedGitlink
-        indexRevision = $indexedGitlink
-        matchesGameHead = $gitlinkMatchesHead
-        matchesIndex = $gitlinkMatchesIndex
+    engineLock = [pscustomobject]@{
+        path = 'engine.lock'
+        repository = $lockedEngineRepository
+        committedRevision = $lockedEngineRevision
+        workingRevision = $workingEngineRevision
+        matchesEngineHead = $engineLockMatchesHead
+        matchesWorkingCopy = $engineLockMatchesWorktree
     }
     buildToolsReady = $buildToolsReady
     runtimeToolsAvailable = $runtimeToolsAvailable
@@ -283,10 +293,10 @@ else {
     Write-Host 'NitroQuake workspace check (read-only; no fetch, reset, bootstrap or replacement performed)'
     Write-Host ("Outer: {0}  {1}  branch={2}  dirty={3}" -f $outer.path, $outer.revision, $outer.branch, $outer.dirty)
     Write-Host ("Game:  {0}  {1}  branch={2}  dirty={3}" -f $game.path, $game.revision, $game.branch, $game.dirty)
-    Write-Host ("Gitlink quake: committed={0}  index={1}  game-head-match={2}" -f `
-        $recordedGitlink, $indexedGitlink, $workspaceConsistent)
+    Write-Host ("Engine lock: repository={0}  committed={1}  engine-head-match={2}" -f `
+        $lockedEngineRepository, $lockedEngineRevision, $workspaceConsistent)
     Write-Host ("Build tools ready: {0}; runtime toolchain available: {1}" -f $buildToolsReady, $runtimeToolsAvailable)
-    Write-Host ("Game checkout is shallow: {0} (full history is required for numbered build identity)" -f `
+    Write-Host ("Engine checkout is shallow: {0} (full history is required for numbered build identity)" -f `
         $game.shallow)
     Write-Host 'A complete optimization-attempt inventory and numbered build identity require full game history.'
     foreach ($tool in $tools) {

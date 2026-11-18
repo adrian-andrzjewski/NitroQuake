@@ -1,9 +1,10 @@
 # Current architecture and verification boundaries
 
-NitroQuake is a DOS software-renderer fork of Quake, tuned for 486-class
-systems. The game engine and benchmark suite live in separate Git histories;
-the outer repository records `quake/` as a gitlink and does not fetch its source
-when cloned by itself. See the [repository layout guide](../repository-layout.md).
+NitroQuake is a DOS software-renderer project for 486-class systems. Its source
+engine and benchmark workspace are maintained in separate Git repositories.
+The workspace's `engine.lock` pins the exact engine commit; the bootstrap script
+checks out its complete history under the ignored local `quake/` directory.
+See the [repository layout guide](../repository-layout.md).
 
 ## Runtime shape
 
@@ -22,20 +23,19 @@ target has strict memory and instruction constraints.
 
 ## Build and optimization identity
 
-The game repository owns the supported `i486-release` and `c-reference` builds,
-the pinned DJGPP toolchain, and source-bound plus linked-image i486 ISA checks.
-The benchmark suite owns DOSBox-X orchestration, runtime comparisons,
-parity scenarios, and reporting. Start with the game
-[build guide](../../quake/BUILD-DOS.md) and the
-[benchmark documentation index](../../benchmarks/docs/INDEX.md).
+The [engine repository](https://github.com/adrian-andrzjewski/NitroQuake-engine)
+owns the supported `i486-release` and `c-reference` builds, pinned DJGPP
+toolchain, and source-bound plus linked-image i486 ISA checks. This workspace
+owns DOSBox-X orchestration, runtime comparisons, parity scenarios, and
+reporting. Start with the [engine build guide](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/BUILD-DOS.md)
+and the [benchmark documentation index](../../benchmarks/docs/INDEX.md).
 
 The console's optimization build number counts distinct accepted and rejected
-optimization attempts recorded in the game ledger and its classified legacy
-source. It does not count commits or benchmark runs. The supported builder
-requires complete Git history and fails when it cannot classify the inventory;
-the product version and source/configuration fingerprint are separate values.
-The current rules and the derived count are documented in the game's
-[optimization policy](../../quake/docs/optimization/policy.md).
+optimization attempts recorded in the engine ledger. It does not count commits
+or benchmark runs. The supported builder requires complete Git history and
+fails when it cannot classify the inventory; the product version and
+source/configuration fingerprint are separate values. The current rules and
+the derived count are documented in the [optimization policy](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/optimization/policy.md).
 
 ## What current checks establish
 
@@ -51,6 +51,5 @@ The current rules and the derived count are documented in the game's
   margin require the separate hardware procedure and remain open until measured
   on a physical target.
 
-The [history index](../history/INDEX.md) preserves earlier assessments and
-their limitations. Do not read a dated audit as a fresh validation of the
-current checkout.
+Dated reports identify their source revision and evidence scope. They are
+historical records, not fresh validation of the current checkout.

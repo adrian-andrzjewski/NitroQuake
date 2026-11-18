@@ -194,7 +194,7 @@ soldier, incoming damage and final health 68. Its uncached server share was 10.1
 That is another workload point, not an isolated experiment on combat versus idle.
 
 The accepted 1,536-byte immutable leaf-query cache is already present in
-[pr_cmds.c](../../quake/src/server/pr_cmds.c). Across 18 retained off-mode samples, its
+[pr_cmds.c](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/src/server/pr_cmds.c). Across 18 retained off-mode samples, its
 frame-weighted diagnostic gain was 0.387% (0.288–0.493% by workload). It preserves
 target/PVS decisions rather than caching mutable AI state. This is an existing
 improvement, not a new gain from this analysis or a physical-hardware speed claim.
@@ -240,7 +240,7 @@ hardware cache misses:
   predicates (0.645 checks/frame combined). The check rate is low, and these
   counts do not price its CPU time.
 
-The [assembly dlight census ledger](../../quake/docs/ledger/2026-11-09-surface-cache-dlight-probe-census.md)
+The [assembly dlight census ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-09-surface-cache-dlight-probe-census.md)
 records the two-map results, build audits, exact run checksums and hashes for the
 ignored generated captures. The census corrects instrumentation coverage; it
 does not establish a dlight optimization or FPS gain.
@@ -319,7 +319,7 @@ Validation completed for this refresh:
 
 This does not claim the entire historical game host suite is green. Existing
 unrelated test debt remains recorded in
-[the prior validation ledger](../../quake/docs/ledger/2026-11-08-commit-validation-and-test-debt.md).
+[the prior validation ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-08-commit-validation-and-test-debt.md).
 
 Coverage is explicit rather than inferred from a successful demo:
 
@@ -336,14 +336,11 @@ Coverage is explicit rather than inferred from a successful demo:
 | Loading and disk I/O | Map startup excluded; runtime asset work remains if triggered; no profiling-report writes inside measured frames; loading-inclusive allocator counters labeled separately |
 
 - [Reusable collection and interpretation workflow](ENGINE-PROFILING.md).
-- Current refresh: `benchmarks/out/engine-analysis-verified-20261108/`, including
-  native/source pins, all raw results and ordinary/profiled samples.
-- [Audited reference report](../../quake/out/engine-performance-analysis-20261108/report.html),
-  [reference ledger](../../quake/docs/ledger/2026-11-08-engine-wide-profile-and-ai-cache.md)
-  and original evidence files remain preserved.
-- `out/prior-engine-evidence-refresh.json` records this audit's 104 matching hashes
-  and the expected changed/migrated paths; interrupted prototype captures remain
-  explicitly excluded.
+- The audited reference report and raw capture files are generated local
+  artifacts and are not part of this source release. The
+  [reference ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-08-engine-wide-profile-and-ai-cache.md)
+  preserves the engine-side decision record; interrupted prototype captures
+  remain explicitly excluded.
 
 Scope covers these recorded scenes, bounded local movement/fire, stationary worlds
 and the retained hitscan encounter. It does not establish human-input, missile-heavy,

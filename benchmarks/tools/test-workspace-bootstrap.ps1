@@ -32,30 +32,26 @@ function Set-TestGitIdentity {
 function New-FixtureOuterRepository {
     param(
         [Parameter(Mandatory = $true)][string]$RepositoryPath,
-        [Parameter(Mandatory = $true)][string]$GameRevision
+        [Parameter(Mandatory = $true)][string]$EngineUrl,
+        [Parameter(Mandatory = $true)][string]$EngineRevision
     )
 
     New-Item -ItemType Directory -Path $RepositoryPath -Force | Out-Null
     [void](Invoke-TestGit -RepositoryPath $RepositoryPath -Arguments @('init', '--quiet'))
     Set-TestGitIdentity -RepositoryPath $RepositoryPath
     [IO.File]::WriteAllText((Join-Path $RepositoryPath 'README.txt'), 'outer fixture')
-    [void](Invoke-TestGit -RepositoryPath $RepositoryPath -Arguments @('add', 'README.txt'))
-    [void](Invoke-TestGit -RepositoryPath $RepositoryPath -Arguments @('commit', '--quiet', '-m', 'fixture: create outer repository'))
-    [void](Invoke-TestGit -RepositoryPath $RepositoryPath -Arguments @(
-        'update-index', '--add', '--cacheinfo', "160000,$GameRevision,quake"))
-    [void](Invoke-TestGit -RepositoryPath $RepositoryPath -Arguments @('commit', '--quiet', '-m', 'fixture: record game Gitlink'))
+    $engineLock = [ordered]@{ schemaVersion = 1; repository = $EngineUrl; commit = $EngineRevision }
+    [IO.File]::WriteAllText(
+        (Join-Path $RepositoryPath 'engine.lock'),
+        ($engineLock | ConvertTo-Json -Depth 3) + [Environment]::NewLine)
+    [void](Invoke-TestGit -RepositoryPath $RepositoryPath -Arguments @('add', 'README.txt', 'engine.lock'))
+    [void](Invoke-TestGit -RepositoryPath $RepositoryPath -Arguments @('commit', '--quiet', '-m', 'fixture: pin engine revision'))
 }
 
 function Invoke-Bootstrap {
-    param(
-        [Parameter(Mandatory = $true)][string]$RepositoryPath,
-        [string]$GameUrl
-    )
+    param([Parameter(Mandatory = $true)][string]$RepositoryPath)
 
     $arguments = @('-OuterRoot', $RepositoryPath)
-    if (-not [string]::IsNullOrWhiteSpace($GameUrl)) {
-        $arguments += @('-GameRepositoryUrl', $GameUrl)
-    }
     $output = @(& $script:pwsh.Source -NoProfile -File $script:bootstrap @arguments 2>&1)
     return [pscustomobject]@{
         exitCode = $LASTEXITCODE
@@ -85,8 +81,8 @@ try {
     if ($LASTEXITCODE -ne 0) { throw "Could not create the local fixture remote: $($cloneOutput -join ' ')" }
 
     $freshOuter = Join-Path $temporaryRoot 'fresh outer checkout'
-    New-FixtureOuterRepository -RepositoryPath $freshOuter -GameRevision $secondRevision
-    $freshResult = Invoke-Bootstrap -RepositoryPath $freshOuter -GameUrl $remote
+    New-FixtureOuterRepository -RepositoryPath $freshOuter -EngineUrl $remote -EngineRevision $secondRevision
+    $freshResult = Invoke-Bootstrap -RepositoryPath $freshOuter
     if ($freshResult.exitCode -ne 0) {
         throw "Bootstrap failed for a fresh workspace: $($freshResult.output)"
     }
@@ -98,33 +94,33 @@ try {
     $gameRoot = [IO.Path]::GetFullPath((Invoke-TestGit -RepositoryPath $freshGame -Arguments @('rev-parse', '--show-toplevel')))
     if ($checkedOutRevision -ne $secondRevision -or $isShallow -ne 'false' -or $historyCount -ne 2 -or
         -not [string]::Equals($gameRoot.TrimEnd('\', '/'), $freshGame.TrimEnd('\', '/'), [StringComparison]::OrdinalIgnoreCase)) {
-        throw 'Bootstrap did not create a complete game checkout at the outer Gitlink revision.'
+        throw 'Bootstrap did not create a complete engine checkout at the pinned revision.'
     }
 
     $repeatResult = Invoke-Bootstrap -RepositoryPath $freshOuter
-    if ($repeatResult.exitCode -ne 0 -or $repeatResult.output -notmatch 'already matches outer HEAD') {
+    if ($repeatResult.exitCode -ne 0 -or $repeatResult.output -notmatch 'already matches engine.lock') {
         throw "Bootstrap did not safely recognize an already ready checkout: $($repeatResult.output)"
     }
 
     $nonRepositoryOuter = Join-Path $temporaryRoot 'outer with existing files'
-    New-FixtureOuterRepository -RepositoryPath $nonRepositoryOuter -GameRevision $secondRevision
+    New-FixtureOuterRepository -RepositoryPath $nonRepositoryOuter -EngineUrl $remote -EngineRevision $secondRevision
     $nonRepositoryGame = Join-Path $nonRepositoryOuter 'quake'
     New-Item -ItemType Directory -Path $nonRepositoryGame -Force | Out-Null
     $preservedFile = Join-Path $nonRepositoryGame 'keep.txt'
     [IO.File]::WriteAllText($preservedFile, 'preserve this existing file')
-    $nonRepositoryResult = Invoke-Bootstrap -RepositoryPath $nonRepositoryOuter -GameUrl $remote
+    $nonRepositoryResult = Invoke-Bootstrap -RepositoryPath $nonRepositoryOuter
     if ($nonRepositoryResult.exitCode -eq 0 -or (Get-Content -LiteralPath $preservedFile -Raw) -ne 'preserve this existing file') {
         throw 'Bootstrap did not reject and preserve non-repository content at quake/.'
     }
 
     $mismatchOuter = Join-Path $temporaryRoot 'outer with mismatched game'
-    New-FixtureOuterRepository -RepositoryPath $mismatchOuter -GameRevision $firstRevision
+    New-FixtureOuterRepository -RepositoryPath $mismatchOuter -EngineUrl $remote -EngineRevision $firstRevision
     $mismatchGame = Join-Path $mismatchOuter 'quake'
     $mismatchCloneOutput = @(& $script:git.Source clone --no-checkout -- $remote $mismatchGame 2>&1)
     if ($LASTEXITCODE -ne 0) { throw "Could not create mismatched game fixture: $($mismatchCloneOutput -join ' ')" }
     [void](Invoke-TestGit -RepositoryPath $mismatchGame -Arguments @('checkout', '--quiet', '--detach', $secondRevision))
     $beforeMismatch = Invoke-TestGit -RepositoryPath $mismatchGame -Arguments @('rev-parse', 'HEAD')
-    $mismatchResult = Invoke-Bootstrap -RepositoryPath $mismatchOuter -GameUrl $remote
+    $mismatchResult = Invoke-Bootstrap -RepositoryPath $mismatchOuter
     $afterMismatch = Invoke-TestGit -RepositoryPath $mismatchGame -Arguments @('rev-parse', 'HEAD')
     if ($mismatchResult.exitCode -eq 0 -or $beforeMismatch -ne $afterMismatch -or $afterMismatch -ne $secondRevision) {
         throw 'Bootstrap did not reject and preserve a checkout at the wrong game revision.'
@@ -143,4 +139,4 @@ finally {
     }
 }
 
-Write-Host 'PASS: full-history clone, exact Gitlink checkout, idempotent rerun and existing-content preservation'
+Write-Host 'PASS: full-history clone, exact engine.lock checkout, idempotent rerun and existing-content preservation'

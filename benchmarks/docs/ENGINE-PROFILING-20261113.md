@@ -48,7 +48,7 @@ component profiles.
 
 The component shares come from the profiled source fingerprint above. The audio
 timing is a separate, later candidate build; its parity, matched runs, and build
-audit are recorded in the [mixer ledger](../../quake/docs/ledger/2026-11-13-snd-mixa-four-sample-unroll-promoted.md).
+audit are recorded in the [mixer ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-13-snd-mixa-four-sample-unroll-promoted.md).
 
 ### Local-gameplay server detail
 
@@ -69,7 +69,7 @@ The QuakeC scope includes scripted AI and gameplay code, so it does not isolate
 AI as its own cost. In the earlier measured attacking-soldier encounter, the
 `PF_CheckClientLeaf` cache reduced that query from 0.683 to 0.439 ms/frame and
 the complete local-gameplay benchmark improved 0.387% pooled FPS; see the
-[AI leaf-cache ledger](../../quake/docs/ledger/2026-11-08-engine-wide-profile-and-ai-cache.md).
+[AI leaf-cache ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-08-engine-wide-profile-and-ai-cache.md).
 That is evidence for this specific AI query, not a general AI share. Collision,
 physics, and QuakeC are the best measured non-renderer targets in these moving
 and firing scenarios. The very small visibility share gives no support for
@@ -89,7 +89,8 @@ These are bytecode execution counts, not elapsed-time shares; opcodes have
 different costs and this capture has a fixed scripted workload. They point to
 target acquisition and monster/player AI as the next QuakeC paths to time before
 changing behavior. The source capture and its complete CSV are retained under
-[`engine-profile-20261113-060136-98b8ba`](../out/engine-profile-20261113-060136-98b8ba/quake/QCPROF.CSV).
+Raw profiling captures from this run are local generated artifacts and are not
+distributed with the source repository.
 
 ### Static entity dispatch measurement
 
@@ -179,7 +180,7 @@ framebuffer checksums. Three fixed-clock demo1 replays also matched every
 per-frame color and Z checksum across variants. The i486 release profile now
 selects this measured path by default. Its complete strict i486 gate passed.
 Full samples and trace hashes are recorded in the
-[exact-zero-T ledger](../../quake/docs/ledger/2026-11-13-span16-exact-zero-tstep-promoted.md).
+[exact-zero-T ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-13-span16-exact-zero-tstep-promoted.md).
 
 ### Exact-zero-T texture-span tail specialization
 
@@ -192,7 +193,7 @@ uninstrumented runs per variant and map, pooled FPS rose from **23.484092** to
 faster; local simulation/framebuffer checksums and all 970 per-frame color and
 Z checksums in three fixed-clock demo1 replays matched exactly. The i486 release
 profile now selects this measured path by default. Strict qbench and release
-ISA gates passed. See the [tail-zero ledger](../../quake/docs/ledger/2026-11-13-span16-tail-exact-zero-tstep-promoted.md)
+ISA gates passed. See the [tail-zero ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-13-span16-tail-exact-zero-tstep-promoted.md)
 and the matched result records under `benchmarks/out/span16-tail-tzero-*`.
 
 ## Amdahl estimates and next experiments
@@ -239,6 +240,6 @@ Host suites were not rerun for these candidates.
 - [Generated profile report](../out/engine-profile-session-final-20261113/report.html)
 - [Corrected ranked-scope CSV](../out/engine-profile-session-final-20261113/ranked-scopes.csv)
 - [Full profile analysis](../out/engine-profile-session-final-20261113/analysis.json)
-- [Sound-mixer optimization ledger](../../quake/docs/ledger/2026-11-13-snd-mixa-four-sample-unroll-promoted.md)
-- [QuakeC statement-store optimization ledger](../../quake/docs/ledger/2026-11-13-quakec-statement-store-elision-promoted.md)
-- [Texture-span tail exact-zero-T optimization ledger](../../quake/docs/ledger/2026-11-13-span16-tail-exact-zero-tstep-promoted.md)
+- [Sound-mixer optimization ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-13-snd-mixa-four-sample-unroll-promoted.md)
+- [QuakeC statement-store optimization ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-13-quakec-statement-store-elision-promoted.md)
+- [Texture-span tail exact-zero-T optimization ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-13-span16-tail-exact-zero-tstep-promoted.md)

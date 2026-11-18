@@ -1,15 +1,15 @@
 <#
 .SYNOPSIS
-    Provision the game checkout recorded by the outer repository's quake gitlink.
+    Provision the engine checkout pinned by the outer repository's engine.lock.
 .DESCRIPTION
-    Clone the game repository with complete history and check out the exact
-    commit recorded in outer HEAD. A game repository URL is needed only when
-    the checkout must be cloned; supply it explicitly or through
-    NITROQUAKE_GAME_REPOSITORY_URL. Existing content is never replaced.
+    Clone the engine repository with complete history and check out the exact
+    commit recorded in engine.lock. The pinned repository URL can be overridden
+    through -EngineRepositoryUrl or NITROQUAKE_ENGINE_REPOSITORY_URL. Existing
+    content is never replaced.
 #>
 [CmdletBinding()]
 param(
-    [string]$GameRepositoryUrl = $env:NITROQUAKE_GAME_REPOSITORY_URL,
+    [string]$EngineRepositoryUrl = $env:NITROQUAKE_ENGINE_REPOSITORY_URL,
     [string]$OuterRoot
 )
 
@@ -21,10 +21,11 @@ if ([string]::IsNullOrWhiteSpace($OuterRoot)) {
 }
 $OuterRoot = [IO.Path]::GetFullPath($OuterRoot)
 $GameRoot = [IO.Path]::GetFullPath((Join-Path $OuterRoot 'quake'))
+$EngineLockPath = Join-Path $OuterRoot 'engine.lock'
 
 $gitCommand = Get-Command git.exe -ErrorAction SilentlyContinue
 if ($null -eq $gitCommand) { $gitCommand = Get-Command git -ErrorAction SilentlyContinue }
-if ($null -eq $gitCommand) { throw 'Git is required to provision the game checkout.' }
+if ($null -eq $gitCommand) { throw 'Git is required to provision the engine checkout.' }
 
 function Invoke-BootstrapGit {
     param(
@@ -52,12 +53,30 @@ if (-not [string]::Equals($outerTopLevel.TrimEnd('\', '/'), $OuterRoot.TrimEnd('
     throw "OuterRoot must be the outer Git repository root: '$outerTopLevel'."
 }
 
-$gitlinkOutput = Invoke-BootstrapGit -RepositoryPath $OuterRoot -Arguments @('ls-tree', 'HEAD', '--', 'quake')
-$gitlinkMatch = [regex]::Match($gitlinkOutput, '^160000 commit ([0-9a-fA-F]{40,64})\tquake$')
-if (-not $gitlinkMatch.Success) {
-    throw "Outer HEAD does not record a Git link at '$OuterRoot\quake'."
+if (-not (Test-Path -LiteralPath $EngineLockPath -PathType Leaf)) {
+    throw "Engine lock file is missing: '$EngineLockPath'."
 }
-$expectedRevision = $gitlinkMatch.Groups[1].Value.ToLowerInvariant()
+$committedEngineLock = Invoke-BootstrapGit -RepositoryPath $OuterRoot -Arguments @('show', 'HEAD:engine.lock')
+$engineLock = $committedEngineLock | ConvertFrom-Json
+$workingEngineLock = Get-Content -LiteralPath $EngineLockPath -Raw | ConvertFrom-Json
+if ([int]$engineLock.schemaVersion -ne 1) {
+    throw "Unsupported engine lock schema in committed HEAD:engine.lock."
+}
+$lockedRepositoryUrl = [string]$engineLock.repository
+$expectedRevision = ([string]$engineLock.commit).ToLowerInvariant()
+if ([string]::IsNullOrWhiteSpace($lockedRepositoryUrl)) {
+    throw "Engine lock file '$EngineLockPath' must define a repository URL."
+}
+if ($expectedRevision -notmatch '^(?:[0-9a-f]{40}|[0-9a-f]{64})$') {
+    throw "Engine lock file '$EngineLockPath' must define a full 40- or 64-character commit ID."
+}
+if ([string]$workingEngineLock.repository -ne $lockedRepositoryUrl -or
+        ([string]$workingEngineLock.commit).ToLowerInvariant() -ne $expectedRevision) {
+    throw "Working '$EngineLockPath' differs from committed HEAD:engine.lock. Commit the pin before bootstrapping."
+}
+if ([string]::IsNullOrWhiteSpace($EngineRepositoryUrl)) {
+    $EngineRepositoryUrl = $lockedRepositoryUrl
+}
 
 if (Test-Path -LiteralPath $GameRoot) {
     $gameItem = Get-Item -LiteralPath $GameRoot -Force
@@ -79,29 +98,25 @@ if (Test-Path -LiteralPath $GameRoot) {
 
         $existingRevision = (Invoke-BootstrapGit -RepositoryPath $GameRoot -Arguments @('rev-parse', '--verify', 'HEAD')).ToLowerInvariant()
         if ($existingRevision -ne $expectedRevision) {
-            throw "Existing game checkout is at $existingRevision; outer HEAD records $expectedRevision. Existing content was preserved."
+            throw "Existing engine checkout is at $existingRevision; engine.lock pins $expectedRevision. Existing content was preserved."
         }
         $isShallow = Invoke-BootstrapGit -RepositoryPath $GameRoot -Arguments @('rev-parse', '--is-shallow-repository')
         if ($isShallow -eq 'true') {
-            throw "Existing game checkout at '$GameRoot' is shallow. Fetch complete history manually, then rerun the workspace check."
+            throw "Existing engine checkout at '$GameRoot' is shallow. Fetch complete history manually, then rerun the workspace check."
         }
         $status = Invoke-BootstrapGit -RepositoryPath $GameRoot -Arguments @('status', '--porcelain=v1', '--untracked-files=normal')
         if (-not [string]::IsNullOrWhiteSpace($status)) {
-            throw "Existing game checkout at '$GameRoot' has local changes. Existing content was preserved."
+            throw "Existing engine checkout at '$GameRoot' has local changes. Existing content was preserved."
         }
 
-        Write-Host "Game checkout already matches outer HEAD at $expectedRevision and has complete history."
+        Write-Host "Engine checkout already matches engine.lock at $expectedRevision and has complete history."
         exit 0
     }
 }
 
-if ([string]::IsNullOrWhiteSpace($GameRepositoryUrl)) {
-    throw 'Pass -GameRepositoryUrl or set NITROQUAKE_GAME_REPOSITORY_URL to clone the NitroQuake game repository.'
-}
-
-Write-Host "Cloning full game history from the supplied repository URL..."
+Write-Host "Cloning full engine history from $EngineRepositoryUrl..."
 $cloneOutput = @(& $script:gitCommand.Source clone --no-checkout --no-single-branch -- `
-        $GameRepositoryUrl $GameRoot 2>&1)
+        $EngineRepositoryUrl $GameRoot 2>&1)
 $cloneExitCode = $LASTEXITCODE
 $cloneOutput | ForEach-Object { Write-Host ([string]$_) }
 if ($cloneExitCode -ne 0) {
@@ -117,16 +132,16 @@ try {
     }
     $isShallow = Invoke-BootstrapGit -RepositoryPath $GameRoot -Arguments @('rev-parse', '--is-shallow-repository')
     if ($isShallow -eq 'true') {
-        throw 'The cloned game repository is shallow; a complete history is required for numbered builds.'
+        throw 'The cloned engine repository is shallow; a complete history is required for numbered builds.'
     }
     $status = Invoke-BootstrapGit -RepositoryPath $GameRoot -Arguments @('status', '--porcelain=v1', '--untracked-files=normal')
     if (-not [string]::IsNullOrWhiteSpace($status)) {
-        throw "The newly cloned game checkout is unexpectedly dirty: $status"
+        throw "The newly cloned engine checkout is unexpectedly dirty: $status"
     }
 }
 catch {
     throw "Workspace bootstrap could not complete at '$GameRoot'. Any created checkout was preserved for inspection. $($_.Exception.Message)"
 }
 
-Write-Host "Game checkout ready at $GameRoot"
-Write-Host "Checked out outer HEAD's recorded game revision $expectedRevision with complete history."
+Write-Host "Engine checkout ready at $GameRoot"
+Write-Host "Checked out engine.lock revision $expectedRevision with complete history."

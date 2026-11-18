@@ -24,9 +24,9 @@ do not contribute. Working-tree reports participate so an optimization can be
 built before its report is committed. The reviewed legacy classifications in
 `tools/optimization-history-legacy.json` resolve aggregate reports and duplicate
 write-ups; they contain source references and decisions, never a numeric offset.
-One retained early mip-0 specialization has no standalone report; its exact Git
-revision is classified in the same map and counted only when reachable from HEAD.
-The later dword-packing optimization to its helper is a separate attempt.
+The early retained mip-0 specialization has a stable ledger record at
+`quake/docs/ledger/2026-10-25-mip0-fully-flat-blocks-promoted.md`; the later
+dword-packing optimization to its helper is a separate attempt.
 
 An attempt is a separately documented implemented candidate or independent
 variant with an acceptance or rejection decision. Accepted C-to-assembly ports
@@ -584,18 +584,18 @@ ledger, which is where a result belongs.
 
 | Section | Now recorded in | Why it left |
 |---|---|---|
-| **Offline precomputation pass (2026-09-29) — one rejection, one cleanup, one closure** | [`docs/ledger/2026-09-29-offline-precomputation-pass.md`](../../../quake/docs/ledger/2026-09-29-offline-precomputation-pass.md) | a result, not a build step |
-| **Hot-code clustering (2026-09-29) — rejected, selector removed** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](../../../quake/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
-| **What this harness can and cannot measure (2026-09-29)** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](../../../quake/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
-| **Z-span x87 prologue (2026-09-29) — measured at 0.71%, not worth porting** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](../../../quake/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
-| **Aff8 AGI back-edge padding (2026-09-29) — measured null, selector removed** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](../../../quake/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
-| **Alias-raster C-glue instrumentation (2026-09-29)** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](../../../quake/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
-| **Alias-raster child instrumentation (2026-09-29)** | [`docs/ledger/2026-09-29-alias-and-surface-block-experiments.md`](../../../quake/docs/ledger/2026-09-29-alias-and-surface-block-experiments.md) | duplicate of the ledger copy |
-| **Alias sub-node instrumentation (2026-09-29)** | [`docs/ledger/2026-09-29-alias-and-surface-block-experiments.md`](../../../quake/docs/ledger/2026-09-29-alias-and-surface-block-experiments.md) | duplicate of the ledger copy |
-| **Static 486 cost model (read-only analysis)** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](../../../quake/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
-| **Aff8 16-byte code-alignment experiment (2026-09-29) — rejected and reverted** | [`docs/ledger/2026-09-29-alias-and-surface-block-experiments.md`](../../../quake/docs/ledger/2026-09-29-alias-and-surface-block-experiments.md) | duplicate of the ledger copy |
-| **Latest PROFILE486 and texture-span STOSW experiment (2026-09-29)** | [`docs/ledger/2026-09-29-offline-precomputation-pass.md`](../../../quake/docs/ledger/2026-09-29-offline-precomputation-pass.md) | a result, not a build step |
-| **Monster gib trail zero-XY experiment (2026-09-29)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](../../../quake/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
+| **Offline precomputation pass (2026-09-29) — one rejection, one cleanup, one closure** | [`docs/ledger/2026-09-29-offline-precomputation-pass.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-29-offline-precomputation-pass.md) | a result, not a build step |
+| **Hot-code clustering (2026-09-29) — rejected, selector removed** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
+| **What this harness can and cannot measure (2026-09-29)** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
+| **Z-span x87 prologue (2026-09-29) — measured at 0.71%, not worth porting** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
+| **Aff8 AGI back-edge padding (2026-09-29) — measured null, selector removed** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
+| **Alias-raster C-glue instrumentation (2026-09-29)** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
+| **Alias-raster child instrumentation (2026-09-29)** | [`docs/ledger/2026-09-29-alias-and-surface-block-experiments.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-29-alias-and-surface-block-experiments.md) | duplicate of the ledger copy |
+| **Alias sub-node instrumentation (2026-09-29)** | [`docs/ledger/2026-09-29-alias-and-surface-block-experiments.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-29-alias-and-surface-block-experiments.md) | duplicate of the ledger copy |
+| **Static 486 cost model (read-only analysis)** | [`docs/ledger/2026-09-29-harness-and-cost-model.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-29-harness-and-cost-model.md) | duplicate of the ledger copy |
+| **Aff8 16-byte code-alignment experiment (2026-09-29) — rejected and reverted** | [`docs/ledger/2026-09-29-alias-and-surface-block-experiments.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-29-alias-and-surface-block-experiments.md) | duplicate of the ledger copy |
+| **Latest PROFILE486 and texture-span STOSW experiment (2026-09-29)** | [`docs/ledger/2026-09-29-offline-precomputation-pass.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-29-offline-precomputation-pass.md) | a result, not a build step |
+| **Monster gib trail zero-XY experiment (2026-09-29)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
 
 ## Build
 
@@ -1087,13 +1087,13 @@ here said the same thing in fewer words.
 
 | Section | Now recorded in | Why it left |
 |---|---|---|
-| **Texture-span row-cross experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](../../../quake/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
-| **Texture-span address-update experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](../../../quake/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
-| **Texture-span load-order experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](../../../quake/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
-| **Alias-model prepare source-cursor experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](../../../quake/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
-| **Alias-span address-update experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](../../../quake/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
-| **World-BSP frame-count cache experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](../../../quake/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
-| **Texture-span tail-store experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](../../../quake/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
+| **Texture-span row-cross experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
+| **Texture-span address-update experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
+| **Texture-span load-order experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
+| **Alias-model prepare source-cursor experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
+| **Alias-span address-update experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
+| **World-BSP frame-count cache experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
+| **Texture-span tail-store experiment (2026-09-28)** | [`docs/ledger/2026-09-28-span-micro-experiments.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-09-28-span-micro-experiments.md) | duplicate of the ledger copy |
 
 ## Runtime smoke test
 
@@ -1777,12 +1777,12 @@ ledger, which is where a result belongs.
 
 | Section | Now recorded in | Why it left |
 |---|---|---|
-| **Lightmap style accumulation** | [`docs/ledger/timedemo-baseline-history.md`](../../../quake/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
-| **VGA full-frame copy experiment** | [`docs/ledger/timedemo-baseline-history.md`](../../../quake/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
-| **Surface-cache capacity and churn** | [`docs/ledger/timedemo-baseline-history.md`](../../../quake/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
-| **Surface-cache header locality experiment** | [`docs/ledger/timedemo-baseline-history.md`](../../../quake/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
-| **Lazy viewspantable rebuild** | [`docs/ledger/timedemo-baseline-history.md`](../../../quake/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
-| **Measured texture-span change** | [`docs/ledger/timedemo-baseline-history.md`](../../../quake/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
+| **Lightmap style accumulation** | [`docs/ledger/timedemo-baseline-history.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
+| **VGA full-frame copy experiment** | [`docs/ledger/timedemo-baseline-history.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
+| **Surface-cache capacity and churn** | [`docs/ledger/timedemo-baseline-history.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
+| **Surface-cache header locality experiment** | [`docs/ledger/timedemo-baseline-history.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
+| **Lazy viewspantable rebuild** | [`docs/ledger/timedemo-baseline-history.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
+| **Measured texture-span change** | [`docs/ledger/timedemo-baseline-history.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/timedemo-baseline-history.md) | a result, not a build step |
 
 ## 486 microbenchmark build
 
@@ -2061,20 +2061,20 @@ ledger, which is where a result belongs.
 
 | Section | Now recorded in | Why it left |
 |---|---|---|
-| **Memory helper experiment result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **Runtime memory-helper result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **Texture-axis cache probe result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **Surface-cache predicate result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **Mip-level selector result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **Turbulent-span inner-loop result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **Alias-project projection result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **Texture-animation frame-selection result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **Lightmap normalization result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **BSP plane-dot result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **BSP frustum-clipping result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **Alias bounding-box projection result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **Clipped alias vertex transform result** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
-| **Rejected negative-gradient Z-span unroll** | [`docs/ledger/microbenchmark-results.md`](../../../quake/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Memory helper experiment result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Runtime memory-helper result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Texture-axis cache probe result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Surface-cache predicate result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Mip-level selector result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Turbulent-span inner-loop result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Alias-project projection result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Texture-animation frame-selection result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Lightmap normalization result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **BSP plane-dot result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **BSP frustum-clipping result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Alias bounding-box projection result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Clipped alias vertex transform result** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
+| **Rejected negative-gradient Z-span unroll** | [`docs/ledger/microbenchmark-results.md`](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/microbenchmark-results.md) | a result, not a build step |
 
 ## Reprovisioning
 

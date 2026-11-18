@@ -234,7 +234,7 @@ try {
     $sidecar = [IO.Path]::ChangeExtension($OutputPath, '.manifest.json')
     $gameRepositoryRevision = (& git -C $gameRoot rev-parse HEAD).Trim()
     if ($LASTEXITCODE -ne 0 -or $gameRepositoryRevision -notmatch '^[0-9a-f]{40}$') {
-        throw 'Could not resolve the game repository revision for the portable ISO sidecar.'
+        throw 'Could not resolve the engine repository revision for the portable ISO sidecar.'
     }
     $benchmarkSuiteRevision = (& git -C $suiteRoot rev-parse HEAD).Trim()
     if ($LASTEXITCODE -ne 0 -or $benchmarkSuiteRevision -notmatch '^[0-9a-f]{40}$') {

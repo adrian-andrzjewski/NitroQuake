@@ -4,7 +4,7 @@ The [benchmark suite guide](../README.md) is the entry point for prerequisites,
 bootstrap, game-data staging, and portable ISO creation. This page summarizes
 the normal measurement sequence and links to the detailed procedures.
 
-## Select the game checkout
+## Select the engine checkout
 
 Run commands from `benchmarks/`. The sibling `quake/` checkout is the default;
 use `-GameRoot` or `NITROQUAKE_GAME_ROOT` to select another complete game
@@ -21,7 +21,7 @@ pwsh -NoProfile -File tools/smoke-dos.ps1 -NoBootstrap
 pwsh -NoProfile -File tools/timedemo-dos.ps1 -Runs 3 -NoBootstrap -NoFpsStats
 ```
 
-Run the game repository's host checks separately. Use
+Run the engine repository's host checks separately. Use
 [`run-tests.ps1`](../tools/run-tests.ps1) without `-HostOnly` for the registered
 runtime suite, and report skipped gates explicitly.
 
@@ -38,7 +38,7 @@ runtime suite, and report skipped gates explicitly.
 The game build number counts documented accepted and rejected optimization
 attempts, not benchmark runs or commits. Its inventory and reproducibility rules
 are maintained in the game's
-[optimization policy](../../quake/docs/optimization/policy.md).
+[optimization policy](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/optimization/policy.md).
 
 ## Historical operations notes
 

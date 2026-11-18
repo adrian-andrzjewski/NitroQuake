@@ -20,7 +20,7 @@ reporting a partial count. Moving benchmark tooling does not count as an
 optimization attempt. Product build identity is also distinct from the
 benchmark tooling revision. Do not edit generated headers, inventories,
 manifests, or proof reports. See the game's
-[optimization policy](../../quake/docs/optimization/policy.md).
+[optimization policy](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/optimization/policy.md).
 
 ## Paths and toolchains
 
@@ -98,11 +98,10 @@ The terminal session must have a sibling `audit.json` with `status: PASS` and
 exports every timing sample to CSV, and plots median FPS/change plus observed
 paired ranges. It does not turn those ranges into confidence intervals.
 
-## History and archives
+## Repository history
 
-`../migration.json` records each transferred path's original game revision and
-SHA-256, plus split interfaces and transferred workspace assets. Both existing
-Git histories are retained without rewriting. To inspect an original script,
-use `git -C <game> show <sourceRevision>:<sourcePath>` from the migration record.
-Historical ledger commands describe their original checkout layout. Active
-runtime commands now belong to this suite; native build commands remain in game.
+The workspace and engine use separate Git repositories. The root
+[`engine.lock`](../../engine.lock) pins the exact engine commit used by the
+workspace bootstrap. Historical ledger commands describe their original
+checkout layout. Active runtime commands belong to this suite; native build
+commands remain in the engine repository.

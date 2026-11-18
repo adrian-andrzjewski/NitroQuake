@@ -27,6 +27,6 @@ environment.
   remain in this directory. Their scope and limitations are stated in each file.
 
 The [history directory](history/) contains the former operations notebook and
-optimization-opportunities snapshot. The game checkout owns attempt policy and
+optimization-opportunities snapshot. The engine checkout owns attempt policy and
 the automatically derived build number; see its
-[optimization policy](../../quake/docs/optimization/policy.md).
+[optimization policy](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/optimization/policy.md).

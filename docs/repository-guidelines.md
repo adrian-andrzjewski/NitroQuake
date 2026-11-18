@@ -1,32 +1,45 @@
-# Repository Guidelines
+# Repository guidelines
 
-## Project Structure & Module Organization
+## Project structure
 
-This workspace coordinates two Git repositories. `benchmarks/` contains DOSBox automation, Python analysis, test fixtures, scenarios, and performance reports. `docs/` describes the repository boundary and migration. `quake/` is a standalone game checkout recorded by the outer repository as a gitlink; it owns the C and assembly sources, game assets, DJGPP build, and game verification tools. Commit game changes inside `quake/` first, then update the outer repository's gitlink. See `docs/repository-layout.md` for ownership details.
+NitroQuake uses two independent Git repositories. The [engine repository](https://github.com/adrian-andrzjewski/NitroQuake-engine)
+owns the C and assembly code, DOS build, optimization ledger, and engine tests.
+This workspace owns benchmark automation, fixtures, analysis, and reports.
+`engine.lock` pins the engine revision used by a workspace checkout; the
+bootstrap script creates the ignored local `quake/` clone.
 
-## Build, Test, and Development Commands
+## Build and test commands
 
-Run game commands from `quake/` and benchmark commands from `benchmarks/`:
+Build and verify the engine from its checkout:
 
 ```powershell
-# From quake/: build the i486 DOS executable
-pwsh -NoProfile -File tools/build-dos.ps1 -CpuTarget i486
-# From quake/: run host-side game checks
-pwsh -NoProfile -File tools/run-tests.ps1 -HostOnly
-# From benchmarks/: run host-side suite checks
+pwsh -NoProfile -File tools/bootstrap-dos.ps1
+pwsh -NoProfile -File tools/build-dos.ps1 -Configuration i486-release
 pwsh -NoProfile -File tools/run-tests.ps1 -HostOnly
 ```
 
-The game build uses the pinned DJGPP toolchain. Runtime checks additionally need the benchmark toolchain and legally obtained game PAK files; see `quake/BUILD-DOS.md` and `benchmarks/README.md` for full workflows.
+Run workspace host checks from `benchmarks/`:
 
-## Coding Style & Naming Conventions
+```powershell
+pwsh -NoProfile -File tools/run-tests.ps1 -HostOnly
+```
 
-Match the surrounding C, GNU assembly, PowerShell, and Python style; keep changes focused and preserve existing APIs, calling conventions, and supported CPU targets. Name new test scripts `test-*.py` or `test-*.ps1`, following the neighboring tools. No repository-wide formatter is configured.
+The engine requires PowerShell 7, Python 3.9+, the pinned DJGPP toolchain, and
+a native Windows GCC for its strict startup-source verification. Runtime
+scenarios additionally need DOSBox-X and legally obtained Quake game data.
+See the engine `BUILD-DOS.md` and workspace `benchmarks/README.md` for details.
 
-## Testing Guidelines
+## Changes and review
 
-Run the relevant host checks for changes in either repository. For runtime or rendering changes, use the documented benchmark scenarios and report the exact checks performed. Performance claims require correctness/parity evidence and repeatable matched runs; DOSBox measurements alone do not establish real-hardware performance.
+Keep source changes in the engine repository and benchmark/workspace changes in
+this repository. When updating the engine pin, commit and publish the engine
+revision first, then update `engine.lock` to its exact commit. Use focused
+commits with `type(scope): summary` messages. Preserve existing public APIs,
+calling conventions, and supported CPU targets. Do not commit PAK files,
+commercial assets, unverified third-party binaries, or generated output under
+`out/`.
 
-## Commit & Pull Request Guidelines
-
-Recent commits use `type(scope): summary`, for example `perf(i486): ...` or `test(benchmarks): ...`. Keep game-source commits in `quake/` and gitlink updates in the outer repository. Pull requests should identify the affected repository, summarize behavior changes, list commands and results, and include relevant comparison data for performance or visual changes. Do not commit licensed PAK files or generated output under `out/`.
+Run the relevant host checks for each change. For rendering or runtime work,
+report the exact scenarios, inputs, and results. Performance acceptance
+requires correctness evidence and repeatable matched runs; DOSBox measurements
+alone do not establish real-hardware performance.

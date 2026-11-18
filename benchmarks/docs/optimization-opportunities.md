@@ -2,7 +2,7 @@
 
 Start with the [current-source profile](results/current-source-engine-profile-2026-11-17.md)
 to find measured work, then search the game's
-[optimization ledger](../../quake/docs/ledger/INDEX.md) for accepted, rejected,
+[optimization ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/INDEX.md) for accepted, rejected,
 and combined experiments. The profile is an attribution snapshot from game
 revision `644fb3a`; it uses a single uninstrumented timing sample per workload
 and does not establish repeatable performance.
@@ -22,7 +22,7 @@ optimization candidates. Refresh profiling when source or workloads change.
 5. Record all samples, spread, executable identity, and the accepted or rejected
    decision in the ledger.
 
-See the game's [optimization policy](../../quake/docs/optimization/policy.md)
+See the game's [optimization policy](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/optimization/policy.md)
 for the complete acceptance and attempt-count rules. The dated
 [opportunity survey](history/optimization-opportunities.md) remains available
 as a historical profile note.

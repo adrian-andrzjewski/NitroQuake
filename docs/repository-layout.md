@@ -1,105 +1,53 @@
-# Game and benchmarking repository boundary
+# Repository layout
 
-The workspace contains two existing Git histories. `quake/` remains the game
-repository. The outer repository owns the independent suite under `benchmarks/`.
-The suite can target another complete game checkout through `-GameRoot` (or
-`NITROQUAKE_GAME_ROOT`); the sibling `quake/` is only its workspace default.
+NitroQuake is split across two public Git repositories with separate histories:
 
-## Canonical checkouts and worktrees
+- [NitroQuake workspace](https://github.com/adrian-andrzjewski/NitroQuake)
+  contains benchmarks, fixtures, workspace automation, and project reports.
+- [NitroQuake engine](https://github.com/adrian-andrzjewski/NitroQuake-engine)
+  contains Quake-derived source, DOS build tools, optimization records, and
+  engine verification.
 
-The primary outer checkout is `workspace` on `master`. The primary
-game checkout is `workspace\quake`, also on `master`. New linked
-worktrees belong under `workspace-worktrees\outer\<topic>` or
-`workspace-worktrees\quake\<topic>`; do not create NitroQuake or
-NQ worktree directories directly under `D:\`. Retired experiment output is
-kept under `benchmarks/out/worktree-archives/<date>/<former-worktree>/out`.
-The dated mapping in `docs/history/repository/worktree-archive-map-2026-11-13.csv` records the
-checkout, branch, commit, and archived output location for this consolidation.
-
-The outer repository records the game checkout as a Git link while keeping the
-two histories independent. A fresh outer clone does not fetch the game. Set
-`NITROQUAKE_GAME_REPOSITORY_URL` to the NitroQuake game repository URL and run
-`benchmarks/tools/bootstrap-workspace.ps1` to clone complete history and check
-out the Gitlink revision from outer `HEAD`. The script refuses to replace an
-existing non-empty directory, a mismatched checkout, or a checkout with local
-changes. `benchmarks/tools/check-workspace.ps1` remains read-only.
+The workspace's `engine.lock` pins the engine repository URL and exact commit.
+Run `benchmarks/tools/bootstrap-workspace.ps1` after cloning the workspace to
+fetch complete engine history into a local `quake/` directory. That directory
+is ignored by the workspace repository and remains a standalone engine clone.
+The full history is required for the optimization-attempt build number.
 
 ## Ownership
 
-| Game repository | Benchmarking repository |
+| Engine repository | Workspace repository |
 | --- | --- |
-| Native C and assembly, including optional engine instrumentation and native correctness fixtures | Python analysis, image/report comparison, ownership reports, and charts |
-| DJGPP bootstrap, compiler configuration, selector profiles, source-bound ISA verification, and their tests | DOSBox bootstrap, pinned emulator configuration, staging, smoke, coverage, profiling, parity, and timedemo runners |
-| Game assets, licenses, engine documentation, and optimization decisions retained as historical provenance | Scenario definitions, captured-frame oracles, benchmark qualification tests, alternative DPMI comparison inputs, and operating guides |
+| Native C and assembly, DOS build, DJGPP bootstrap, selector profiles, and source-bound ISA verification | Benchmark orchestration, Python analysis, fixtures, scenarios, charts, and reports |
+| Optimization ledger and automatic product build identity | DOSBox-X bootstrap, staging, smoke, coverage, profiling, parity, and timedemo tools |
+| Engine-specific licenses and third-party notices | Workspace license, third-party notices, and instructions for supplying local game data |
 
-Python used for compiler/source/binary verification is build infrastructure and
-stays with the game. A language-only move would break the standalone i486 gate.
-The optimization ledger stays with the game as historical decision provenance.
-Its accepted/rejected attempts determine the console build number, and its
-inventory digest participates in build freshness and the source/configuration
-fingerprint. The numeric build number remains distinct from the product build
-ID. Historical measurements and source quotations must not be silently
-rewritten. Native BENCH486 fixtures are optional game test code, not Python
-orchestration.
+The engine can be built without the benchmark workspace or DOSBox-X. Benchmark
+commands can use the checked-out sibling engine or another complete checkout
+with `-GameRoot` or `NITROQUAKE_GAME_ROOT`.
 
-## Integration contracts
+## Build and test
 
-The game owns `tools/build-dos.ps1` and its two named configurations,
-`i486-release` and `c-reference`, along with resolved `-DumpFlags` output,
-generated build identity, manifests, native artifacts, and ISA proofs. The
-benchmark suite owns per-routine selector and probe controls and calls the game's
-internal `tools/build-dos-experimental.ps1` backend for comparisons. Emulator
-staging and new measurement output belong under `benchmarks/out/`; game
-compilation output remains under `quake/out/`.
-Historical output is an archive and is preserved in place.
+From the workspace root, provision the pinned engine and build it:
 
-The game bootstrap installs only the compiler toolchain. The benchmark bootstrap
-uses a separate pinned emulator definition and delegates to the same verified
-artifact installer. Game build helpers do not import the benchmark suite.
+```powershell
+pwsh -NoProfile -File benchmarks/tools/bootstrap-workspace.ps1
+Set-Location quake
+pwsh -NoProfile -File tools/bootstrap-dos.ps1
+pwsh -NoProfile -File tools/build-dos.ps1 -Configuration i486-release
+pwsh -NoProfile -File tools/run-tests.ps1 -HostOnly
+```
 
-Existing timedemo, profile, checksum, PCX, event, and parity-report semantics are
-preserved. New path resolution must distinguish engine inputs, suite fixtures,
-user data, tool installations, and run output explicitly.
+From `benchmarks/`, run suite host checks with
+`pwsh -NoProfile -File tools/run-tests.ps1 -HostOnly`. Runtime rendering and
+gameplay tests require legally obtained Quake data and DOSBox-X. Reference
+captures are user-supplied; the project does not distribute game imagery.
 
-## Migration and preservation
+## Game data and generated files
 
-`benchmarks/migration.json` records both starting revisions, each transferred
-tracked path, and its original working-file and Git-blob digests. The old game ancestry remains available; the outer
-history records new ownership without rewriting either repository's history.
-Cross-repository transfer cannot be represented by an ordinary single-repository
-rename; the manifest provides explicit source attribution without history rewriting.
-
-Canonical game branding remains in `quake/assets/branding/`. The outer
-repository keeps publication copies of the logo variants and its tracked
-benchmark chart in `docs/assets/` so the GitHub landing page renders without
-reading through the game gitlink. These copies are presentation assets; the
-game checkout remains the canonical owner of engine artwork. Local comparison
-executables moved to ignored `benchmarks/baselines/`, with a hash inventory.
-License files, canonical game PAKs, tool caches, junctions, accepted artifacts,
-and historical reports are preserved. Historical output from a retired
-worktree is moved byte-for-byte into the central archive above before its
-checkout is removed. Unreferenced experiment output is not assumed disposable.
-
-## Verification procedure
-
-- Run `benchmarks/tools/check-workspace.ps1` to compare the nested `HEAD` with the
-  outer committed and staged gitlink and report local tool availability. The
-  check is read-only and does not fetch, reset, bootstrap, or replace anything.
-- For a fresh workspace, run `benchmarks/tools/bootstrap-workspace.ps1` with
-  `NITROQUAKE_GAME_REPOSITORY_URL` set to the NitroQuake game repository. It
-  checks out the committed Gitlink revision with complete history and preserves
-  existing files or game worktrees.
-- Build and run game build checks from an independent full-history checkout
-  without a neighboring benchmark suite or installed emulator. The supported
-  numbered builder requires complete Git history to derive the full
-  optimization-attempt inventory; shallow clones fail explicitly.
-- Verify compiler flags and selector propagation across i386/i486 and native
-  release/BENCH486/profiling configurations.
-- Exercise suite path resolution against explicit and sibling game checkouts,
-  including paths with spaces, and run its host format/comparison tests.
-- After the existing Quake2 hold is released, validate DOS startup, a deterministic
-  timedemo, native drawing parity, and profile collection through the relocated
-  runners. Keep diagnostic profiling separate from timing claims.
-- Generate comparison charts from recorded evidence and preserve data/provenance.
-- Review exact staged scopes, commit logical changes locally, verify the outer
-  gitlink matches the game revision, and finish with clean worktrees.
+Neither repository contains commercial Quake PAK files or game assets. The
+engine ignores its `id1/` directory and common game-data formats. Keep personal
+game data outside Git and provide legally obtained registered data at runtime.
+Both repositories ignore generated `out/` trees, local tools, binaries, and
+other build artifacts. See each repository's `.gitignore` and third-party
+notices for distribution boundaries.

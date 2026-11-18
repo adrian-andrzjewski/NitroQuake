@@ -10,7 +10,7 @@ function Resolve-NitroQuakeGameRoot {
     foreach ($required in @('tools/build-dos.ps1', 'tools/build-dos-experimental.ps1',
             'tools/common.ps1', 'src/quakedef.h')) {
         if (-not (Test-Path -LiteralPath (Join-Path $resolved $required) -PathType Leaf)) {
-            throw "Not a NitroQuake game checkout: '$resolved' (missing $required). Pass -GameRoot or set NITROQUAKE_GAME_ROOT."
+            throw "Not a NitroQuake engine checkout: '$resolved' (missing $required). Pass -GameRoot or set NITROQUAKE_GAME_ROOT."
         }
     }
     return $resolved

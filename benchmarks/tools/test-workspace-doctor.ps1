@@ -32,14 +32,14 @@ $gameBefore = Get-StatusLines -RepositoryPath (Join-Path $outerRoot 'quake')
 try {
     $real = Invoke-DoctorJson -Arguments @('-Json')
     if ($real.exitCode -ne 0 -or -not $real.report.workspaceConsistent) {
-        throw 'The workspace doctor did not confirm the current checkout and gitlink.'
+        throw 'The workspace doctor did not confirm the current checkout and pinned engine revision.'
     }
     if (-not $real.report.readOnly -or @($real.report.sideEffects).Count -ne 0) {
         throw 'The workspace doctor did not report its read-only behavior.'
     }
-    if ($real.report.gitlink.committedRevision -ne $real.report.game.revision -or
-        $real.report.gitlink.indexRevision -ne $real.report.game.revision) {
-        throw 'The workspace doctor reported inconsistent gitlink revisions.'
+    if ($real.report.engineLock.committedRevision -ne $real.report.game.revision -or
+        $real.report.engineLock.workingRevision -ne $real.report.game.revision) {
+        throw 'The workspace doctor reported an inconsistent engine pin.'
     }
     if ($real.report.optimizationInventory.gameHistoryIsShallow -ne $false -or
         $real.report.optimizationInventory.fullHistoryRequiredForBuildIdentity -ne $true -or
@@ -63,7 +63,7 @@ try {
     $fixtureGame = Join-Path $temporaryRoot 'game checkout'
     New-Item -ItemType Directory -Path $fixtureGame -Force | Out-Null
     & $git.Source -C $fixtureGame init --quiet
-    if ($LASTEXITCODE -ne 0) { throw 'Could not initialize the temporary game repository.' }
+    if ($LASTEXITCODE -ne 0) { throw 'Could not initialize the temporary engine repository.' }
     & $git.Source -C $fixtureGame config user.name 'Workspace Doctor Test'
     if ($LASTEXITCODE -ne 0) { throw 'Could not configure the temporary repository identity.' }
     & $git.Source -C $fixtureGame config user.email 'workspace-doctor@example.invalid'
@@ -80,8 +80,8 @@ try {
         '-ToolRoot', (Join-Path $temporaryRoot 'missing-tools')
     )
     if ($mismatch.exitCode -eq 0 -or $mismatch.report.workspaceConsistent -or
-        $mismatch.report.gitlink.matchesGameHead) {
-        throw 'The workspace doctor did not reject a game revision that differs from the recorded gitlink.'
+        $mismatch.report.engineLock.matchesEngineHead) {
+        throw 'The workspace doctor did not reject an engine revision that differs from engine.lock.'
     }
     $fixtureAfter = Get-StatusLines -RepositoryPath $fixtureGame
     if (($fixtureBefore -join "`n") -ne ($fixtureAfter -join "`n")) {
@@ -101,4 +101,4 @@ finally {
     }
 }
 
-Write-Host 'PASS: read-only workspace report, required tools, matching gitlink and mismatched-revision rejection'
+Write-Host 'PASS: read-only workspace report, required tools, matching engine.lock and mismatched-revision rejection'

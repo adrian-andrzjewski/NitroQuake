@@ -28,12 +28,12 @@ instructions per plane-test pair while preserving the left-associative dot
 products and exact output. Three alternating uninstrumented `demo1` pairs
 improved mean FPS from 16.823771 to 16.888323 (+0.383695%); all 970 color and Z
 records and the captured frame 482 PCX matched, and the complete strict i486
-gate passed. See the [promotion ledger](../../../quake/docs/ledger/2026-11-11-r-clipedge-dot-product-stack-reschedule-promoted.md).
+gate passed. See the [promotion ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-11-r-clipedge-dot-product-stack-reschedule-promoted.md).
 
 The C BSP walk is now the i486 default after three alternating pairs measured
 it +0.024255% faster than assembly, with exact 970-record color/Z and frame 482
 PCX parity and complete strict i486 gates. Assembly remains explicitly
-selectable. See the [BSP-walk ledger](../../../quake/docs/ledger/2026-11-11-bsp-walk-c-default-promoted.md).
+selectable. See the [BSP-walk ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-11-bsp-walk-c-default-promoted.md).
 These results are DOSBox-X measurements, not physical-486 performance claims.
 
 ## Current default-C parts and detailed profile (2026-11-11)
@@ -80,9 +80,9 @@ uninstrumented demo1 pairs improved mean FPS from 16.940373 to 16.940452
 color and Z streams matched exactly, as did the frame-169 PCX captures, and
 the strict release and qbench i486 gates passed. The measured gain is small
 and comes from DOSBox-X, not physical-486 timing. See the
-[promotion ledger](../../../quake/docs/ledger/2026-11-12-surf8-mip0-horizontal-flat-unroll16-promoted.md)
+[promotion ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-12-surf8-mip0-horizontal-flat-unroll16-promoted.md)
 for each timing sample, checksum hash, and artifact path. The earlier
-[eight-row promotion](../../../quake/docs/ledger/2026-11-11-surf8-mip0-horizontal-flat-unroll8-promoted.md)
+[eight-row promotion](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-11-surf8-mip0-horizontal-flat-unroll8-promoted.md)
 remains in the ledger as the preceding step.
 
 ## Current-source refresh (2026-11-10)
@@ -131,7 +131,7 @@ alternating uninstrumented pairs averaged 17.185951 FPS for control and
 17.241270 FPS for the candidate (+0.321885%). The full strict i486 audit passed.
 These DOSBox-X timings apply to this workload and do not establish physical-486
 performance. The complete parity, audit, timing, and provenance record is in
-the [promotion ledger](../../../quake/docs/ledger/2026-11-10-underwater-warp-pixel-unroll8-promoted.md).
+the [promotion ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-10-underwater-warp-pixel-unroll8-promoted.md).
 
 ## Span16 decisions that remain closed
 
@@ -140,10 +140,10 @@ specializations have already failed or lacked the required premise. The current
 profile records zero unit-stride pixels. A power-of-two width shift was 0.688%
 slower, the signed row-scale table was 0.430% slower, and the no-row-cross path
 was 0.585% slower in their recorded 320x200 checks. See the [power-of-two
-multiply result](../../../quake/docs/ledger/2026-10-29-span16-pow2-cachewidth-multiply-screen-rejected.md),
-[row-scale table result](../../../quake/docs/ledger/2026-11-02-span16-row-scale-table-unqualified.md),
-[no-row-cross result](../../../quake/docs/ledger/2026-10-29-span16-norowcross-current-recheck-rejected.md),
-and the [unit-stride census](../../../quake/docs/ledger/2026-10-02-surf8-bundle-and-promotion.md).
+multiply result](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-10-29-span16-pow2-cachewidth-multiply-screen-rejected.md),
+[row-scale table result](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-11-02-span16-row-scale-table-unqualified.md),
+[no-row-cross result](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-10-29-span16-norowcross-current-recheck-rejected.md),
+and the [unit-stride census](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/2026-10-02-surf8-bundle-and-promotion.md).
 Do not revive these exact paths. Any further texture-span change needs a
 different algorithm that reduces required work while preserving exact output.
 

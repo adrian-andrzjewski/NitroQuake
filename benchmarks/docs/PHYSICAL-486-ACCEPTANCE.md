@@ -220,7 +220,7 @@ require a positive pooled mean FPS from at least three matched uninstrumented
 runs per variant with matching output and strict ISA gates; the physical screen
 uses five alternating pairs for stronger coverage. There is no minimum
 percentage threshold. See the
-[current renderer acceptance rule](../../quake/docs/optimization/policy.md).
+[current renderer acceptance rule](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/optimization/policy.md).
 Report each workload separately and call out regressions; a positive pooled
 result does not support a claim of improvement on every map. If pair results
 are inconsistent or timer resolution obscures the sign, add alternating pairs
@@ -233,7 +233,7 @@ bounds/headroom report from the physical run. The normal renderer must reject
 insufficient capacity before entering its large frames; fallback warp must run
 only when its generated requirement fits the available bounds. Run the
 allocated-buffer, fallback, insufficient-capacity and waterwarp-disabled cases
-from the [renderer stack procedure](../../quake/docs/renderer-assembly/warp-scratch.md).
+from the [renderer stack procedure](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/renderer-assembly/warp-scratch.md).
 Do not use a stack-fill high-water scan as a substitute for those bounds.
 
 ## Evidence bundle

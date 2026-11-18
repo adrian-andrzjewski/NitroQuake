@@ -13,7 +13,7 @@ game's internal selector-driven build backend.
 Use the [benchmark documentation index](docs/INDEX.md) to find current
 workflows, acceptance procedures, and dated reports. Game-side build identity
 and optimization attempt counting are documented in the game's
-[optimization policy](../quake/docs/optimization/policy.md).
+[optimization policy](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/optimization/policy.md).
 
 For per-frame FPS/time graphs across demo1, demo2 and demo3, see the
 [frame timeline workflow](docs/FRAME-TIMING.md):
@@ -57,10 +57,14 @@ pwsh -NoProfile -File tools/timedemo-dos.ps1 -Runs 3 -NoBootstrap -NoFpsStats
 The sibling `quake/` checkout is discovered automatically. Every runtime runner
 also accepts `-GameRoot` when using a different checkout; the environment
 variable propagates to child processes and Python source-contract tests. Use
-absolute paths for user-supplied inputs. Built-in scenarios, golden PCX files
-and emulator settings resolve relative to this suite; renderer selector
-profiles resolve against the game. Compiler output remains in the selected
-game's `out/` directory.
+absolute paths for user-supplied inputs. Built-in scenarios and emulator
+settings resolve relative to this suite; renderer selector profiles resolve
+against the game. Compiler output remains in the selected game's `out/`
+directory. Reference render captures are not distributed. Supply your own
+matching PCX files by filename with `-ReferenceRenderRoot` or the
+`NITROQUAKE_REFERENCE_RENDER_ROOT` environment variable. Use
+`-SkipGoldenImageComparison` to run checksum and event validation without image
+comparison.
 
 Supply legally obtained `pak0.pak` and optionally `pak1.pak` with `-DataRoot`,
 or put them in the selected game's `testdata/id1/`. PAKs are hash-verified when
@@ -72,7 +76,7 @@ the migration inventory. Original game binaries and licensed PAKs are not shippe
 `run-tests.ps1` composes the game's verification runner with suite host checks,
 DOS startup, server coverage, native C/assembly fixtures, image parity and
 timedemos. `-HostOnly` runs suite host checks without repeating the game's host
-runner; run that from the game checkout separately. `-SkipRendering` and
+runner; run that from the engine checkout separately. `-SkipRendering` and
 `-SkipSlow` omit their named runtime gates, and report them as skipped.
 Historical test debt is documented in the game's
 `docs/ledger/2026-11-08-commit-validation-and-test-debt.md`.
@@ -80,8 +84,6 @@ Historical test debt is documented in the game's
 See [interfaces](docs/INTERFACES.md), [operations](docs/OPERATIONS.md),
 [render validation](docs/RENDERING-VALIDATION.md), and
 [comparison methodology](docs/BENCHMARK-COMPARISON.md).
-The [reorganization validation record](docs/REORGANIZATION-VALIDATION.md) lists
-passing checks, retained test debt and checks deferred by the external hold.
 Instrumented profiles rank costs; performance acceptance uses matched
 uninstrumented runs with deterministic correctness evidence. DOSBox timings
 are emulator measurements and do not establish physical 486 performance.
