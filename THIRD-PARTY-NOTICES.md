@@ -24,6 +24,9 @@ under the upstream terms.
 
 ## Project-owned material
 
-No uncredited project logo or game-render reference images are distributed.
+The NitroQuake banner and logo files in `docs/assets/branding/` are project
+branding artwork cleared by the project owner for public distribution with this
+repository. They are separate from Quake game data. This clearance does not
+grant rights to use id Software trademarks outside this independent project.
 First-party source, tools, and documentation are covered by the repository
 license unless a file carries a different notice.

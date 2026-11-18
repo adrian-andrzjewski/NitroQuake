@@ -87,3 +87,7 @@ htmlcov/
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# README branding assets approved for public redistribution.
+!/docs/assets/branding/NitroQuakeLogo.png
+!/docs/assets/branding/NitroQuakeLogo-inv.png

@@ -1,5 +1,14 @@
 # NitroQuake
 
+<p align="center">
+  <img src="docs/assets/branding/nitroquake-banner.svg" alt="Original Quake. The 486, pushed further. NitroQuake DOS performance project." width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/assets/branding/NitroQuakeLogo-inv.png#gh-light-mode-only" alt="NitroQuake logo" width="320">
+  <img src="docs/assets/branding/NitroQuakeLogo.png#gh-dark-mode-only" alt="NitroQuake logo" width="320">
+</p>
+
 NitroQuake is an independent performance engineering project for id Software's
 Quake MS-DOS software renderer. It focuses on measured, behavior-preserving
 optimizations for 486-class PCs with x87 floating-point hardware.

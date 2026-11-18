@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="320" viewBox="0 0 1280 320" role="img" aria-labelledby="title desc">
+  <title id="title">Original Quake. The 486, pushed further.</title>
+  <desc id="desc">A dark CRT-inspired banner with a 486 processor motif and NitroQuake's yellow, orange, and red stripes.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101115" />
+      <stop offset="1" stop-color="#202126" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffcf28" />
+      <stop offset="0.52" stop-color="#ff7a24" />
+      <stop offset="1" stop-color="#e73248" />
+    </linearGradient>
+    <pattern id="scan" width="4" height="6" patternUnits="userSpaceOnUse">
+      <rect width="4" height="1" fill="#ffffff" opacity="0.07" />
+    </pattern>
+  </defs>
+  <rect width="1280" height="320" rx="22" fill="url(#bg)" />
+  <rect x="16" y="16" width="1248" height="288" rx="15" fill="none" stroke="#59606b" stroke-width="2" opacity="0.65" />
+  <rect x="16" y="16" width="1248" height="288" rx="15" fill="url(#scan)" />
+  <path d="M70 246 H878" stroke="url(#accent)" stroke-width="7" />
+  <path d="M70 260 H798" stroke="url(#accent)" stroke-width="5" opacity="0.8" />
+  <path d="M70 272 H718" stroke="url(#accent)" stroke-width="3" opacity="0.6" />
+  <text x="70" y="91" fill="#ffcb38" font-family="Consolas, 'Courier New', monospace" font-size="22" font-weight="700" letter-spacing="4">NITROQUAKE / DOS PERFORMANCE PROJECT</text>
+  <text x="70" y="164" fill="#f5f2e9" font-family="Consolas, 'Courier New', monospace" font-size="48" font-weight="700" letter-spacing="1">ORIGINAL QUAKE.</text>
+  <text x="70" y="217" fill="#f5f2e9" font-family="Consolas, 'Courier New', monospace" font-size="40" font-weight="700" letter-spacing="1">THE 486, PUSHED FURTHER.</text>
+  <g transform="translate(978 70)">
+    <path d="M12 0v18 M42 0v18 M72 0v18 M102 0v18 M132 0v18 M162 0v18 M12 164v18 M42 164v18 M72 164v18 M102 164v18 M132 164v18 M162 164v18 M0 12h18 M0 42h18 M0 72h18 M0 102h18 M0 132h18 M0 162h18 M164 12h18 M164 42h18 M164 72h18 M164 102h18 M164 132h18 M164 162h18" fill="none" stroke="#afb5c0" stroke-width="4" stroke-linecap="square" />
+    <rect x="18" y="18" width="146" height="146" rx="8" fill="#15171b" stroke="#ff9630" stroke-width="3" />
+    <text x="91" y="88" text-anchor="middle" fill="#f5f2e9" font-family="Consolas, 'Courier New', monospace" font-size="39" font-weight="700">486</text>
+    <text x="91" y="122" text-anchor="middle" fill="#ffcb38" font-family="Consolas, 'Courier New', monospace" font-size="15" letter-spacing="3">i486 / x87</text>
+  </g>
+</svg>
