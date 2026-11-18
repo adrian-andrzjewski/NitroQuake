@@ -30,14 +30,34 @@ See the [engine build guide](https://github.com/adrian-andrzjewski/NitroQuake-en
 and [benchmark guide](benchmarks/README.md) for prerequisites and validation
 commands. The source build does not require game data.
 
+## Download and run
+
+Download from the [latest GitHub Release](https://github.com/adrian-andrzjewski/NitroQuake/releases/latest),
+which includes the verified executable, corresponding engine source archive,
+build manifest, optimization inventory, checksums, and license notices. The
+[NitroQuake.exe asset is also available directly](https://github.com/adrian-andrzjewski/NitroQuake/releases/latest/download/NitroQuake.exe).
+The console reports the product version and automatically calculated build
+number:
+
+```text
+NitroQuake v0.999
+Build <number>
+```
+
+Place `NitroQuake.exe` beside an `id1/` directory containing your legally
+obtained Quake game data. Run it from the Quake root under DOS with a DPMI host,
+or in DOSBox-X configured to provide DPMI. See the release notes for the exact
+engine source commit and validation limits.
+
 ## Quake game data
 
 No Quake PAK files, maps, models, music, demos, or captured game imagery are
-distributed here. To run the engine or gameplay benchmarks, provide a legally
-obtained copy of Quake's registered `id1/pak0.pak` and `id1/pak1.pak` in the
-runtime `id1/` directory. These files are ignored by Git. Do not commit or
-redistribute commercial game data. The original source release distinguishes
-the GPL-licensed engine source from the separately copyrighted game data.
+distributed here. To run the engine or gameplay benchmarks, provide legally
+obtained Quake game data in the runtime `id1/` directory; registered game data
+commonly contains `pak0.pak` and `pak1.pak`. These files are ignored by Git. Do
+not commit or redistribute commercial game data. The original source release
+distinguishes the GPL-licensed engine source from the separately copyrighted
+game data.
 
 Quake is a trademark of id Software. NitroQuake is an independent project and
 is not affiliated with or endorsed by id Software.
