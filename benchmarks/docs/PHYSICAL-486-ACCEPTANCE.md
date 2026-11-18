@@ -15,10 +15,10 @@ stack acceptance requirement.
 
 | Item | Recorded value |
 | --- | --- |
-| Game revision | `432ae1afaf00e3551d6564ad94fcd4263c5708a6` |
-| Product build ID | `432ae1afaf00-8153186631e7` |
-| Build command | `quake/tools/build-dos.ps1 -Configuration i486-release -CpuTarget i486 -NoBootstrap -LocalOutputDirectoryName physical-486-preflight-432ae1a` |
-| Executable | `quake/out/local-physical-486-preflight-432ae1a/quake.exe` |
+| Game revision | `275f9103112a63e461c603c0a005f94733d8cfd1` |
+| Product build ID | `275f9103112a-8153186631e7` |
+| Build command | `quake/tools/build-dos.ps1 -Configuration i486-release -CpuTarget i486 -NoBootstrap -LocalOutputDirectoryName physical-486-preflight-275f9103112a` |
+| Executable | `quake/out/local-physical-486-preflight-275f9103112a/quake.exe` |
 | Executable SHA-256 | `2165ab8f06a8f387977492ee36a14b31f1e4ee4d846749afd331dcc182eb26a3` |
 | Build manifest SHA-256 | `f06deaf51d678ea3dc2da7d05e1283e90fe43c12a7ae973ba0eee1d3202d9ee9` |
 | Renderer profile | `i486-asm-selectable-current` |
@@ -44,12 +44,12 @@ generated stack formulas above:
 
 | Configuration | Product build ID | Executable SHA-256 | Manifest SHA-256 |
 | --- | --- | --- | --- |
-| Control (`control` / `control`) | `432ae1afaf00-a5e78aed24e6` | `b0ca76a5e0e286431c7ac3e624756f1fbe01397d5cb28f3444c2282d039b8a55` | `0c6ed16f4bbdd07f7b7d1d9bdd2454135b32a25fe09d84d354762abb92aa99c6` |
-| Candidate (`zerot` / `zerot`) | `432ae1afaf00-bc3c3cecfb7e` | `58cbe190d2059f945ee96524daa31a7e379bbe452919ddcec5ca96dd8843f905` | `dbc48be9d65eb02a7c2df2374129909022f4a8ac3801404cd17b68ca05e32088` |
+| Control (`control` / `control`) | `275f9103112a-a5e78aed24e6` | `b0ca76a5e0e286431c7ac3e624756f1fbe01397d5cb28f3444c2282d039b8a55` | `0c6ed16f4bbdd07f7b7d1d9bdd2454135b32a25fe09d84d354762abb92aa99c6` |
+| Candidate (`zerot` / `zerot`) | `275f9103112a-bc3c3cecfb7e` | `58cbe190d2059f945ee96524daa31a7e379bbe452919ddcec5ca96dd8843f905` | `dbc48be9d65eb02a7c2df2374129909022f4a8ac3801404cd17b68ca05e32088` |
 
 Their ignored output directories are
-`quake/out/local-physical-486-control-432ae1a/` and
-`quake/out/local-physical-486-zerot-432ae1a/`. These builds are ready for the
+`quake/out/local-physical-486-control-275f9103112a/` and
+`quake/out/local-physical-486-zerot-275f9103112a/`. These builds are ready for the
 documented physical correctness and timing procedure.
 
 One emulator-only correctness preflight was run for each build on demo1, demo2

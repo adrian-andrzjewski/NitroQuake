@@ -7,12 +7,12 @@ measurements from verification of the combined release.
 
 ## Scope and method
 
-The control is game revision `fd2b7a559f9838a539f5075c83ebf3a2543c4f9f` (Build 852).
+The control is game revision `93e22507fcfd39ab90a3c6a5b12041ee9a8bef3d` (Build 852).
 Both candidate changes were developed independently against that control, then
 combined without other engine changes. The existing AI leaf-query cache is already
 in the control and contributes no new gain reported here.
 
-Production game commits are `10db93c` (warp geometry) and `b7aef96` (QuakeC
+Production game commits are `2cbeda6ee860` (warp geometry) and `682998a8a3eb` (QuakeC
 operands). The final tested sources and ledgers are committed without changing
 their working bytes. Both source-bound binaries remain fresh after these commits.
 

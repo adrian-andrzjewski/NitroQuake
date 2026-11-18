@@ -2,7 +2,7 @@
 
 ## Scope and provenance
 
-This refresh profiles the source tree at `b65ff69116b555f44803d44366a1b80581b11e20`
+This refresh profiles the source tree at `0eb547d2500ed8607f9c3287a8fa1f040d7ad455`
 (`E2F30E6F7E2AC23FA5358646281E12A4CD82AF05A3952E95CBF75839E023B0D8`). Both
 benchmark builds loaded the committed `i486-asm-selectable-current` selectors
 from `quake/tools/renderer-profiles/i486-asm-selectable-current.json`
@@ -135,7 +135,7 @@ real test machine is available.
 ## Current-source exact-zero-T screen
 
 A fresh uninstrumented `BENCH486` A/B screen used the source at Quake commit
-`b017ffb7f50f69160a58194ade457c322e389586` and the committed
+`9cd46fe444f1272ecb754a7d77546dd39e36288d` and the committed
 `i486-asm-selectable-current` renderer profile (SHA-256
 `CCF865D39DB35A93B66571A65E3E1555B2EB5E4350FE35D593BCB8E517FF4759`). The
 control overrode `TextureSpanTZeroPath` and `TextureSpanTailTZeroPath` to

@@ -26,3 +26,7 @@ instrumentation overhead, and one uninstrumented timing sample per workload;
 use it to rank investigations, not to claim repeatable gains or physical-486
 performance. Dated reports identify their source revision and evidence scope;
 they do not replace fresh validation of a current checkout.
+
+## Publication history
+
+The [commit reference map](PUBLICATION-COMMIT-REFERENCES.md) links source revisions cited in benchmark reports to their rewritten public commits.

@@ -1,6 +1,6 @@
 # NitroQuake benchmark operations and historical reference
 
-This guide was transferred from game revision `2d4392a8abf6009ee1e270babc06aa129121d555`.
+This guide was transferred from game revision `065f8abac70d323f4f50b8d35c7bec69f45acf4c`.
 Commands naming runtime tools now run from `benchmarks/`. Build commands run from
 the game checkout. Native build options are authoritative in the game's `BUILD-DOS.md`.
 Historical output paths and measurements below describe the runs when recorded;

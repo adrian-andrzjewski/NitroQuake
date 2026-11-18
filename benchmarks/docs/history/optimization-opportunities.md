@@ -2,7 +2,7 @@
 
 ## Earlier profile and renderer promotions (2026-11-11)
 
-The pre-C-default source revision `68d05e4` was profiled at VGA 320x200 on the
+The pre-C-default source revision `616b260bd267` was profiled at VGA 320x200 on the
 pinned DOSBox-X 486 configuration, with the then-default assembly BSP walk.
 The lower-overhead `demo1` parts pass completed 969 frames at 15.170257
 instrumented FPS and ranked these components:
@@ -18,7 +18,7 @@ instrumented FPS and ranked these components:
 
 These are instrumented attributions, not release timing shares. The capture is
 [`engine-profile-demo1-currentparts-after-clipdot-20261111.json`](../out/engine-profile-demo1-currentparts-after-clipdot-20261111.json).
-The detailed capture for the preceding source revision `23672ac` counted
+The detailed capture for the preceding source revision `124316804cbe` counted
 789,805 `R_ClipEdge` calls and 1,479,208 plane tests; its counts ranked repeated
 work but are not timing evidence. See
 [`engine-profile-demo1-currentdetailed-20261111.json`](../out/engine-profile-demo1-currentdetailed-20261111.json).
@@ -88,7 +88,7 @@ remains in the ledger as the preceding step.
 ## Current-source refresh (2026-11-10)
 
 A fresh one-repetition `demo1` profile was collected from the current game tree
-(`2a2448a`) and benchmark suite (`741beef`) at VGA 320x200 under DOSBox-X
+(`973c444e17cf`) and benchmark suite (`153e68a897d5`) at VGA 320x200 under DOSBox-X
 2026.08.31, `cputype=486`, fixed 33,445 cycles, FPU 387, and the verified
 `testdata/id1` PAKs. The game source-tree fingerprint is
 `5555126FDDD71C350EB9ED7AA077042C8EA9E12610EDAC91EB9E8A39289666A5`. The full

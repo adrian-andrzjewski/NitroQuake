@@ -6,7 +6,7 @@ scripted local-gameplay FPS by **0.140803%**, from **22.405025 to 22.436572** in
 pinned DOSBox environment. The improvement is modest. Client timedemos remain
 effectively unchanged; they do not run the local server targeted by these changes.
 
-The control is `b7aef96`, Build 854, including the previously accepted AI, warp
+The control is `682998a8a3eb`, Build 854, including the previously accepted AI, warp
 and QuakeC changes. Those earlier gains are already in this baseline and are
 not counted again. The combined candidate is automatically **Build 856**
 (473 accepted + 383 rejected attempts). No version header was edited.
@@ -191,7 +191,7 @@ Workspace-relative generated paths are excluded from Git:
 Native correctness can be rebuilt using the [public fixture command](COLLISION-VALIDATION.md).
 Matched runtime commands use the [local-gameplay protocol](ENGINE-PROFILING.md)
 with `-Mode off` and the [timedemo protocol](BENCHMARK-COMPARISON.md) with per-frame FPS off.
-Retain the b7aef96 control while collecting comparisons. Source/code/ledger bytes
+Retain the 682998a8a3eb control while collecting comparisons. Source/code/ledger bytes
 were frozen through compilation and collection; manifests retain their pre-commit
 base revision. Generated manifests are not rewritten to claim a later build.
 Compiled outputs remain in their original root because fingerprints also include
@@ -200,8 +200,8 @@ establish build freshness there.
 
 ## Commit review and final rebuild
 
-The production changes are committed separately as `b5bd9fd` (overwritten clear)
-and `4924f47` (final-child frame reuse). The main game checkout fast-forwards to
+The production changes are committed separately as `a6ddf70d617d` (overwritten clear)
+and `5977d4259b82` (final-child frame reuse). The main game checkout fast-forwards to
 the latter; isolated prototypes remain on archive branches. The benchmark suite
 commits its maintained native fixtures separately from this performance record.
 

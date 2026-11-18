@@ -4,7 +4,7 @@ Start with the [current-source profile](results/current-source-engine-profile-20
 to find measured work, then search the game's
 [optimization ledger](https://github.com/adrian-andrzjewski/NitroQuake-engine/blob/main/docs/ledger/INDEX.md) for accepted, rejected,
 and combined experiments. The profile is an attribution snapshot from game
-revision `644fb3a`; it uses a single uninstrumented timing sample per workload
+revision `ae559389c9d4`; it uses a single uninstrumented timing sample per workload
 and does not establish repeatable performance.
 
 The capture found substantial work in texture spans, surface-cache operations,

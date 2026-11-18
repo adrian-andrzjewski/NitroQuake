@@ -9,7 +9,7 @@ No PAK files are required.
 From the workspace root, provide a retained control and choose fresh output:
 
 ```powershell
-git -C quake worktree add --detach D:/nq-qc-reference fd2b7a5
+git -C quake worktree add --detach D:/nq-qc-reference 93e22507fcfd
 python benchmarks/tools/verify-qc-interpreter.py --reference-root D:/nq-qc-reference --game-root quake --output benchmarks/out/qc-interpreter-check
 ```
 

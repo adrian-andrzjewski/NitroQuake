@@ -8,7 +8,7 @@ required. The game build has no dependency on this Python driver or its fixtures
 From the workspace root, retain the control and choose fresh output:
 
 ```powershell
-git -C quake worktree add --detach D:/nq-collision-reference b7aef96
+git -C quake worktree add --detach D:/nq-collision-reference 682998a8a3eb
 python benchmarks/tools/verify-collision.py --reference-root D:/nq-collision-reference --game-root quake --output benchmarks/out/collision-native-check --wait-for-slot 1800
 ```
 

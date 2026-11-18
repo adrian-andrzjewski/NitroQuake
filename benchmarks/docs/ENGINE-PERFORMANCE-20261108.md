@@ -1,6 +1,6 @@
 # NitroQuake whole-engine performance analysis — 320×200, i486
 
-This study's source refresh is the pre-change `fd2b7a5` control. Subsequent
+This study's source refresh is the pre-change `93e22507fcfd` control. Subsequent
 warp-table/QuakeC changes and the combined Build 854 release are measured in the
 [i486 optimization record](I486-OPTIMIZATION-20261108.md). The budgets below remain
 reference measurements for their recorded sources and protocols.
@@ -116,10 +116,10 @@ The [current HTML report](../out/engine-analysis-verified-20261108/report.html)
 links both charts, the ranked CSV, raw measurements, source-bound build manifests
 and session pins. The measured source-tree digest is
 `4F06430E32CF5E1EB6E0410D0578A40B4E373C63BEE44D24EC0A2AA0A144CA44`.
-The native instrumentation is committed as `fd2b7a5`; build manifests retain their
+The native instrumentation is committed as `93e22507fcfd`; build manifests retain their
 pre-commit base revision. The digest above binds the measured working-copy bytes,
 including line endings. Post-commit freshness checks pass for both executables.
-The suite workflow is committed as `61adc65`.
+The suite workflow is committed as `18e70ffcdb4c`.
 `out/engine-analysis-source-refresh.json` independently confirms both executables
 are fresh against this same tree. The historical JSON field `sourceFingerprint`
 contains the configuration-bound build digest, so control and profile values
