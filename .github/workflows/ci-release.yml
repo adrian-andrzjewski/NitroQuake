@@ -1,0 +1,370 @@
+name: NitroQuake CI and release
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v0.999-build-*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nitroquake-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  build:
+    name: Build and verify i486 release
+    runs-on: windows-2022
+    timeout-minutes: 120
+    outputs:
+      build_number: ${{ steps.package.outputs.build_number }}
+      artifact_name: ${{ steps.package.outputs.artifact_name }}
+
+    steps:
+      - name: Check out complete workspace history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: 3.14.9
+
+      - name: Verify native Windows GCC
+        shell: pwsh
+        run: |
+          $gcc = Get-Command gcc -ErrorAction Stop
+          $target = (& $gcc.Source -dumpmachine).Trim()
+          if ($target -notmatch 'mingw32') {
+            throw "A native MinGW host compiler is required; found '$target'."
+          }
+          $version = (& $gcc.Source -dumpfullversion).Trim()
+          if ($version -ne '14.2.0') {
+            throw "Expected the reviewed runner-image MinGW GCC 14.2.0; found '$version'."
+          }
+          Write-Host "Host compiler: GCC $version ($target)"
+          "Host compiler: GCC $version ($target)" | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+
+      - name: Provision the exact engine revision from engine.lock
+        shell: pwsh
+        run: pwsh -NoProfile -File benchmarks/tools/bootstrap-workspace.ps1
+
+      - name: Resolve DJGPP download cache path
+        id: tool-cache-path
+        shell: pwsh
+        run: |
+          $path = Join-Path $env:LOCALAPPDATA '486quake\tools\downloads'
+          "downloads=$path" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+
+      - name: Cache pinned toolchain archives
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.tool-cache-path.outputs.downloads }}
+          key: dos-tools-${{ runner.os }}-${{ hashFiles('engine.lock', 'quake/tools/dos-toolchain.json', 'quake/tools/isa-runtime-reference/manifest.json') }}
+
+      - name: Bootstrap pinned DJGPP toolchain
+        shell: pwsh
+        run: pwsh -NoProfile -File quake/tools/bootstrap-dos.ps1
+
+      - name: Run engine tests, numbered i486 build, ISA audits, and release guard
+        shell: pwsh
+        run: pwsh -NoProfile -File quake/tools/run-tests.ps1 -NoBootstrap
+
+      - name: Run workspace host tests
+        shell: pwsh
+        run: pwsh -NoProfile -File benchmarks/tools/run-tests.ps1 -GameRoot "$env:GITHUB_WORKSPACE\quake" -HostOnly
+
+      - name: Package verified binary and corresponding source
+        id: package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $workspace = [IO.Path]::GetFullPath($env:GITHUB_WORKSPACE)
+          $engineRoot = Join-Path $workspace 'quake'
+          $engineCommit = (& git -C $engineRoot rev-parse --verify HEAD).Trim()
+          if ($LASTEXITCODE -ne 0) { throw 'Could not identify the engine source commit.' }
+          $lock = Get-Content -LiteralPath (Join-Path $workspace 'engine.lock') -Raw | ConvertFrom-Json
+          if ($engineCommit -ne [string]$lock.commit) {
+            throw "Engine checkout $engineCommit differs from engine.lock $($lock.commit)."
+          }
+
+          $flagsText = @(& pwsh -NoProfile -File (Join-Path $engineRoot 'tools/build-dos.ps1') -DumpFlags)
+          if ($LASTEXITCODE -ne 0) { throw 'Could not resolve the release build output paths.' }
+          $flags = ($flagsText -join "`n") | ConvertFrom-Json
+          $buildRoot = [IO.Path]::GetFullPath([string]$flags.outputRoot)
+          $manifestPath = Join-Path $buildRoot 'build-manifest.json'
+          $inventoryPath = Join-Path $buildRoot 'optimization-inventory.json'
+          $executablePath = [IO.Path]::GetFullPath([string]$flags.executable)
+          foreach ($required in @($manifestPath, $inventoryPath, $executablePath)) {
+            if (-not (Test-Path -LiteralPath $required -PathType Leaf)) {
+              throw "Required release output is missing: $required"
+            }
+          }
+
+          $manifest = Get-Content -LiteralPath $manifestPath -Raw | ConvertFrom-Json
+          $inventory = Get-Content -LiteralPath $inventoryPath -Raw | ConvertFrom-Json
+          $buildNumber = [int]$manifest.buildNumber
+          if ([string]$manifest.productVersion -ne 'NitroQuake v0.999' -or
+              [string]$manifest.productBuild -ne "Build $buildNumber" -or
+              [string]$manifest.cpuTarget -ne 'i486' -or
+              [string]$manifest.sourceCommit -ne $engineCommit -or
+              [string]$manifest.isaAuditStatus -ne 'PASS' -or
+              $manifest.sourceBoundIsa -ne $true) {
+            throw 'Release manifest does not describe the verified NitroQuake v0.999 i486 build.'
+          }
+          $attempts = $manifest.optimizationAttempts
+          if ($attempts.status -ne 'complete' -or $attempts.complete -ne $true -or
+              [int]$attempts.buildNumber -ne $buildNumber -or
+              $buildNumber -ne ([int]$attempts.accepted + [int]$attempts.rejected) -or
+              $inventory.status -ne 'complete' -or [int]$inventory.buildNumber -ne $buildNumber -or
+              [int]$inventory.accepted -ne [int]$attempts.accepted -or
+              [int]$inventory.rejected -ne [int]$attempts.rejected) {
+            throw 'The packaged build number does not match the complete accepted/rejected optimization inventory.'
+          }
+          $exeHash = (Get-FileHash -LiteralPath $executablePath -Algorithm SHA256).Hash.ToUpperInvariant()
+          if ($exeHash -ne ([string]$manifest.executableSha256).ToUpperInvariant()) {
+            throw 'The executable hash differs from build-manifest.json.'
+          }
+          $exeBytes = [IO.File]::ReadAllBytes($executablePath)
+          if ($exeBytes.Length -lt 64 -or $exeBytes[0] -ne 0x4D -or $exeBytes[1] -ne 0x5A) {
+            throw 'The release output does not have a valid DOS MZ executable header.'
+          }
+
+          $stage = Join-Path $env:RUNNER_TEMP 'nitroquake-release-package'
+          if (Test-Path -LiteralPath $stage) { throw "Package staging directory already exists: $stage" }
+          New-Item -ItemType Directory -Path $stage -Force | Out-Null
+          $verification = Join-Path $stage 'verification'
+          New-Item -ItemType Directory -Path $verification -Force | Out-Null
+          Copy-Item -LiteralPath $executablePath -Destination (Join-Path $stage 'NitroQuake.exe')
+          Copy-Item -LiteralPath $inventoryPath -Destination (Join-Path $stage 'optimization-inventory.json')
+          Copy-Item -LiteralPath (Join-Path $engineRoot 'LICENSE') -Destination (Join-Path $stage 'LICENSE')
+          Copy-Item -LiteralPath (Join-Path $engineRoot 'THIRD-PARTY-NOTICES.md') -Destination (Join-Path $stage 'THIRD-PARTY-NOTICES.md')
+          Copy-Item -LiteralPath (Join-Path $engineRoot 'tools/isa-provider-reference/primary/COPYING.CWS') -Destination (Join-Path $stage 'COPYING.CWS')
+
+          foreach ($report in @(
+              @{ Source = [string]$manifest.isaAuditReport; Hash = [string]$manifest.isaAuditReportSha256; Name = 'isa-audit.json'; ManifestField = 'isaAuditReport' },
+              @{ Source = [string]$manifest.isaLinkedAuditReport; Hash = [string]$manifest.isaLinkedAuditReportSha256; Name = 'isa-audit-linked.json'; ManifestField = 'isaLinkedAuditReport' }
+          )) {
+            $reportPath = [IO.Path]::GetFullPath($report.Source)
+            $buildPrefix = $buildRoot.TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+            if (-not $reportPath.StartsWith($buildPrefix, [StringComparison]::OrdinalIgnoreCase) -or
+                -not (Test-Path -LiteralPath $reportPath -PathType Leaf)) {
+              throw "ISA verification report is missing or outside the build output: $reportPath"
+            }
+            $reportHash = (Get-FileHash -LiteralPath $reportPath -Algorithm SHA256).Hash.ToUpperInvariant()
+            if ($reportHash -ne $report.Hash.ToUpperInvariant()) { throw "ISA report hash mismatch: $($report.Name)" }
+            Copy-Item -LiteralPath $reportPath -Destination (Join-Path $verification $report.Name)
+            $manifest.PSObject.Properties[$report.ManifestField].Value = "verification/$($report.Name)"
+          }
+          $manifest.executable = 'NitroQuake.exe'
+          $manifest.objectRoot = 'not included in the binary release'
+          $manifest.linkMap = $null
+          $manifest | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath (Join-Path $stage 'build-manifest.json') -Encoding utf8
+
+          $sourceArchive = Join-Path $stage "NitroQuake-source-$engineCommit.zip"
+          $sourcePrefix = "NitroQuake-engine-$engineCommit/"
+          & git -C $engineRoot archive --format=zip "--prefix=$sourcePrefix" "--output=$sourceArchive" $engineCommit
+          if ($LASTEXITCODE -ne 0) { throw 'Could not create the corresponding engine source archive.' }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $archive = [IO.Compression.ZipFile]::OpenRead($sourceArchive)
+          try {
+            $expectedSourcePrefix = "NitroQuake-engine-$engineCommit/"
+            $sourceEntries = @($archive.Entries | ForEach-Object { $_.FullName })
+            foreach ($required in @("${expectedSourcePrefix}LICENSE", "${expectedSourcePrefix}THIRD-PARTY-NOTICES.md", "${expectedSourcePrefix}tools/isa-provider-reference/primary/COPYING.CWS")) {
+              if ($required -notin $sourceEntries) { throw "Corresponding source archive is missing $required" }
+            }
+            $restricted = @('.pak', '.wad', '.map', '.bsp', '.mdl', '.spr', '.lmp', '.dem', '.pcx', '.wav', '.ogg', '.mp3', '.mid', '.midi', '.png', '.jpg', '.jpeg', '.bmp', '.gif', '.ico', '.tga', '.lbm')
+            foreach ($entry in $archive.Entries) {
+              if (-not $entry.FullName.StartsWith($expectedSourcePrefix, [StringComparison]::Ordinal)) {
+                throw "Unexpected source archive path outside ${expectedSourcePrefix}: $($entry.FullName)"
+              }
+              if ([IO.Path]::GetExtension($entry.FullName).ToLowerInvariant() -in $restricted) {
+                throw "Restricted Quake game data found in the source package: $($entry.FullName)"
+              }
+            }
+          }
+          finally { $archive.Dispose() }
+
+          $readme = @"
+          NitroQuake v0.999
+          Build $buildNumber
+
+          486-class DOS engine build. Target CPU: i486 with x87.
+          Engine source commit: $engineCommit
+          Corresponding source is included in NitroQuake-source-$engineCommit.zip.
+          Source repository: https://github.com/adrian-andrzjewski/NitroQuake-engine/tree/$engineCommit
+
+          This package contains no Quake PAK files or commercial game data. Supply your own
+          legally obtained Quake data in an id1 directory beside NitroQuake.exe. The registered
+          game commonly provides pak0.pak and pak1.pak. Run from the Quake root under DOS with
+          a DPMI host, or in DOSBox-X configured to provide DPMI.
+
+          The engine source is licensed under GNU GPL version 2 or, at your option, any later
+          version. See LICENSE, THIRD-PARTY-NOTICES.md, and COPYING.CWS.
+          DJGPP project information: https://www.delorie.com/djgpp/.
+          "@
+          Set-Content -LiteralPath (Join-Path $stage 'README.txt') -Value $readme -Encoding utf8
+
+          $hashLines = @()
+          foreach ($file in (Get-ChildItem -LiteralPath $stage -Recurse -File | Sort-Object FullName)) {
+            $relativePath = [IO.Path]::GetRelativePath($stage, $file.FullName) -replace '\\', '/'
+            $hash = (Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash.ToUpperInvariant()
+            $hashLines += "$hash  $relativePath"
+          }
+          Set-Content -LiteralPath (Join-Path $stage 'SHA256SUMS.txt') -Value $hashLines -Encoding ascii
+          $artifactName = "nitroquake-v0.999-build-$buildNumber"
+          "build_number=$buildNumber" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+          "artifact_name=$artifactName" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+          @"
+          ## Verified NitroQuake package
+
+          - Product: NitroQuake v0.999, Build $buildNumber
+          - Engine source: $engineCommit
+          - CPU target: i486 with x87
+          - Optimization attempts: $($attempts.accepted) accepted, $($attempts.rejected) rejected
+          - Executable SHA-256: $exeHash
+          - Game data: none included; runtime tests require user-supplied licensed data
+          "@ | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY
+
+      - name: Upload verified release package
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ steps.package.outputs.artifact_name }}
+          path: ${{ runner.temp }}/nitroquake-release-package/
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish GitHub Release
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v0.999-build-')
+    needs: build
+    runs-on: windows-2022
+    timeout-minutes: 15
+    permissions:
+      contents: write
+
+    steps:
+      - name: Check out tag and complete workspace history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Download the package built by this run
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ needs.build.outputs.artifact_name }}
+          path: ${{ runner.temp }}/nitroquake-release-package
+
+      - name: Verify tag, artifact, and source safety
+        id: verify
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $tag = $env:GITHUB_REF_NAME
+          $stage = Join-Path $env:RUNNER_TEMP 'nitroquake-release-package'
+          $manifest = Get-Content -LiteralPath (Join-Path $stage 'build-manifest.json') -Raw | ConvertFrom-Json
+          $expectedTag = "v0.999-build-$($manifest.buildNumber)"
+          if ($tag -ne $expectedTag -or [int]$manifest.buildNumber -ne [int]'${{ needs.build.outputs.build_number }}') {
+            throw "Tag $tag does not match the verified build $expectedTag."
+          }
+          $tagCommit = (& git rev-parse "refs/tags/$tag^{commit}").Trim()
+          if ($LASTEXITCODE -ne 0 -or $tagCommit -ne $env:GITHUB_SHA) { throw 'The release tag does not point at this workflow revision.' }
+          & git fetch --no-tags origin main
+          if ($LASTEXITCODE -ne 0) { throw 'Could not fetch main for the release ancestry check.' }
+          & git merge-base --is-ancestor $tagCommit origin/main
+          if ($LASTEXITCODE -ne 0) { throw 'Refusing to publish a tag that is not reachable from main.' }
+
+          $expectedTop = @('COPYING.CWS', 'LICENSE', 'NitroQuake.exe', 'README.txt', 'SHA256SUMS.txt', 'THIRD-PARTY-NOTICES.md', 'build-manifest.json', 'optimization-inventory.json', 'verification', "NitroQuake-source-$($manifest.sourceCommit).zip") | Sort-Object
+          $actualTop = @(Get-ChildItem -LiteralPath $stage -Force | ForEach-Object { $_.Name } | Sort-Object)
+          if (Compare-Object $expectedTop $actualTop) { throw "Release package contains unexpected or missing files: $($actualTop -join ', ')" }
+          $exe = Join-Path $stage 'NitroQuake.exe'
+          $exeBytes = [IO.File]::ReadAllBytes($exe)
+          if ($exeBytes.Length -lt 64 -or $exeBytes[0] -ne 0x4D -or $exeBytes[1] -ne 0x5A) { throw 'Release executable is not a DOS MZ binary.' }
+          $exeHash = (Get-FileHash -LiteralPath $exe -Algorithm SHA256).Hash.ToUpperInvariant()
+          if ($exeHash -ne ([string]$manifest.executableSha256).ToUpperInvariant()) { throw 'Release executable hash does not match build manifest.' }
+          $sumPath = Join-Path $stage 'SHA256SUMS.txt'
+          $sumLines = @(Get-Content -LiteralPath $sumPath)
+          $checkedPaths = @()
+          foreach ($line in $sumLines) {
+            $checksumMatch = [regex]::Match($line, '^([A-Fa-f0-9]{64})  (.+)$')
+            if (-not $checksumMatch.Success) { throw "Malformed checksum line: $line" }
+            $expectedHash = $checksumMatch.Groups[1].Value.ToUpperInvariant()
+            $checkedPath = $checksumMatch.Groups[2].Value
+            $relativePath = $checkedPath.Replace('/', [IO.Path]::DirectorySeparatorChar)
+            if ([IO.Path]::IsPathRooted($relativePath) -or $relativePath -match '(^|[\\/])\.\.([\\/]|$)') {
+              throw "Unsafe checksum path: $relativePath"
+            }
+            $assetPath = [IO.Path]::GetFullPath((Join-Path $stage $relativePath))
+            $stagePrefix = [IO.Path]::GetFullPath($stage).TrimEnd('\', '/') + [IO.Path]::DirectorySeparatorChar
+            if (-not $assetPath.StartsWith($stagePrefix, [StringComparison]::OrdinalIgnoreCase) -or
+                -not (Test-Path -LiteralPath $assetPath -PathType Leaf)) {
+              throw "Checksum references a missing or out-of-package file: $relativePath"
+            }
+            $actualHash = (Get-FileHash -LiteralPath $assetPath -Algorithm SHA256).Hash.ToUpperInvariant()
+            if ($actualHash -ne $expectedHash) { throw "Checksum verification failed: $relativePath" }
+            $checkedPaths += $checkedPath
+          }
+          $allPayloads = @(Get-ChildItem -LiteralPath $stage -Recurse -File | Where-Object { $_.Name -ne 'SHA256SUMS.txt' } | ForEach-Object { [IO.Path]::GetRelativePath($stage, $_.FullName) -replace '\\', '/' } | Sort-Object)
+          if (Compare-Object $allPayloads (@($checkedPaths | Sort-Object))) { throw 'Checksum file does not cover exactly the release package payloads.' }
+          $sourceArchive = Join-Path $stage "NitroQuake-source-$($manifest.sourceCommit).zip"
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $archive = [IO.Compression.ZipFile]::OpenRead($sourceArchive)
+          try {
+            $expectedSourcePrefix = "NitroQuake-engine-$($manifest.sourceCommit)/"
+            $sourceEntries = @($archive.Entries | ForEach-Object { $_.FullName })
+            foreach ($required in @("${expectedSourcePrefix}LICENSE", "${expectedSourcePrefix}THIRD-PARTY-NOTICES.md", "${expectedSourcePrefix}tools/isa-provider-reference/primary/COPYING.CWS")) {
+              if ($required -notin $sourceEntries) { throw "Corresponding source archive is missing $required" }
+            }
+            $restricted = @('.pak', '.wad', '.map', '.bsp', '.mdl', '.spr', '.lmp', '.dem', '.pcx', '.wav', '.ogg', '.mp3', '.mid', '.midi', '.png', '.jpg', '.jpeg', '.bmp', '.gif', '.ico', '.tga', '.lbm')
+            foreach ($entry in $archive.Entries) {
+              if (-not $entry.FullName.StartsWith($expectedSourcePrefix, [StringComparison]::Ordinal)) {
+                throw "Unexpected release source path outside ${expectedSourcePrefix}: $($entry.FullName)"
+              }
+              if ([IO.Path]::GetExtension($entry.FullName).ToLowerInvariant() -in $restricted) {
+                throw "Restricted game data found in release source: $($entry.FullName)"
+              }
+            }
+          }
+          finally { $archive.Dispose() }
+          "build_number=$($manifest.buildNumber)" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
+
+      - name: Create GitHub Release and upload verified assets
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP 'nitroquake-release-package'
+          $tag = $env:GITHUB_REF_NAME
+          $number = '${{ steps.verify.outputs.build_number }}'
+          $sourceCommit = (Get-Content -LiteralPath (Join-Path $stage 'build-manifest.json') -Raw | ConvertFrom-Json).sourceCommit
+          $notes = Join-Path $env:RUNNER_TEMP 'nitroquake-release-notes.md'
+          @"
+          NitroQuake v0.999, Build $number
+
+          This verified DOS release targets i486-compatible CPUs with x87. The build used the complete optimization ledger and passed the host, i486 ISA, linked-runtime, and release hash guard checks.
+
+          The corresponding engine source at $sourceCommit is attached as NitroQuake-source-$sourceCommit.zip and is also available at https://github.com/adrian-andrzjewski/NitroQuake-engine/tree/$sourceCommit. The executable is provided under GNU GPL version 2 or, at your option, any later version; see the attached license and third-party notices.
+
+          No Quake PAK files, maps, models, music, demos, or game imagery are included. Supply your own legally obtained Quake data under an `id1/` directory beside `NitroQuake.exe`. Run from the Quake root under DOS with a DPMI host, or use DOSBox-X with DPMI support enabled.
+
+          Automated DOSBox gameplay and rendered-image comparisons are not run by the public workflow because they require separately supplied game data. See the repository README and benchmark documentation for local runtime validation.
+          "@ | Set-Content -LiteralPath $notes -Encoding utf8
+          gh release create $tag --repo adrian-andrzjewski/NitroQuake --verify-tag --latest --title "NitroQuake v0.999 Build $number" --notes-file $notes `
+            (Join-Path $stage 'NitroQuake.exe') `
+            (Join-Path $stage "NitroQuake-source-$sourceCommit.zip") `
+            (Join-Path $stage 'build-manifest.json') `
+            (Join-Path $stage 'optimization-inventory.json') `
+            (Join-Path $stage 'LICENSE') `
+            (Join-Path $stage 'THIRD-PARTY-NOTICES.md') `
+            (Join-Path $stage 'COPYING.CWS') `
+            (Join-Path $stage 'README.txt') `
+            (Join-Path $stage 'SHA256SUMS.txt') `
+            (Join-Path $stage 'verification/isa-audit.json') `
+            (Join-Path $stage 'verification/isa-audit-linked.json')
+          if ($LASTEXITCODE -ne 0) { throw 'GitHub Release creation failed.' }
