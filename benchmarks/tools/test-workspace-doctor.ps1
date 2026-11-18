@@ -42,9 +42,17 @@ try {
         throw 'The workspace doctor reported inconsistent gitlink revisions.'
     }
     if ($real.report.optimizationInventory.gameHistoryIsShallow -ne $false -or
-        $real.report.optimizationInventory.fullHistoryRequiredForBuildIdentity -ne $false -or
+        $real.report.optimizationInventory.fullHistoryRequiredForBuildIdentity -ne $true -or
         $real.report.optimizationInventory.fullHistoryRequiredForCompleteInventory -ne $true) {
         throw 'The workspace doctor reported incorrect history requirements.'
+    }
+    $textOutput = @(& $pwsh.Source -NoProfile -File $doctor 2>&1)
+    $textExitCode = $LASTEXITCODE
+    $textReport = ($textOutput | ForEach-Object { [string]$_ }) -join "`n"
+    if ($textExitCode -ne 0 -or
+        $textReport -notmatch 'full history is required for numbered build identity' -or
+        $textReport -notmatch 'numbered build identity require full game history') {
+        throw 'The workspace doctor console output does not explain its complete-history requirement.'
     }
     $requiredTools = @($real.report.tools | Where-Object { $_.requiredForBuild })
     if (@($requiredTools | Where-Object { $_.status -ne 'available' }).Count -ne 0) {

@@ -270,7 +270,7 @@ $report = [pscustomobject]@{
     runtimeToolsAvailable = $runtimeToolsAvailable
     optimizationInventory = [pscustomobject]@{
         gameHistoryIsShallow = $game.shallow
-        fullHistoryRequiredForBuildIdentity = $false
+        fullHistoryRequiredForBuildIdentity = $true
         fullHistoryRequiredForCompleteInventory = $true
     }
     tools = $tools
@@ -286,9 +286,9 @@ else {
     Write-Host ("Gitlink quake: committed={0}  index={1}  game-head-match={2}" -f `
         $recordedGitlink, $indexedGitlink, $workspaceConsistent)
     Write-Host ("Build tools ready: {0}; runtime toolchain available: {1}" -f $buildToolsReady, $runtimeToolsAvailable)
-    Write-Host ("Game checkout is shallow: {0} (full history is not required for product build identity)" -f `
+    Write-Host ("Game checkout is shallow: {0} (full history is required for numbered build identity)" -f `
         $game.shallow)
-    Write-Host 'A complete optimization-attempt inventory still requires full game history.'
+    Write-Host 'A complete optimization-attempt inventory and numbered build identity require full game history.'
     foreach ($tool in $tools) {
         $version = if ($tool.version) { " ($($tool.version))" } else { '' }
         Write-Host ("  {0}: {1}{2} - {3}" -f $tool.name, $tool.status, $version, $tool.purpose)

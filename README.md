@@ -111,6 +111,16 @@ entry is a Git link, not a configured submodule, so cloning the outer repository
 alone does not fetch the game source. See the
 [repository boundary guide](docs/repository-layout.md).
 
+To provision a missing game checkout, supply the URL of the NitroQuake game
+repository. The bootstrap clones complete history and checks out the exact game
+revision recorded by the outer repository; it refuses to replace existing
+content.
+
+```powershell
+$env:NITROQUAKE_GAME_REPOSITORY_URL = Read-Host 'NitroQuake game repository URL'
+pwsh -NoProfile -File .\benchmarks\tools\bootstrap-workspace.ps1
+```
+
 With both checkouts present, build from the game checkout:
 
 ```powershell

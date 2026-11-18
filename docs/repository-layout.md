@@ -16,6 +16,14 @@ kept under `benchmarks/out/worktree-archives/<date>/<former-worktree>/out`.
 The dated mapping in `docs/history/repository/worktree-archive-map-2026-11-13.csv` records the
 checkout, branch, commit, and archived output location for this consolidation.
 
+The outer repository records the game checkout as a Git link while keeping the
+two histories independent. A fresh outer clone does not fetch the game. Set
+`NITROQUAKE_GAME_REPOSITORY_URL` to the NitroQuake game repository URL and run
+`benchmarks/tools/bootstrap-workspace.ps1` to clone complete history and check
+out the Gitlink revision from outer `HEAD`. The script refuses to replace an
+existing non-empty directory, a mismatched checkout, or a checkout with local
+changes. `benchmarks/tools/check-workspace.ps1` remains read-only.
+
 ## Ownership
 
 | Game repository | Benchmarking repository |
@@ -77,6 +85,10 @@ checkout is removed. Unreferenced experiment output is not assumed disposable.
 - Run `benchmarks/tools/check-workspace.ps1` to compare the nested `HEAD` with the
   outer committed and staged gitlink and report local tool availability. The
   check is read-only and does not fetch, reset, bootstrap, or replace anything.
+- For a fresh workspace, run `benchmarks/tools/bootstrap-workspace.ps1` with
+  `NITROQUAKE_GAME_REPOSITORY_URL` set to the NitroQuake game repository. It
+  checks out the committed Gitlink revision with complete history and preserves
+  existing files or game worktrees.
 - Build and run game build checks from an independent full-history checkout
   without a neighboring benchmark suite or installed emulator. The supported
   numbered builder requires complete Git history to derive the full
